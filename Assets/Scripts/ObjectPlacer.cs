@@ -7,8 +7,6 @@ public class ObjectPlacer : MonoBehaviour
 {
     //Public Variables
     public bool DrawTree = true;
-    public GameObject FruitTree;
-    public GameObject Fruit;
     public int NumberOfFruits;
     public Material OccludedMaterial;
     public SpatialUnderstandingCustomMesh SpatialUnderstandingMesh;
@@ -25,9 +23,7 @@ public class ObjectPlacer : MonoBehaviour
     void Start()
     {
         if (DrawDebugBoxes)
-        {
             _boxDrawing = new BoxDrawer(gameObject);
-        }
     }
 
     void Update()
@@ -49,7 +45,7 @@ public class ObjectPlacer : MonoBehaviour
         SpatialUnderstandingMesh.MeshMaterial = OccludedMaterial;
     }
 
-    public void CreateScene()//1
+    public void CreateScene()
     {
         //Simple check for Spatial Understanding
         if (!SpatialUnderstanding.Instance.AllowSpatialUnderstanding)
@@ -71,10 +67,8 @@ public class ObjectPlacer : MonoBehaviour
 
     public List<PlacementQuery> AddFruits()
     {
-        //TO_DO:create different fruit with different sizes
-        return  CreateLocationQueriesForSolver(ObjectCollectionManager.Instance.FruitPrefabs.Count, ObjectCollectionManager.Instance.FruitSize, ObjectType.Fruit);
+        return  CreateLocationQueriesForSolver(NumberOfFruits, ObjectCollectionManager.Instance.FruitSize, ObjectType.Fruit);
     }
-
 
     private void ProcessPlacementResults()
     {
@@ -91,8 +85,7 @@ public class ObjectPlacer : MonoBehaviour
                     ObjectCollectionManager.Instance.CreateTree(toPlace.Position, rotation);
                     break;
                 case ObjectType.Fruit:
-                    //TO_DO : needs work
-                    //ObjectCollectionManager.Instance.CreateFruit(Fruit, toPlace.Position, rotation);
+                    ObjectCollectionManager.Instance.CreateFruit(toPlace.Position, rotation);
                     break;
             }
         }
@@ -158,7 +151,7 @@ public class ObjectPlacer : MonoBehaviour
         return null;
     }
 
-    private List<PlacementQuery> CreateLocationQueriesForSolver(int desiredLocationCount, Vector3 boxFullDims, ObjectType objType)
+    private List<PlacementQuery> CreateLocationQueriesForSolver(int prefabCount, Vector3 boxFullDims, ObjectType objType)
     {
         List<PlacementQuery> placementQueries = new List<PlacementQuery>();
 
@@ -166,7 +159,7 @@ public class ObjectPlacer : MonoBehaviour
 
         var disctanceFromOtherObjects = halfBoxDims.x > halfBoxDims.z ? halfBoxDims.x * 3f : halfBoxDims.z * 3f;
 
-        for (int i = 0; i < desiredLocationCount; ++i)
+        for (int i = 0; i < prefabCount; ++i)
         {
             var placementRules = new List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule>
             {

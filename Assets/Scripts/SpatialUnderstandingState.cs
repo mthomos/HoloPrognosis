@@ -171,7 +171,7 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
         TapListener = new UnityAction(Tap_Triggered);
         EventManager.StartListening("tap", TapListener);
         //
-        interpolator = gameObject.GetComponent<Interpolator>();
+        interpolator = gameObject.AddComponent<Interpolator>();
         interpolator.SmoothLerpToTarget = true;
         interpolator.SmoothPositionLerpRatio = SmoothingFactor;
     }

@@ -14,8 +14,7 @@ namespace HoloPrognosis
     {
         //Public Variables - For Editor
         //GameObjects
-        public GameObject Cursor;
-        public GameObject RandomObject;
+        private GazeCursor cursor; // Cusrsor used for defining FocusedObject
         public TextMesh StatusText; // Text for debugging (for now)
         public GameObject TrackingObject; // GameObject representing the hand in holographic space
         //Colors
@@ -44,7 +43,6 @@ namespace HoloPrognosis
         private GameObject ManipulatedObject;// GameObject which is being Manipulated by the user
         private GameObject FocusedObject; // GameObject which the user gazes at
         private GestureRecognizer gestureRecognizer;
-        private GazeCursor cursor; // Cusrsor used for defining FocusedObject
         private Outline outlineComponent; //Outline for TouchedObject
 
         void Awake()
@@ -66,17 +64,20 @@ namespace HoloPrognosis
         void Update()
         {
             FocusedObject = cursor.getFocusedObject();
-            int HandsNeeded = ObjectCollectionManager.Instance.GetHandsNeededForManipulation(FocusedObject.GetInstanceID());
-            if (HandsNeeded <= trackingHands.Count && HandsNeeded > 0 && FocusedObject != null)
+            if (FocusedObject != null)
             {
-                switch (HandsNeeded)
+                int HandsNeeded = ObjectCollectionManager.Instance.GetHandsNeededForManipulation(FocusedObject.GetInstanceID());
+                if (HandsNeeded <= trackingHands.Count && HandsNeeded > 0 && FocusedObject != null)
                 {
-                    case 1:
-                        ManipulationForOneHand();
-                        break;
-                    case 2:
-                        ManipulationForTwoHands();
-                        break;
+                    switch (HandsNeeded)
+                    {
+                        case 1:
+                            ManipulationForOneHand();
+                            break;
+                        case 2:
+                            ManipulationForTwoHands();
+                            break;
+                    }
                 }
             }
         }

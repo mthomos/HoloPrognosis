@@ -1,6 +1,4 @@
 .vs*
-Library/ShaderCache*
-Library/PlayerDataCache*
+Library*
 *.meta
-Library/metadata*
 Temp*

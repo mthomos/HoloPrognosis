@@ -13,7 +13,6 @@ public class GazeCursor : MonoBehaviour
     void Start ()
     {
         meshRenderer = Cursor.GetComponent<MeshRenderer>();
-        //meshRenderer = Cursor.gameObject.GetComponentInChildren<MeshRenderer>();
         buffer = new GazeBuffer();
     }
 	

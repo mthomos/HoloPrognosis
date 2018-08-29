@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using HoloToolkit.Unity;
 using UnityEngine;
-//Almost done, check scale
+
 public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
 {
+    //Public Variables - For Editor
     public GameObject TreePrefab;
     public GameObject FruitPrefab;
     public Vector3 TreeSize = new Vector3(.25f, .5f, .25f);
-    public List<GameObject> FruitPrefabs;
     public Vector3 FruitSize = new Vector3(.1f, 0.1f, .1f);
     public float ScaleFactor;
 
@@ -58,7 +58,6 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
 
     private Vector3 RescaleToSameScaleFactor(GameObject objectToScale)
     {
-        // ReSharper disable once CompareOfFloatsByEqualityOperator
         if (ScaleFactor == 0f)
             CalculateScaleFactor(TreePrefab, TreeSize);
 
@@ -92,7 +91,6 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
     private void CalculateScaleFactor(GameObject prefab, Vector3 prefabSize)
     {
         List<GameObject> list = new List<GameObject> { prefab };
-        //list.Add(prefab);
         CalculateScaleFactor(list, prefabSize);
     }
 
@@ -104,26 +102,17 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         {
             var curBounds = GetBoundsForAllChildren(obj).size;
             var difference = curBounds - desiredSize;
-
             float ratio;
 
             if (difference.x > difference.y && difference.x > difference.z)
-            {
                 ratio = desiredSize.x / curBounds.x;
-            }
             else if (difference.y > difference.x && difference.y > difference.z)
-            {
                 ratio = desiredSize.y / curBounds.y;
-            }
             else
-            {
                 ratio = desiredSize.z / curBounds.z;
-            }
 
             if (ratio < maxScale)
-            {
                 maxScale = ratio;
-            }
         }
 
         return maxScale;
