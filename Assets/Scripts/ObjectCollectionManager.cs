@@ -1,0 +1,160 @@
+﻿using System.Collections.Generic;
+using HoloToolkit.Unity;
+using UnityEngine;
+//Almost done, check scale
+public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
+{
+    public GameObject TreePrefab;
+    public GameObject FruitPrefab;
+    public Vector3 TreeSize = new Vector3(.25f, .5f, .25f);
+    public List<GameObject> FruitPrefabs;
+    public Vector3 FruitSize = new Vector3(.1f, 0.1f, .1f);
+    public float ScaleFactor;
+
+    private List<GameObject> ActiveHolograms = new List<GameObject>();
+    private Dictionary<int, int> HandsForActiveHolograms = new Dictionary<int, int>();//key: id, value: hands
+
+    public void CreateTree(Vector3 positionCenter, Quaternion rotation)
+    {
+        var position = positionCenter - new Vector3(0, TreeSize.y * .5f, 0);
+
+        GameObject newObject = Instantiate(TreePrefab, position, rotation);
+
+        if (newObject != null)
+        {
+            // Set the parent of the new object the GameObject it was placed on
+            newObject.transform.parent = gameObject.transform;
+            // Scale Tree
+            newObject.transform.localScale = RescaleToSameScaleFactor(TreePrefab);
+            AddMeshColliderToAllChildren(newObject); // collisions
+            ActiveHolograms.Add(newObject);
+            HandsForActiveHolograms.Add(newObject.GetInstanceID(), 0);
+        }
+    }
+
+    public void CreateFruit (Vector3 positionCenter, Quaternion rotation)
+    {
+        var position = positionCenter - new Vector3(0, FruitSize.y * .5f, 0);
+
+        GameObject newObject = Instantiate(FruitPrefab, position, rotation);
+
+        if (newObject != null)
+        {
+            // Set the parent of the new object the GameObject it was placed on
+            newObject.transform.parent = gameObject.transform;
+            // Scale Tree
+            newObject.transform.localScale = RescaleToSameScaleFactor(TreePrefab);
+            AddMeshColliderToAllChildren(newObject); // collisions
+            ActiveHolograms.Add(newObject);
+            HandsForActiveHolograms.Add(newObject.GetInstanceID(), 1);
+        }
+    }
+
+    private void AddMeshColliderToAllChildren(GameObject obj)
+    {
+        for (int i = 0; i < obj.transform.childCount; i++)
+            obj.transform.GetChild(i).gameObject.AddComponent<MeshCollider>();
+    }
+
+    private Vector3 RescaleToSameScaleFactor(GameObject objectToScale)
+    {
+        // ReSharper disable once CompareOfFloatsByEqualityOperator
+        if (ScaleFactor == 0f)
+            CalculateScaleFactor(TreePrefab, TreeSize);
+
+        return objectToScale.transform.localScale * ScaleFactor;
+    }
+
+    private Vector3 RescaleToDesiredSizeProportional(GameObject objectToScale, Vector3 desiredSize)
+    {
+        float scaleFactor = CalcScaleFactorHelper(new List<GameObject> { objectToScale }, desiredSize);
+
+        return objectToScale.transform.localScale * scaleFactor;
+    }
+
+    private Vector3 StretchToFit(GameObject obj, Vector3 desiredSize)
+    {
+        var curBounds = GetBoundsForAllChildren(obj).size;
+
+        return new Vector3(desiredSize.x / curBounds.x / 2, desiredSize.y, desiredSize.z / curBounds.z / 2);
+    }
+
+    private void CalculateScaleFactor(List<GameObject> prefabs, Vector3 prefabSize)
+    {
+        float maxScale = float.MaxValue;
+        var ratio = CalcScaleFactorHelper(prefabs, prefabSize);
+        if (ratio < maxScale)
+            maxScale = ratio;
+
+        ScaleFactor = maxScale;
+    }
+    
+    private void CalculateScaleFactor(GameObject prefab, Vector3 prefabSize)
+    {
+        List<GameObject> list = new List<GameObject> { prefab };
+        //list.Add(prefab);
+        CalculateScaleFactor(list, prefabSize);
+    }
+
+    private float CalcScaleFactorHelper(List<GameObject> objects, Vector3 desiredSize)
+    {
+        float maxScale = float.MaxValue;
+
+        foreach (var obj in objects)
+        {
+            var curBounds = GetBoundsForAllChildren(obj).size;
+            var difference = curBounds - desiredSize;
+
+            float ratio;
+
+            if (difference.x > difference.y && difference.x > difference.z)
+            {
+                ratio = desiredSize.x / curBounds.x;
+            }
+            else if (difference.y > difference.x && difference.y > difference.z)
+            {
+                ratio = desiredSize.y / curBounds.y;
+            }
+            else
+            {
+                ratio = desiredSize.z / curBounds.z;
+            }
+
+            if (ratio < maxScale)
+            {
+                maxScale = ratio;
+            }
+        }
+
+        return maxScale;
+    }
+
+    private Bounds GetBoundsForAllChildren(GameObject findMyBounds) //get bounds for object children
+    {
+        Bounds result = new Bounds(Vector3.zero, Vector3.zero);
+
+        foreach (var curRenderer in findMyBounds.GetComponentsInChildren<Renderer>())
+        {
+            if (result.extents == Vector3.zero)
+                result = curRenderer.bounds;
+            else
+                result.Encapsulate(curRenderer.bounds);
+        }
+
+        return result;
+    }
+
+    public int GetHandsNeededForManipulation(int objectID)
+    {
+        int hands;
+        try
+        {
+            hands = HandsForActiveHolograms[objectID];
+        }
+        catch (KeyNotFoundException)
+        {
+            hands = 1;
+        } 
+        return hands;
+    }
+}
