@@ -298,9 +298,10 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
+  m_Children:
+  - {fileID: 1827575317}
   m_Father: {fileID: 654468649}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &347611043
 GameObject:
@@ -422,7 +423,6 @@ Transform:
   m_Children:
   - {fileID: 1541976792}
   - {fileID: 904239019}
-  - {fileID: 1827575317}
   - {fileID: 311475137}
   m_Father: {fileID: 0}
   m_RootOrder: 3
@@ -436,7 +436,6 @@ GameObject:
   m_Component:
   - component: {fileID: 790716440}
   - component: {fileID: 790716441}
-  - component: {fileID: 790716442}
   m_Layer: 0
   m_Name: Object Placement
   m_TagString: Untagged
@@ -470,22 +469,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DrawTree: 1
   NumberOfFruits: 10
-  OccludedMaterial: {fileID: 0}
+  OccludedMaterial: {fileID: 2100000, guid: df172103f5fba4a4d8636aeca60cb0d7, type: 2}
   SpatialUnderstandingMesh: {fileID: 434274831}
---- !u!114 &790716442
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 790716439}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa3b9ae11f0076c43a4d80760e83d0db, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  TreePrefab: {fileID: 145700, guid: bf5cd350de97c824bb1b592d969de266, type: 2}
-  FruitPrefab: {fileID: 1000013678658166, guid: 8fa35cdad352cfa4297d3be64705ecf1,
-    type: 2}
+  TreePrefab: {fileID: 0}
+  FruitPrefab: {fileID: 0}
   TreeSize: {x: 0.25, y: 0.5, z: 0.25}
   FruitSize: {x: 0.1, y: 0.1, z: 0.1}
   ScaleFactor: 0
@@ -867,7 +854,7 @@ Prefab:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
-    m_TransformParent: {fileID: 654468649}
+    m_TransformParent: {fileID: 311475137}
     m_Modifications:
     - target: {fileID: 4000012071801678, guid: d41fa7615c3c85b40bcc95fc4367b607, type: 2}
       propertyPath: m_LocalPosition.x
@@ -899,7 +886,11 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4000012071801678, guid: d41fa7615c3c85b40bcc95fc4367b607, type: 2}
       propertyPath: m_RootOrder
-      value: 2
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000010427123524, guid: d41fa7615c3c85b40bcc95fc4367b607, type: 2}
+      propertyPath: m_Name
+      value: SpatialUnderstanding-Dependecies
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: d41fa7615c3c85b40bcc95fc4367b607, type: 2}

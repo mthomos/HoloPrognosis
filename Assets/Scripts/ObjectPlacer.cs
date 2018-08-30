@@ -6,24 +6,17 @@ using UnityEngine;
 public class ObjectPlacer : MonoBehaviour
 {
     //Public Variables
-    public bool DrawTree = true;
     public int NumberOfFruits;
     public Material OccludedMaterial;
     public SpatialUnderstandingCustomMesh SpatialUnderstandingMesh;
     //Private Variables
     private readonly Queue<PlacementResult> _results = new Queue<PlacementResult>();
     private bool _timeToHideMesh;
-    private int _placedTree;
-    //Box functionality
-    private bool DrawDebugBoxes = false;
-    private BoxDrawer _boxDrawing;
-    private readonly List<BoxDrawer.Box> _lineBoxList = new List<BoxDrawer.Box>();
 
     // Use this for initialization
     void Start()
     {
-        if (DrawDebugBoxes)
-            _boxDrawing = new BoxDrawer(gameObject);
+
     }
 
     void Update()
@@ -35,8 +28,6 @@ public class ObjectPlacer : MonoBehaviour
             HideGridEnableOcclulsion();
             _timeToHideMesh = false;
         }
-        if (DrawDebugBoxes)
-            _boxDrawing.UpdateBoxes(_lineBoxList);
     }
 
     private void HideGridEnableOcclulsion()
@@ -75,8 +66,6 @@ public class ObjectPlacer : MonoBehaviour
         if (_results.Count > 0)
         {
             var toPlace = _results.Dequeue();
-            // Output
-            if (DrawDebugBoxes) DrawBox(toPlace, Color.red);
 
             var rotation = Quaternion.LookRotation(toPlace.Normal, Vector3.up);
             switch (toPlace.ObjType)
@@ -88,20 +77,6 @@ public class ObjectPlacer : MonoBehaviour
                     ObjectCollectionManager.Instance.CreateFruit(toPlace.Position, rotation);
                     break;
             }
-        }
-    }
-
-    private void DrawBox(PlacementResult boxLocation, Color color)
-    {
-        if (boxLocation != null)
-        {
-            _lineBoxList.Add(
-                new BoxDrawer.Box(
-                    boxLocation.Position,
-                    Quaternion.LookRotation(boxLocation.Normal, Vector3.up),
-                    color,
-                    boxLocation.Dimensions * 0.5f)
-            );
         }
     }
 

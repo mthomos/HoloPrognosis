@@ -25,7 +25,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             // Set the parent of the new object the GameObject it was placed on
             newObject.transform.parent = gameObject.transform;
             // Scale Tree
-            newObject.transform.localScale = RescaleToSameScaleFactor(TreePrefab);
+            //newObject.transform.localScale = RescaleToSameScaleFactor(TreePrefab);
             AddMeshColliderToAllChildren(newObject); // collisions
             ActiveHolograms.Add(newObject);
             HandsForActiveHolograms.Add(newObject.GetInstanceID(), 0);
@@ -43,7 +43,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             // Set the parent of the new object the GameObject it was placed on
             newObject.transform.parent = gameObject.transform;
             // Scale Tree
-            newObject.transform.localScale = RescaleToSameScaleFactor(TreePrefab);
+            //newObject.transform.localScale = RescaleToSameScaleFactor(TreePrefab);
             AddMeshColliderToAllChildren(newObject); // collisions
             ActiveHolograms.Add(newObject);
             HandsForActiveHolograms.Add(newObject.GetInstanceID(), 1);
@@ -62,20 +62,6 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             CalculateScaleFactor(TreePrefab, TreeSize);
 
         return objectToScale.transform.localScale * ScaleFactor;
-    }
-
-    private Vector3 RescaleToDesiredSizeProportional(GameObject objectToScale, Vector3 desiredSize)
-    {
-        float scaleFactor = CalcScaleFactorHelper(new List<GameObject> { objectToScale }, desiredSize);
-
-        return objectToScale.transform.localScale * scaleFactor;
-    }
-
-    private Vector3 StretchToFit(GameObject obj, Vector3 desiredSize)
-    {
-        var curBounds = GetBoundsForAllChildren(obj).size;
-
-        return new Vector3(desiredSize.x / curBounds.x / 2, desiredSize.y, desiredSize.z / curBounds.z / 2);
     }
 
     private void CalculateScaleFactor(List<GameObject> prefabs, Vector3 prefabSize)
