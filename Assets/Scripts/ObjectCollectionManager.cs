@@ -7,8 +7,8 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
     //Public Variables - For Editor
     public GameObject TreePrefab;
     public GameObject FruitPrefab;
-    public Vector3 TreeSize = new Vector3(.25f, .5f, .25f);
-    public Vector3 FruitSize = new Vector3(.1f, 0.1f, .1f);
+    public Vector3 TreeSize;
+    public Vector3 FruitSize;
     public float ScaleFactor;
 
     private List<GameObject> ActiveHolograms = new List<GameObject>();
@@ -16,6 +16,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
 
     public void CreateTree(Vector3 positionCenter, Quaternion rotation)
     {
+        //TreeSize = TreePrefab.GetComponent<Renderer>().bounds.size;
         var position = positionCenter - new Vector3(0, TreeSize.y * .5f, 0);
 
         GameObject newObject = Instantiate(TreePrefab, position, rotation);
@@ -34,8 +35,9 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
 
     public void CreateFruit (Vector3 positionCenter, Quaternion rotation)
     {
+        //FruitSize = FruitPrefab.GetComponent<Renderer>().bounds.size;
         var position = positionCenter - new Vector3(0, FruitSize.y * .5f, 0);
-
+       
         GameObject newObject = Instantiate(FruitPrefab, position, rotation);
 
         if (newObject != null)

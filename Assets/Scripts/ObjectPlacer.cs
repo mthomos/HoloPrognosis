@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using HoloToolkit.Unity;
 using UnityEngine;
+using Random = UnityEngine.Random;
 //Almost done
 public class ObjectPlacer : MonoBehaviour
 {
@@ -12,11 +13,18 @@ public class ObjectPlacer : MonoBehaviour
     //Private Variables
     private readonly Queue<PlacementResult> _results = new Queue<PlacementResult>();
     private bool _timeToHideMesh;
+    private bool treeCreated = false;
+    private Vector3 treePosition;
+    private Vector3 treeSize;
+    private Vector3 fruitSize;
 
     // Use this for initialization
     void Start()
     {
-
+        ObjectCollectionManager.Instance.TreeSize = ObjectCollectionManager.Instance.TreePrefab.GetComponent<Renderer>().bounds.size;
+        treeSize = ObjectCollectionManager.Instance.TreeSize;
+        ObjectCollectionManager.Instance.FruitSize = ObjectCollectionManager.Instance.FruitPrefab.GetComponent<Renderer>().bounds.size;
+        fruitSize = ObjectCollectionManager.Instance.FruitSize;
     }
 
     void Update()
@@ -47,7 +55,7 @@ public class ObjectPlacer : MonoBehaviour
 
         List<PlacementQuery> queries = new List<PlacementQuery>();
         queries.AddRange(AddTree());
-        queries.AddRange(AddFruits());
+        //queries.AddRange(AddFruits());
         GetLocationsFromSolver(queries);
     }
 
@@ -65,16 +73,23 @@ public class ObjectPlacer : MonoBehaviour
     {
         if (_results.Count > 0)
         {
-            var toPlace = _results.Dequeue();
+            PlacementResult toPlace = _results.Dequeue();
 
             var rotation = Quaternion.LookRotation(toPlace.Normal, Vector3.up);
             switch (toPlace.ObjType)
             {
                 case ObjectType.Tree:
                     ObjectCollectionManager.Instance.CreateTree(toPlace.Position, rotation);
+                    treePosition = toPlace.Position;
+                    treeCreated = true;
+                    //Add the fruits
+                    GetLocationsFromSolver(AddFruits());
                     break;
                 case ObjectType.Fruit:
-                    ObjectCollectionManager.Instance.CreateFruit(toPlace.Position, rotation);
+                    if (treeCreated)
+                        ObjectCollectionManager.Instance.CreateFruit(toPlace.Position, rotation);
+                    else
+                        _results.Enqueue(toPlace);
                     break;
             }
         }
@@ -82,8 +97,8 @@ public class ObjectPlacer : MonoBehaviour
 
     private void GetLocationsFromSolver(List<PlacementQuery> placementQueries)//2
     {
-        System.Threading.Tasks.Task.Run(() =>
-        {
+        //System.Threading.Tasks.Task.Run(() =>
+        //{
             // Go through the queries in the list
             for (int i = 0; i < placementQueries.Count; ++i)
             {
@@ -97,7 +112,7 @@ public class ObjectPlacer : MonoBehaviour
                 if (result != null) _results.Enqueue(result);
             }
             _timeToHideMesh = true;
-        });
+        //});
     }
 
     private PlacementResult PlaceObject(string placementName,
@@ -129,12 +144,10 @@ public class ObjectPlacer : MonoBehaviour
     private List<PlacementQuery> CreateLocationQueriesForSolver(int prefabCount, Vector3 boxFullDims, ObjectType objType)
     {
         List<PlacementQuery> placementQueries = new List<PlacementQuery>();
-
-        var halfBoxDims = boxFullDims * .5f;
-
-        var disctanceFromOtherObjects = halfBoxDims.x > halfBoxDims.z ? halfBoxDims.x * 3f : halfBoxDims.z * 3f;
-
-        for (int i = 0; i < prefabCount; ++i)
+        Vector3 halfBoxDims = boxFullDims * .5f;
+        float disctanceFromOtherObjects = halfBoxDims.x > halfBoxDims.z ? halfBoxDims.x * 3f : halfBoxDims.z * 3f;
+        
+        for (int i = 0; i < prefabCount; i++)
         {
             var placementRules = new List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule>
             {
@@ -142,8 +155,31 @@ public class ObjectPlacer : MonoBehaviour
             };
 
             var placementConstraints = new List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint>();
+            SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition placementDefinition;
 
-            SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_OnFloor(halfBoxDims);
+            if (objType == ObjectType.Tree)
+            {
+                placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_NearCenter());
+                placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_OnFloor(halfBoxDims);
+            }
+            else if (objType == ObjectType.Fruit && treeCreated)
+            {
+                float x = Random.Range(treeSize.x / 2, treeSize.x);
+                float y = Random.Range(treeSize.y / 1.5f, treeSize.y);
+                float z = Random.Range(treeSize.z / 2, treeSize.z);
+
+                Vector3 fruitPosition = new Vector3(treeSize.x + x + halfBoxDims.x,
+                                                    y,
+                                                    treeSize.z + z + halfBoxDims.z);
+                fruitPosition = ObjectCollectionManager.Instance.TreePrefab.GetComponent<Renderer>().bounds.ClosestPoint(fruitPosition);
+                placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_NearCenter());
+                placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_NearPoint(fruitPosition, 0, .2f));
+                placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_InMidAir(halfBoxDims);
+            }
+            else
+            {
+                placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_InMidAir(halfBoxDims);
+            }
 
             placementQueries.Add(
                 new PlacementQuery(placementDefinition,
