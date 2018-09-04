@@ -2,26 +2,28 @@
 
 public class GazeCursor : MonoBehaviour
 {
+    //Public Variables-For Editor
     public GameObject Cursor;
+    //Private Variables
     private GameObject FocusedObject; // The object which user is staring at
     private GazeBuffer buffer; // Gaze stabilizer
-    private MeshRenderer meshRenderer;
-    private RaycastHit hitInfo;
-    private Vector3 gazeOrigin;
-    private Vector3 gazeForward;
+    private MeshRenderer meshRenderer; // Using this to disable cursor
+    private RaycastHit hitInfo; //Better for this variable to be cached
+    private Vector3 gazeOrigin; // same
+    private Vector3 gazeForward; // same
     
     void Start ()
     {
         meshRenderer = Cursor.GetComponent<MeshRenderer>();
+        meshRenderer.enabled = false;
         buffer = new GazeBuffer();
     }
 	
 	void Update ()
     {
-        RaycastHit hitInfo;
         gazeOrigin = Camera.main.transform.position;
         gazeForward = Camera.main.transform.forward;
-
+        /*
         if (Physics.Raycast(gazeOrigin, gazeForward, out hitInfo))
         {
             buffer.addSamples(gazeOrigin, gazeForward);
@@ -29,7 +31,7 @@ public class GazeCursor : MonoBehaviour
             gazeOrigin = buffer.getStableGazeOrigin();
             gazeForward = buffer.getStableGazeForward();
         }
-
+        */
         if (Physics.Raycast(gazeOrigin, gazeForward, out hitInfo))
         {
             meshRenderer.enabled = true;

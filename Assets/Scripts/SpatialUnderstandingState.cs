@@ -8,13 +8,10 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
 {
     //Public Variables - For Editor
     //Scan surface variables, for ease -> public
-    public float MinAreaForStats = 1.0f;
-    public float MinAreaForComplete = 8.0f; // for floor
-    public float MinHorizAreaForComplete = 5.0f; // for horizontal surfaces not only walls
+    public float MinAreaForStats = 0.1f; // both floor and wall surfaces
+    public float MinAreaForComplete = 3.0f; // for floor
+    public float MinHorizAreaForComplete = 2.0f; // for horizontal surfaces not only walls
     public float MinWallAreaForComplete = 0.0f; // for walls only
-    public float TagalongDistance = 2.0f;
-    public float PositionUpdateSpeed = 10f;
-    public float SmoothingFactor = 0.6f;
     //Debug displays
     public TextMesh DebugDisplay;
     public TextMesh DebugSubDisplay;
@@ -25,11 +22,8 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
     private bool HideText = false;
     private bool ready = false;
     private UnityAction TapListener;
-    //
-    protected Interpolator interpolator;
-    //
 
-    public bool DoesScanMeetMinBarForCompletion
+    private bool DoesScanMeetMinBarForCompletion
     {
         get
         {
@@ -50,12 +44,12 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
                 (stats.HorizSurfaceArea > MinHorizAreaForComplete) ||
                 (stats.WallSurfaceArea > MinWallAreaForComplete))
                 return true;
-
-            return false;
+            else
+                return false;
         }
     }
     //OK
-    public string PrimaryText
+    private string PrimaryText
     {
         get
         {
@@ -124,9 +118,7 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
         get
         {
             if (SpatialUnderstanding.Instance.ScanState == SpatialUnderstanding.ScanStates.None)
-            {
                 return "";
-            }
 
             // Scanning stats get second priority
             if ((SpatialUnderstanding.Instance.ScanState == SpatialUnderstanding.ScanStates.Scanning) &&
@@ -162,18 +154,12 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
         DebugDisplay.text = PrimaryText;
         DebugDisplay.color = PrimaryColor;
         DebugSubDisplay.text = DetailsText;
-        //Update display rotation
-        Update_DisplayRotation();
     }
 
     private void Start()
     {
         TapListener = new UnityAction(Tap_Triggered);
         EventManager.StartListening("tap", TapListener);
-        //
-        interpolator = gameObject.AddComponent<Interpolator>();
-        interpolator.SmoothLerpToTarget = true;
-        interpolator.SmoothPositionLerpRatio = SmoothingFactor;
     }
 
     private void Tap_Triggered()
@@ -197,24 +183,5 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
             EventManager.StopListening("tap", TapListener);
             Placer.CreateScene();
         }
-    }
-
-    private void Update_DisplayRotation()
-    {
-        Vector3 tagalongTargetPosition;
-        tagalongTargetPosition = Camera.main.transform.position + Camera.main.transform.forward * TagalongDistance;
-        interpolator.PositionPerSecond = PositionUpdateSpeed;
-        interpolator.SetTargetPosition(tagalongTargetPosition);
-
-        Vector3 directionToTarget = Camera.main.transform.position - DebugDisplay.transform.position;
-
-        directionToTarget.y = 0.0f;
-
-        // If we are right next to the camera the rotation is undefined. 
-        if (directionToTarget.sqrMagnitude < 0.005f)
-            return;
-
-        DebugDisplay.transform.rotation = Quaternion.LookRotation(-directionToTarget);
-        DebugSubDisplay.transform.rotation = Quaternion.LookRotation(-directionToTarget);
     }
 }

@@ -28,8 +28,7 @@ public class TagAlongForDisplay : MonoBehaviour
         directionToTarget.y = 0.0f;
 
         // If we are right next to the camera the rotation is undefined. 
-        if (directionToTarget.sqrMagnitude < 0.005f)
-            return;
+        if (directionToTarget.sqrMagnitude < 0.005f) return;
 
         transform.rotation = Quaternion.LookRotation(-directionToTarget);
     }

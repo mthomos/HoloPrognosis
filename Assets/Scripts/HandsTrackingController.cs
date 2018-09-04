@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,7 +18,7 @@ namespace HoloPrognosis
         public GameObject TrackingObject; // GameObject representing the hand in holographic space
         //Colors
         public Color DefaultColor = Color.green;
-        public Color TapColor = Color.blue;
+        public Color TapColor = Color.white;
         public Color HoldStartedColor = Color.red;
         public Color HoldCanceledColor = Color.magenta;
         public Color HoldCompletedColor = Color.yellow;
