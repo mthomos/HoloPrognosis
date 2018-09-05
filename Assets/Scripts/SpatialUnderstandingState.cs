@@ -14,13 +14,13 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
     public float MinWallAreaForComplete = 0.0f; // for walls only
     //Debug displays
     public TextMesh DebugDisplay;
-    public TextMesh DebugSubDisplay;
+    //public TextMesh DebugSubDisplay;
     public ObjectPlacer Placer;
     public string SpaceQueryDescription;
     //Private Variables
     private bool _triggered;
     private bool HideText = false;
-    private bool ready = false;
+    private bool scanReady = false;
     private UnityAction TapListener;
 
     private bool DoesScanMeetMinBarForCompletion
@@ -53,63 +53,48 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
     {
         get
         {
-            if (HideText)
-                return string.Empty;
-
             // Display the space and object query results (has priority)
             if (!string.IsNullOrEmpty(SpaceQueryDescription))
-            {
                 return SpaceQueryDescription;
-            }
 
             // Scan state
-            if (SpatialUnderstanding.Instance.AllowSpatialUnderstanding)
+            if (SpatialUnderstanding.Instance.AllowSpatialUnderstanding && !HideText)
             {
                 switch (SpatialUnderstanding.Instance.ScanState)
                 {
                     case SpatialUnderstanding.ScanStates.Scanning:
-                        // Get the scan stats
                         IntPtr statsPtr = SpatialUnderstanding.Instance.UnderstandingDLL.GetStaticPlayspaceStatsPtr();
+                        //Just for case
                         if (SpatialUnderstandingDll.Imports.QueryPlayspaceStats(statsPtr) == 0)
-                        {
                             return "playspace stats query failed";
-                        }
 
-                        // The stats tell us if we could potentially finish
                         if (DoesScanMeetMinBarForCompletion)
-                        {
-                            return "When ready, air tap to finalize your playspace";
-                        }
+                            return "Space scanned, air tap to finalize your playspace";
+
                         return "Walk around and scan in your playspace";
                     case SpatialUnderstanding.ScanStates.Finishing:
-                        return "Finalizing scan (please wait)";
+                        return "Finalizing scan";
                     case SpatialUnderstanding.ScanStates.Done:
                         return "Scan complete";
                     default:
                         return "ScanState = " + SpatialUnderstanding.Instance.ScanState;
                 }
             }
-            return string.Empty;
+            else
+                return string.Empty;
         }
     }
-    //OK
+
     public Color PrimaryColor
     {
         get
         {
-            ready = DoesScanMeetMinBarForCompletion;
-            if (SpatialUnderstanding.Instance.ScanState == SpatialUnderstanding.ScanStates.Scanning)
-            {
-                return ready ? Color.yellow : Color.white;
-            }
+            scanReady = DoesScanMeetMinBarForCompletion;
+            if (SpatialUnderstanding.Instance.ScanState == SpatialUnderstanding.ScanStates.Scanning && scanReady)
+                return Color.yellow;
+            else
+                return Color.white;
 
-            // If we're looking at the menu, fade it out
-            float alpha = 1.0f;
-
-            // Special case processing & 
-            return (!string.IsNullOrEmpty(SpaceQueryDescription)) ?
-                (PrimaryText.Contains("processing") ? new Color(1.0f, 0.0f, 0.0f, 1.0f) : new Color(1.0f, 0.7f, 0.1f, alpha)) :
-                new Color(1.0f, 1.0f, 1.0f, alpha);
         }
     }
     //OK
@@ -148,12 +133,10 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
 
     private void Update_DebugDisplay()
     {
-        // Basic checks
-        if (DebugDisplay == null) return;
         // Update display text
         DebugDisplay.text = PrimaryText;
         DebugDisplay.color = PrimaryColor;
-        DebugSubDisplay.text = DetailsText;
+        //DebugSubDisplay.text = DetailsText;
     }
 
     private void Start()
@@ -164,7 +147,7 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
 
     private void Tap_Triggered()
     {
-        if (ready &&
+        if (scanReady &&
             (SpatialUnderstanding.Instance.ScanState == SpatialUnderstanding.ScanStates.Scanning) &&
              !SpatialUnderstanding.Instance.ScanStatsReportStillWorking)
             SpatialUnderstanding.Instance.RequestFinishScan();

@@ -57,7 +57,7 @@ namespace HoloPrognosis
             gestureRecognizer.ManipulationCanceled += GestureRecognizer_ManipulationCanceled;
             gestureRecognizer.ManipulationUpdated += GestureRecognizer_ManipulationUpdated; 
             gestureRecognizer.StartCapturingGestures();
-            cursor = GameObject.Find("Gaze").GetComponent<GazeCursor>();
+            cursor = GameObject.Find("Cursor").GetComponent<GazeCursor>();
         }
 
         void Update()
@@ -92,7 +92,7 @@ namespace HoloPrognosis
             {
                 ChangeObjectColor(trackingHands[trackingHands.ElementAt(0).Key], Color.magenta);
                 ChangeObjectColor(trackingHands[trackingHands.ElementAt(1).Key], Color.magenta);
-                StatusText.text = "Focus Object Touched";
+                StatusText.text = "Focus Object Touched:" + TouchedObject.name;
                 ObjectTouched = true;
                 ManipulationWithTwoHands = true;
                 TouchedObject = FocusedObject;
@@ -123,7 +123,7 @@ namespace HoloPrognosis
             if (focusedObjectBounds.Contains(handPos))
             {
                 ChangeObjectColor(trackingHands[trackingHands.ElementAt(0).Key], Color.magenta);
-                StatusText.text = "Focus Object Touched";
+                StatusText.text = "Focus Object Touched:"+TouchedObject.name;
                 ObjectTouched = true;
                 ManipulationWithTwoHands = false;
                 TouchedObject = FocusedObject;

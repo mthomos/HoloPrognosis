@@ -3,45 +3,56 @@
 public class GazeCursor : MonoBehaviour
 {
     //Public Variables-For Editor
-    public GameObject Cursor;
+    //public GameObject Cursor;
     //Private Variables
     private GameObject FocusedObject; // The object which user is staring at
     private GazeBuffer buffer; // Gaze stabilizer
-    private MeshRenderer meshRenderer; // Using this to disable cursor
-    private RaycastHit hitInfo; //Better for this variable to be cached
+    private MeshRenderer cursorMeshRenderer; // Using this to disable cursor
+    //private RaycastHit hitInfo; //Better for this variable to be cached
     private Vector3 gazeOrigin; // same
-    private Vector3 gazeForward; // same
+    private Vector3 gazeDirection; // same
     
     void Start ()
     {
-        meshRenderer = Cursor.GetComponent<MeshRenderer>();
-        meshRenderer.enabled = false;
         buffer = new GazeBuffer();
+        cursorMeshRenderer = gameObject.GetComponentInChildren<MeshRenderer>();
     }
 	
 	void Update ()
     {
         gazeOrigin = Camera.main.transform.position;
-        gazeForward = Camera.main.transform.forward;
+        gazeDirection = Camera.main.transform.forward;
+        RaycastHit hitInfo;
         /*
-        if (Physics.Raycast(gazeOrigin, gazeForward, out hitInfo))
+        if (Physics.Raycast(gazeOrigin, gazeDirection, out hitInfo))
         {
-            buffer.addSamples(gazeOrigin, gazeForward);
-            buffer.UpdateStability(gazeOrigin, gazeForward);
+            buffer.addSamples(gazeOrigin, gazeDirection);
+            buffer.UpdateStability(gazeOrigin, gazeDirection);
             gazeOrigin = buffer.getStableGazeOrigin();
-            gazeForward = buffer.getStableGazeForward();
+            gazeDirection = buffer.getStablegazeDirection();
         }
         */
-        if (Physics.Raycast(gazeOrigin, gazeForward, out hitInfo))
+        if (Physics.Raycast(gazeOrigin, gazeDirection, out hitInfo))
         {
-            meshRenderer.enabled = true;
-            Cursor.transform.position = hitInfo.transform.position;
-            Cursor.transform.rotation = hitInfo.transform.rotation;
+            cursorMeshRenderer.enabled = true;
+            this.transform.position = hitInfo.point;
+            this.transform.rotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal);
             FocusedObject = hitInfo.collider.gameObject;
         }
         else
         {
-            meshRenderer.enabled = false;
+            /*
+            Vector3 tagalongTargetPosition = Camera.main.transform.position + Camera.main.transform.forward * 1.75f;
+            this.transform.position = tagalongTargetPosition;
+
+            Vector3 directionToTarget = Camera.main.transform.position - this.transform.position;
+            directionToTarget.y = 0.0f;
+
+            if (directionToTarget.sqrMagnitude >= 0.005f)
+                transform.rotation = Quaternion.LookRotation(-directionToTarget);
+            */
+
+            cursorMeshRenderer.enabled = false;
             FocusedObject = null;
         }
     }
