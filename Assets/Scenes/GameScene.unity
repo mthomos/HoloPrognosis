@@ -1024,11 +1024,6 @@ Prefab:
       propertyPath: m_Name
       value: SpatialUnderstanding-Dependecies
       objectReference: {fileID: 0}
-    - target: {fileID: 114000013027790266, guid: d41fa7615c3c85b40bcc95fc4367b607,
-        type: 2}
-      propertyPath: meshMaterial
-      value: 
-      objectReference: {fileID: 2100000, guid: 6cec46d5b336e2a4b9b2e1d3e8e3754c, type: 2}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: d41fa7615c3c85b40bcc95fc4367b607, type: 2}
   m_IsPrefabParent: 0
