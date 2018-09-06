@@ -42,7 +42,7 @@ namespace HoloPrognosis
         private GameObject ManipulatedObject;// GameObject which is being Manipulated by the user
         private GameObject FocusedObject; // GameObject which the user gazes at
         private GestureRecognizer gestureRecognizer;
-        private Outline outlineComponent; //Outline for TouchedObject
+        //private Outline outlineComponent; //Outline for TouchedObject
 
         void Awake()
         {
@@ -90,8 +90,6 @@ namespace HoloPrognosis
             focusedObjectBounds.Expand(.1f);
             if (focusedObjectBounds.Contains(firstHand) && focusedObjectBounds.Contains(secondHand))
             {
-                ChangeObjectColor(trackingHands[trackingHands.ElementAt(0).Key], Color.magenta);
-                ChangeObjectColor(trackingHands[trackingHands.ElementAt(1).Key], Color.magenta);
                 StatusText.text = "Focus Object Touched:" + TouchedObject.name;
                 ObjectTouched = true;
                 ManipulationWithTwoHands = true;
@@ -122,7 +120,6 @@ namespace HoloPrognosis
             focusedObjectBounds.Expand(.1f);
             if (focusedObjectBounds.Contains(handPos))
             {
-                ChangeObjectColor(trackingHands[trackingHands.ElementAt(0).Key], Color.magenta);
                 StatusText.text = "Focus Object Touched:"+TouchedObject.name;
                 ObjectTouched = true;
                 ManipulationWithTwoHands = false;
@@ -141,8 +138,7 @@ namespace HoloPrognosis
         {
             if (focusedObject == null)
             {
-                if (outlineComponent != null)
-                    outlineComponent.enabled = false;
+                focusedObject.GetComponent<Outline>().enabled = false;
             }
         }
 
@@ -150,11 +146,7 @@ namespace HoloPrognosis
         {
             if (focusedObject == null)
             {
-                if (outlineComponent != null)
-                    outlineComponent.enabled = false;
-                outlineComponent = focusedObject.GetComponent<Outline>();
-                if (outlineComponent != null)
-                    outlineComponent.enabled = true;
+                focusedObject.GetComponent<Outline>().enabled = true;
             }
         }
 

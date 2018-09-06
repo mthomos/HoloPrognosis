@@ -139,10 +139,12 @@ public class GazeBuffer
         {   
             resetSamples();
         }
-        else if (GazeOriginSamples.Count > bufferCount)
+        else if (GazeOriginSamples.Count > bufferCount &&
+            (standardDeviationOrigin <= StandardDeviationReset) &&
+                (standardDeviationForward <= StandardDeviationReset))
         {
-            stableGazeOrigin = getStableGazeOrigin();
-            stableGazeForward = getStableGazeForward();
+            stableGazeOrigin = getCentroidPointOrigin();
+            stableGazeForward = getCentroidPointForward();
         }
     }
 }
