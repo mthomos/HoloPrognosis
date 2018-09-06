@@ -4,8 +4,9 @@ using UnityEngine;
 public class TagAlongForDisplay : MonoBehaviour
 {
     public float TagalongDistance = 1.75f;
-    public float PositionUpdateSpeed = 10f;
-    public float SmoothingFactor = 0.6f;
+    public float PositionUpdateSpeed = 30f;
+    public float SmoothingFactor = 0.5f;
+    public float PositionOffsetY = 2f;
 
     protected Interpolator interpolator;
 
@@ -19,6 +20,7 @@ public class TagAlongForDisplay : MonoBehaviour
     void Update()
     {
         Vector3 tagalongTargetPosition = Camera.main.transform.position + Camera.main.transform.forward * TagalongDistance;
+        tagalongTargetPosition.y = tagalongTargetPosition.y + PositionOffsetY;
         interpolator.PositionPerSecond = PositionUpdateSpeed;
         interpolator.SetTargetPosition(tagalongTargetPosition);
 

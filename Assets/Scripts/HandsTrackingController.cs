@@ -20,9 +20,9 @@ namespace HoloPrognosis
         public Color DefaultColor = Color.green;
         public Color TapColor = Color.white;
         public Color HoldStartedColor = Color.red;
-        public Color HoldCanceledColor = Color.magenta;
         public Color HoldCompletedColor = Color.yellow;
         public Color ManipulateColor = Color.cyan;
+        public Color TouchedColor = Color.magenta;
         //Private Variables
         //Booleans
         private bool ObjectTouched = false;
@@ -58,6 +58,7 @@ namespace HoloPrognosis
             gestureRecognizer.ManipulationUpdated += GestureRecognizer_ManipulationUpdated; 
             gestureRecognizer.StartCapturingGestures();
             cursor = GameObject.Find("Cursor").GetComponent<GazeCursor>();
+
         }
 
         void Update()
@@ -90,7 +91,9 @@ namespace HoloPrognosis
             focusedObjectBounds.Expand(.1f);
             if (focusedObjectBounds.Contains(firstHand) && focusedObjectBounds.Contains(secondHand))
             {
-                StatusText.text = "Focus Object Touched:" + TouchedObject.name;
+                ChangeObjectColor(trackingHands[trackingHands.ElementAt(0).Key], TouchedColor);
+                ChangeObjectColor(trackingHands[trackingHands.ElementAt(1).Key], TouchedColor);
+                StatusText.text = "Focus Object Touched";
                 ObjectTouched = true;
                 ManipulationWithTwoHands = true;
                 TouchedObject = FocusedObject;
@@ -98,6 +101,8 @@ namespace HoloPrognosis
             }
             else
             {
+                ChangeObjectColor(trackingHands[trackingHands.ElementAt(0).Key], DefaultColor);
+                ChangeObjectColor(trackingHands[trackingHands.ElementAt(1).Key], DefaultColor);
                 ObjectTouched = false;
                 TouchedObject = null;
                 DisableOutline(FocusedObject);
@@ -120,7 +125,8 @@ namespace HoloPrognosis
             focusedObjectBounds.Expand(.1f);
             if (focusedObjectBounds.Contains(handPos))
             {
-                StatusText.text = "Focus Object Touched:"+TouchedObject.name;
+                ChangeObjectColor(trackingHands[trackingHands.ElementAt(0).Key], TouchedColor);
+                StatusText.text = "Focus Object Touched";
                 ObjectTouched = true;
                 ManipulationWithTwoHands = false;
                 TouchedObject = FocusedObject;
@@ -128,6 +134,7 @@ namespace HoloPrognosis
             }
             else
             {
+                ChangeObjectColor(trackingHands[trackingHands.ElementAt(0).Key], DefaultColor);
                 ObjectTouched = false;
                 TouchedObject = null;
                 DisableOutline(FocusedObject);
@@ -136,17 +143,28 @@ namespace HoloPrognosis
 
         private void DisableOutline(GameObject focusedObject)
         {
-            if (focusedObject == null)
+            if (focusedObject != null)
             {
-                focusedObject.GetComponent<Outline>().enabled = false;
+                var outline = focusedObject.GetComponentInChildren<Outline>();
+                if (outline != null) outline.enabled = false;
             }
         }
 
         private void EnableOutline(GameObject focusedObject)
         {
-            if (focusedObject == null)
+            if (focusedObject != null)
             {
-                focusedObject.GetComponent<Outline>().enabled = true;
+                var outline = focusedObject.GetComponentInChildren<Outline>();
+                if(outline == null)
+                {
+                    outline = gameObject.AddComponent<Outline>();
+                    outline.OutlineMode = Outline.Mode.OutlineAll;
+                    outline.OutlineColor = Color.red;
+                    outline.OutlineWidth = 5f;
+                    outline.enabled = true;
+                }
+                else
+                    outline.enabled = true;
             }
         }
 
@@ -190,14 +208,12 @@ namespace HoloPrognosis
             uint id = args.source.id;
             if (trackingHands.ContainsKey(args.source.id) && objectManipulationInProgress)
             {
-                StatusText.text = "Manipulation Updated";
                 if (!ManipulationWithTwoHands)
                 {
                     GameObject currentHandObject;// OR = trackingHands[id];
                     trackingHands.TryGetValue(id, out currentHandObject);
                     GameObject currentManipulatedObject = handAndManipulatedObjectCombo[id];
                     currentManipulatedObject.transform.position = currentHandObject.transform.position;
-                    //currentManipulatedObject.transform.rotation = currentHandObject.transform.rotation;
                 }
                 else
                 {
@@ -213,6 +229,8 @@ namespace HoloPrognosis
             if (trackingHands.ContainsKey(args.source.id) && objectManipulationInProgress)
             {
                 StatusText.text = "Manipulation Completed";
+                DisableOutline(ManipulatedObject);
+                ChangeObjectColor(trackingHands[args.source.id], DefaultColor);
                 if (!ManipulationWithTwoHands)
                 {
                     objectManipulationInProgress = false;
@@ -234,6 +252,8 @@ namespace HoloPrognosis
             if (trackingHands.ContainsKey(args.source.id) && objectManipulationInProgress)
             {
                 StatusText.text = "Manipulation Canceled";
+                ChangeObjectColor(trackingHands[args.source.id], DefaultColor);
+                DisableOutline(ManipulatedObject);
                 if (!ManipulationWithTwoHands)
                 {
                     objectManipulationInProgress = false;
@@ -263,46 +283,41 @@ namespace HoloPrognosis
         private void InteractionManager_InteractionSourceDetected(InteractionSourceDetectedEventArgs obj)
         {
             uint id = obj.state.source.id;
-            // Check to see that the source is a hand.
-            if (obj.state.source.kind != InteractionSourceKind.Hand)
-                return;
-           
-            var hand = Instantiate(TrackingObject) as GameObject;
-            Vector3 pos;
+            if (obj.state.source.kind == InteractionSourceKind.Hand)
+            {
 
-            if (obj.state.sourcePose.TryGetPosition(out pos))
-                hand.transform.position = pos;
+                var hand = Instantiate(TrackingObject) as GameObject;
+                Vector3 pos;
 
-            trackingHands.Add(id, hand);
+                if (obj.state.sourcePose.TryGetPosition(out pos))
+                    hand.transform.position = pos;
+
+                trackingHands.Add(id, hand);
+            }
         }
 
         void InteractionManager_InteractionSourceUpdated(InteractionSourceUpdatedEventArgs args)
         {
             uint id = args.state.source.id;
 
-            if (args.state.source.kind == InteractionSourceKind.Hand)
+            if (trackingHands.ContainsKey(id) && args.state.source.kind == InteractionSourceKind.Hand)
             {
-                StatusText.text = " Hand Interaction updated";
-                if (trackingHands.ContainsKey(id))
-                {
-                    Vector3 pos;
-                    Quaternion rot;
-                    if (args.state.sourcePose.TryGetPosition(out pos))
-                        trackingHands[id].transform.position = pos;
+                Vector3 pos;
+                Quaternion rot;
+                if (args.state.sourcePose.TryGetPosition(out pos))
+                    trackingHands[id].transform.position = pos;
 
-                    if (args.state.sourcePose.TryGetRotation(out rot))
-                        trackingHands[id].transform.rotation = rot;
-                }
+                if (args.state.sourcePose.TryGetRotation(out rot))
+                    trackingHands[id].transform.rotation = rot;
             }
         }   
 
         private void InteractionManager_InteractionSourceLost(InteractionSourceLostEventArgs args)
         {
             uint id = args.state.source.id;
-            if (args.state.source.kind != InteractionSourceKind.Hand)
-                return;
-            StatusText.text = " Hand Interaction lost";
-            if (trackingHands.ContainsKey(id))
+
+            StatusText.text ="Hand Interaction lost";
+            if (trackingHands.ContainsKey(id) && args.state.source.kind == InteractionSourceKind.Hand)
             {
                 var obj = trackingHands[id];
                 trackingHands.Remove(id);

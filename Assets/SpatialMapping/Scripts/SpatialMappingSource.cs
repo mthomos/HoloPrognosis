@@ -333,7 +333,7 @@ namespace HoloToolkit.Unity.SpatialMapping
         /// <param name="fileName">Name to give the mesh file. Exclude path and extension.</param>
         public void SaveSpatialMeshes(string fileName)
         {
-            MeshSaver.Save(fileName, GetMeshFilters());
+            //MeshSaver.Save(fileName, GetMeshFilters());
         }
     }
 }
