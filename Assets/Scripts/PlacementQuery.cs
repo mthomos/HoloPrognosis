@@ -1,16 +1,17 @@
 ﻿using System.Collections.Generic;
 using HoloToolkit.Unity;
 using UnityEngine;
-//Done
+
 public enum ObjectType
 {
     Tree,
     Fruit,
-    Box,
+    Box
 }
 
 public struct PlacementQuery
 {
+
     public readonly SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition PlacementDefinition;
     public readonly Vector3 Dimensions;
     public readonly ObjectType ObjType;

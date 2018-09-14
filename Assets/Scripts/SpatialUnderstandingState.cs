@@ -8,9 +8,9 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
 {
     //Public Variables - For Editor
     //Scan surface variables, for ease -> public
-    public float MinAreaForStats = 0.1f; // both floor and wall surfaces
+    public float MinAreaForStats = 1.0f; // both floor and wall surfaces
     public float MinAreaForComplete = 3.0f; // for floor
-    public float MinHorizAreaForComplete = 2.0f; // for horizontal surfaces not only walls
+    public float MinHorizAreaForComplete = 1.0f; // for horizontal surfaces not only walls
     public float MinWallAreaForComplete = 0.0f; // for walls only
     //Debug displays
     public TextMesh DebugDisplay;
@@ -19,7 +19,6 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
     public string SpaceQueryDescription;
     //Private Variables
     private bool _triggered;
-    private bool HideText = false;
     private bool scanReady = false;
     private UnityAction TapListener;
 
@@ -58,7 +57,7 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
                 return SpaceQueryDescription;
 
             // Scan state
-            if (SpatialUnderstanding.Instance.AllowSpatialUnderstanding && !HideText)
+            if (SpatialUnderstanding.Instance.AllowSpatialUnderstanding)
             {
                 switch (SpatialUnderstanding.Instance.ScanState)
                 {
@@ -162,7 +161,6 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
         if (!_triggered && SpatialUnderstanding.Instance.ScanState == SpatialUnderstanding.ScanStates.Done)
         {
             _triggered = true;
-            HideText = true;
             EventManager.StopListening("tap", TapListener);
             Placer.CreateScene();
         }

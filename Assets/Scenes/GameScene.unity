@@ -113,6 +113,25 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &106563690 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 100468, guid: 9c69b08e413020b419be1bbf631dffba, type: 2}
+  m_PrefabInternal: {fileID: 665181993}
+--- !u!54 &106563691
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 106563690}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &170076733
 GameObject:
   m_ObjectHideFlags: 0
@@ -211,7 +230,7 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.2
+  near clip plane: 0.15
   far clip plane: 1000
   field of view: 60
   orthographic: 0
@@ -344,9 +363,6 @@ MonoBehaviour:
     type: 2}
   DefaultColor: {r: 0, g: 1, b: 0, a: 1}
   TapColor: {r: 0, g: 0, b: 1, a: 1}
-  HoldStartedColor: {r: 1, g: 0, b: 0, a: 1}
-  HoldCompletedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  ManipulateColor: {r: 0, g: 1, b: 1, a: 1}
   TouchedColor: {r: 1, g: 0, b: 1, a: 1}
 --- !u!1 &416328711
 GameObject:
@@ -559,9 +575,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 932469d900224d4498344b6e1125340e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NumberOfFruits: 10
-  OccludedMaterial: {fileID: 2100000, guid: df172103f5fba4a4d8636aeca60cb0d7, type: 2}
+  NumberOfFruits: 5
   SpatialUnderstandingMesh: {fileID: 434274831}
+  OccludedMaterial: {fileID: 2100000, guid: df172103f5fba4a4d8636aeca60cb0d7, type: 2}
 --- !u!114 &790716442
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -573,12 +589,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa3b9ae11f0076c43a4d80760e83d0db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TreePrefab: {fileID: 145700, guid: bf5cd350de97c824bb1b592d969de266, type: 2}
+  TreePrefab: {fileID: 137650, guid: 826b6a0b570e8460990010fa615b5a2a, type: 2}
   FruitPrefab: {fileID: 1000013678658166, guid: 8fa35cdad352cfa4297d3be64705ecf1,
     type: 2}
-  TreeSize: {x: 0.25, y: 0.5, z: 0.25}
-  FruitSize: {x: 0.1, y: 0.1, z: 0.1}
-  ScaleFactor: 1
+  BoxPrefab: {fileID: 100000, guid: 23fc59362ba1e264eb5b636821ad929a, type: 2}
+  TreeSize: {x: 0.8, y: 1.8, z: 0.8}
+  FruitSize: {x: 0.08, y: 0.08, z: 0.08}
+  BoxSize: {x: 0.5, y: 1, z: 0.5}
+  ScaleFactor: 0
+  createdTree: {fileID: 0}
 --- !u!1001 &1045876286
 Prefab:
   m_ObjectHideFlags: 0
@@ -618,7 +637,20 @@ Prefab:
       propertyPath: m_RootOrder
       value: 8
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 470424, guid: 41c74e011dc1d864b96754e37cbdd37a, type: 2}
+      propertyPath: m_LocalScale.x
+      value: 0.04
+      objectReference: {fileID: 0}
+    - target: {fileID: 470424, guid: 41c74e011dc1d864b96754e37cbdd37a, type: 2}
+      propertyPath: m_LocalScale.y
+      value: 0.04
+      objectReference: {fileID: 0}
+    - target: {fileID: 470424, guid: 41c74e011dc1d864b96754e37cbdd37a, type: 2}
+      propertyPath: m_LocalScale.z
+      value: 0.04
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 65440076099332570, guid: 41c74e011dc1d864b96754e37cbdd37a, type: 2}
   m_ParentPrefab: {fileID: 100100000, guid: 41c74e011dc1d864b96754e37cbdd37a, type: 2}
   m_IsPrefabParent: 0
 --- !u!4 &1324366932 stripped
@@ -1035,7 +1067,7 @@ TextMesh:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1468260354}
-  m_Text: Hand Display
+  m_Text: ' '
   m_OffsetZ: 0
   m_CharacterSize: 1
   m_LineSpacing: 1

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.XR.WSA.Input;
 
 namespace HoloPrognosis
@@ -19,9 +18,6 @@ namespace HoloPrognosis
         //Colors
         public Color DefaultColor = Color.green;
         public Color TapColor = Color.white;
-        public Color HoldStartedColor = Color.red;
-        public Color HoldCompletedColor = Color.yellow;
-        public Color ManipulateColor = Color.cyan;
         public Color TouchedColor = Color.magenta;
         //Private Variables
         //Booleans
@@ -42,7 +38,6 @@ namespace HoloPrognosis
         private GameObject ManipulatedObject;// GameObject which is being Manipulated by the user
         private GameObject FocusedObject; // GameObject which the user gazes at
         private GestureRecognizer gestureRecognizer;
-        //private Outline outlineComponent; //Outline for TouchedObject
 
         void Awake()
         {
@@ -91,13 +86,12 @@ namespace HoloPrognosis
             focusedObjectBounds.Expand(.1f);
             if (focusedObjectBounds.Contains(firstHand) && focusedObjectBounds.Contains(secondHand))
             {
-                ChangeObjectColor(trackingHands[trackingHands.ElementAt(0).Key], TouchedColor);
-                ChangeObjectColor(trackingHands[trackingHands.ElementAt(1).Key], TouchedColor);
-                StatusText.text = "Focus Object Touched";
-                ObjectTouched = true;
-                ManipulationWithTwoHands = true;
-                TouchedObject = FocusedObject;
-                EnableOutline(FocusedObject);
+                    ChangeObjectColor(trackingHands[trackingHands.ElementAt(0).Key], TouchedColor);
+                    ChangeObjectColor(trackingHands[trackingHands.ElementAt(1).Key], TouchedColor);
+                    ObjectTouched = true;
+                    ManipulationWithTwoHands = true;
+                    TouchedObject = FocusedObject;
+                    EnableOutline(FocusedObject);
             }
             else
             {
@@ -113,24 +107,20 @@ namespace HoloPrognosis
         {
             Vector3 focusPos = FocusedObject.transform.position; //The player gazes at the item which will catch
             Vector3 handPos = trackingHands.ElementAt(0).Value.transform.position; //The position of user's hand in the Holospace
-            //First approach : Use euclidean distance
-            /*
-            float dx = Mathf.Abs(handPos.x - focusPos.x);
-            float dy = Mathf.Abs(handPos.y - focusPos.y);
-            float dz = Mathf.Abs(handPos.z - focusPos.z);
-            if (dx < 0.05 && dy < 0.05 && dz < 0.05)
-            */
+
             // Another approach : Using graphical bounds of the object and expand them
             Bounds focusedObjectBounds = FocusedObject.GetComponent<Renderer>().bounds; //The graphical bounds of the focused objects
             focusedObjectBounds.Expand(.1f);
             if (focusedObjectBounds.Contains(handPos))
             {
-                ChangeObjectColor(trackingHands[trackingHands.ElementAt(0).Key], TouchedColor);
-                StatusText.text = "Focus Object Touched";
-                ObjectTouched = true;
-                ManipulationWithTwoHands = false;
-                TouchedObject = FocusedObject;
-                EnableOutline(FocusedObject);
+                if (!objectManipulationInProgress)
+                {
+                    ChangeObjectColor(trackingHands[trackingHands.ElementAt(0).Key], TouchedColor);
+                    ObjectTouched = true;
+                    ManipulationWithTwoHands = false;
+                    TouchedObject = FocusedObject;
+                    EnableOutline(FocusedObject);
+                }
             }
             else
             {
@@ -138,6 +128,15 @@ namespace HoloPrognosis
                 ObjectTouched = false;
                 TouchedObject = null;
                 DisableOutline(FocusedObject);
+            }
+        }
+
+        private void ChangeColorOutline(GameObject focusedObject, Color color)
+        {
+            if (focusedObject != null)
+            {
+                var outline = focusedObject.GetComponentInChildren<Outline>();
+                if (outline != null) outline.OutlineColor = color;
             }
         }
 
@@ -159,12 +158,15 @@ namespace HoloPrognosis
                 {
                     outline = gameObject.AddComponent<Outline>();
                     outline.OutlineMode = Outline.Mode.OutlineAll;
-                    outline.OutlineColor = Color.red;
+                    if (!objectManipulationInProgress) outline.OutlineColor = Color.red;
                     outline.OutlineWidth = 5f;
                     outline.enabled = true;
                 }
                 else
+                {
+                    if (!objectManipulationInProgress) outline.OutlineColor = Color.red;
                     outline.enabled = true;
+                }
             }
         }
 
@@ -172,10 +174,7 @@ namespace HoloPrognosis
         {            
             var rend = obj.GetComponentInChildren<Renderer>();
             if (rend)
-            {
                 rend.material.color = color;
-                Debug.LogFormat("Color Change: {0}", color.ToString());
-            }
         }
 
         private void GestureRecognizer_ManipulationStarted(ManipulationStartedEventArgs args)
@@ -185,12 +184,12 @@ namespace HoloPrognosis
             {
                 objectManipulationInProgress = true;
                 ManipulatedObject = TouchedObject;
+                ChangeColorOutline(ManipulatedObject, Color.green);
                 if (!ManipulationWithTwoHands)
                 {
                     GameObject currentHandObject;
                     trackingHands.TryGetValue(id, out currentHandObject);
                     ManipulatedObject.transform.position = currentHandObject.transform.position;
-                    //ManipulatedObject.transform.rotation = currentHandObject.transform.rotation;
                     handAndManipulatedObjectCombo.Add(id, ManipulatedObject);
                 }
                 else
@@ -228,7 +227,6 @@ namespace HoloPrognosis
         {
             if (trackingHands.ContainsKey(args.source.id) && objectManipulationInProgress)
             {
-                StatusText.text = "Manipulation Completed";
                 DisableOutline(ManipulatedObject);
                 ChangeObjectColor(trackingHands[args.source.id], DefaultColor);
                 if (!ManipulationWithTwoHands)
@@ -251,7 +249,6 @@ namespace HoloPrognosis
         {
             if (trackingHands.ContainsKey(args.source.id) && objectManipulationInProgress)
             {
-                StatusText.text = "Manipulation Canceled";
                 ChangeObjectColor(trackingHands[args.source.id], DefaultColor);
                 DisableOutline(ManipulatedObject);
                 if (!ManipulationWithTwoHands)
@@ -296,7 +293,7 @@ namespace HoloPrognosis
             }
         }
 
-        void InteractionManager_InteractionSourceUpdated(InteractionSourceUpdatedEventArgs args)
+        private void InteractionManager_InteractionSourceUpdated(InteractionSourceUpdatedEventArgs args)
         {
             uint id = args.state.source.id;
 
@@ -316,7 +313,6 @@ namespace HoloPrognosis
         {
             uint id = args.state.source.id;
 
-            StatusText.text ="Hand Interaction lost";
             if (trackingHands.ContainsKey(id) && args.state.source.kind == InteractionSourceKind.Hand)
             {
                 var obj = trackingHands[id];

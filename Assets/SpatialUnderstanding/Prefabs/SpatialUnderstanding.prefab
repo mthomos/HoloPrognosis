@@ -56,8 +56,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   AutoBeginScanning: 1
-  UpdatePeriod_DuringScanning: 2
-  UpdatePeriod_AfterScanning: 2
+  UpdatePeriod_DuringScanning: 1
+  UpdatePeriod_AfterScanning: 1
 --- !u!114 &114000012152922318
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -111,7 +111,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2a98b181acba5549af3d852c7664623, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TrianglesPerCubicMeter: 400
+  TrianglesPerCubicMeter: 500
   TimeBetweenUpdates: 2
   observerVolumeType: 0
   extents: {x: 10, y: 10, z: 10}

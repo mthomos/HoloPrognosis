@@ -1,126 +1,132 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using HoloToolkit.Unity;
 using UnityEngine;
+using System;
 using Random = UnityEngine.Random;
-//Almost done
+
 public class ObjectPlacer : MonoBehaviour
 {
-    //Public Variables
     public int NumberOfFruits;
-    public Material OccludedMaterial;
     public SpatialUnderstandingCustomMesh SpatialUnderstandingMesh;
-    //Private Variables
-    private readonly Queue<PlacementResult> _results = new Queue<PlacementResult>();
-    private bool _timeToHideMesh;
-    private bool treeCreated = false;
-    private Vector3 treePosition;
-    private Vector3 treeSize;
-    private Vector3 fruitSize;
+    public Material OccludedMaterial;
 
-    // Use this for initialization
+    private Queue<PlacementResult> _results = new Queue<PlacementResult>();
+    private bool treeCreated = false;
+    private bool fruitsQueriesCreated = false;
+    private int fruitsCreated = 0;
+    private GameObject tree;
+
     void Start()
     {
-        ObjectCollectionManager.Instance.TreeSize = ObjectCollectionManager.Instance.TreePrefab.GetComponent<Renderer>().bounds.size;
-        treeSize = ObjectCollectionManager.Instance.TreeSize;
-        ObjectCollectionManager.Instance.FruitSize = ObjectCollectionManager.Instance.FruitPrefab.GetComponent<Renderer>().bounds.size;
-        fruitSize = ObjectCollectionManager.Instance.FruitSize;
+
     }
 
     void Update()
     {
-        ProcessPlacementResults();
-        if (_timeToHideMesh)
+        if(treeCreated && !fruitsQueriesCreated)
         {
-            //SpatialUnderstandingState.Instance.HideText = true;
-            HideGridEnableOcclulsion();
-            _timeToHideMesh = false;
+            List<PlacementQuery> queries = new List<PlacementQuery>();
+            queries.AddRange(AddFruits());
+            GetLocationsFromSolver(queries);
+            SpatialUnderstandingState.Instance.SpaceQueryDescription = "Fruits queries";
+            fruitsQueriesCreated = true;
         }
+        ProcessPlacementResults();
+
     }
 
     private void HideGridEnableOcclulsion()
     {
-        //SpatialUnderstandingMesh.DrawProcessedMesh = false;
         SpatialUnderstandingMesh.MeshMaterial = OccludedMaterial;
     }
 
     public void CreateScene()
     {
-        //Simple check for Spatial Understanding
         if (!SpatialUnderstanding.Instance.AllowSpatialUnderstanding)
             return;
 
         SpatialUnderstandingDllObjectPlacement.Solver_Init();
+
         SpatialUnderstandingState.Instance.SpaceQueryDescription = "Generating World";
+        HideGridEnableOcclulsion();
 
         List<PlacementQuery> queries = new List<PlacementQuery>();
         queries.AddRange(AddTree());
-        //queries.AddRange(AddFruits());
+        queries.AddRange(AddBox());
+        //Don't create fruits yet ,first place
         GetLocationsFromSolver(queries);
     }
 
     public List<PlacementQuery> AddTree()
     {
+        SpatialUnderstandingState.Instance.SpaceQueryDescription = "Creating Tree";
         return CreateLocationQueriesForSolver(1, ObjectCollectionManager.Instance.TreeSize, ObjectType.Tree);
     }
 
     public List<PlacementQuery> AddFruits()
     {
-        return  CreateLocationQueriesForSolver(NumberOfFruits, ObjectCollectionManager.Instance.FruitSize, ObjectType.Fruit);
+        return CreateLocationQueriesForSolver(NumberOfFruits, ObjectCollectionManager.Instance.FruitSize, ObjectType.Fruit);
+    }
+
+    public List<PlacementQuery> AddBox()
+    {
+        SpatialUnderstandingState.Instance.SpaceQueryDescription = "Creating Box";
+        return CreateLocationQueriesForSolver(1, ObjectCollectionManager.Instance.BoxSize, ObjectType.Box);
     }
 
     private void ProcessPlacementResults()
     {
         if (_results.Count > 0)
         {
-            PlacementResult toPlace = _results.Dequeue();
+            var toPlace = _results.Dequeue();
+            Quaternion rotation = Quaternion.LookRotation(toPlace.Normal, Vector3.up);
 
-            var rotation = Quaternion.LookRotation(toPlace.Normal, Vector3.up);
             switch (toPlace.ObjType)
             {
                 case ObjectType.Tree:
                     ObjectCollectionManager.Instance.CreateTree(toPlace.Position, rotation);
-                    treePosition = toPlace.Position;
+                    SpatialUnderstandingState.Instance.SpaceQueryDescription = "Tree Created";
+                    tree = ObjectCollectionManager.Instance.createdTree;
                     treeCreated = true;
-                    //Add the fruits
-                    GetLocationsFromSolver(AddFruits());
                     break;
                 case ObjectType.Fruit:
-                    if (treeCreated)
-                        ObjectCollectionManager.Instance.CreateFruit(toPlace.Position, rotation);
-                    else
-                        _results.Enqueue(toPlace);
+                    ObjectCollectionManager.Instance.CreateFruit(toPlace.Position, rotation);
+                    fruitsCreated++;
+                    SpatialUnderstandingState.Instance.SpaceQueryDescription = "Creating Fruits " + fruitsCreated + "/" + NumberOfFruits;
+                    if (fruitsCreated == NumberOfFruits)
+                        SpatialUnderstandingState.Instance.SpaceQueryDescription = " ";
+                    break;
+                case ObjectType.Box:
+                    ObjectCollectionManager.Instance.CreateBox(toPlace.Position, rotation);
+                    SpatialUnderstandingState.Instance.SpaceQueryDescription = "Box Created";
                     break;
             }
         }
     }
 
-    private void GetLocationsFromSolver(List<PlacementQuery> placementQueries)//2
+    private void GetLocationsFromSolver(List<PlacementQuery> placementQueries)
     {
-        //System.Threading.Tasks.Task.Run(() =>
-        //{
-            // Go through the queries in the list
-            for (int i = 0; i < placementQueries.Count; ++i)
-            {
-                var result = PlaceObject(placementQueries[i].ObjType.ToString() + i,
-                                         placementQueries[i].PlacementDefinition,
-                                         placementQueries[i].Dimensions,
-                                         placementQueries[i].ObjType,
-                                         placementQueries[i].PlacementRules,
-                                         placementQueries[i].PlacementConstraints);
-
-                if (result != null) _results.Enqueue(result);
-            }
-            _timeToHideMesh = true;
-        //});
+        for (int i = 0; i < placementQueries.Count; ++i)
+        {
+            var result = PlaceObject(placementQueries[i].ObjType.ToString() + i,
+                                        placementQueries[i].PlacementDefinition,
+                                        placementQueries[i].Dimensions,
+                                        placementQueries[i].ObjType,
+                                        placementQueries[i].PlacementRules,
+                                        placementQueries[i].PlacementConstraints);
+            if(placementQueries[i].ObjType == ObjectType.Fruit)
+                SpatialUnderstandingState.Instance.SpaceQueryDescription = "Queries Fruits " + i + "/" + NumberOfFruits;
+            if (result != null) _results.Enqueue(result);
+            else SpatialUnderstandingState.Instance.SpaceQueryDescription += "is null";
+        }
     }
 
     private PlacementResult PlaceObject(string placementName,
         SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition placementDefinition,
         Vector3 boxFullDims,
         ObjectType objType,
-        List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule> placementRules = null,
-        List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint> placementConstraints = null)//3
+        List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule> placementRules,
+        List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint> placementConstraints)
     {
 
         // New query
@@ -145,40 +151,54 @@ public class ObjectPlacer : MonoBehaviour
     {
         List<PlacementQuery> placementQueries = new List<PlacementQuery>();
         Vector3 halfBoxDims = boxFullDims * .5f;
-        float disctanceFromOtherObjects = halfBoxDims.x > halfBoxDims.z ? halfBoxDims.x * 3f : halfBoxDims.z * 3f;
-        
+        float distanceFromOtherObjects = halfBoxDims.x > halfBoxDims.z ? halfBoxDims.x * 1f : halfBoxDims.z * 1f;
+
         for (int i = 0; i < prefabCount; i++)
         {
-            var placementRules = new List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule>
-            {
-                SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule.Create_AwayFromOtherObjects(disctanceFromOtherObjects)
-            };
+            List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule> placementRules;
 
             var placementConstraints = new List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint>();
             SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition placementDefinition;
 
             if (objType == ObjectType.Tree)
             {
+                placementRules = new List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule>{};
                 placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_NearCenter());
                 placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_OnFloor(halfBoxDims);
             }
             else if (objType == ObjectType.Fruit && treeCreated)
             {
-                float x = Random.Range(treeSize.x / 2, treeSize.x);
-                float y = Random.Range(treeSize.y / 1.5f, treeSize.y);
-                float z = Random.Range(treeSize.z / 2, treeSize.z);
+                placementRules = new List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule>
+                {
+                SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule.Create_AwayFromOtherObjects(distanceFromOtherObjects)
+                };
 
-                Vector3 fruitPosition = new Vector3(treeSize.x + x + halfBoxDims.x,
-                                                    y,
-                                                    treeSize.z + z + halfBoxDims.z);
+                float x = Random.Range(-2f, 2f);
+                float y = Random.Range(-.5f, 1f);
+                float z = Random.Range(-2f, 2f);
+
+                Vector3 fruitPosition = new Vector3(tree.transform.position.x + x + halfBoxDims.x,
+                                                    tree.transform.position.y + y,
+                                                    tree.transform.position.z + z + halfBoxDims.z);
                 fruitPosition = ObjectCollectionManager.Instance.TreePrefab.GetComponent<Renderer>().bounds.ClosestPoint(fruitPosition);
                 placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_NearCenter());
-                placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_NearPoint(fruitPosition, 0, .2f));
+                placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_NearPoint(fruitPosition, .01f, .15f));
+                placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_InMidAir(halfBoxDims);
+            }
+            else if (objType == ObjectType.Box)
+            {
+                placementRules = new List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule>
+                {
+                SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule.Create_AwayFromOtherObjects(0.1f)
+                };
+
+                placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_NearWall());
                 placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_InMidAir(halfBoxDims);
             }
             else
             {
                 placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_InMidAir(halfBoxDims);
+                placementRules = new List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule>{};
             }
 
             placementQueries.Add(
