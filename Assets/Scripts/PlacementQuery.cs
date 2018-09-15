@@ -11,13 +11,6 @@ public enum ObjectType
 
 public struct PlacementQuery
 {
-
-    public readonly SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition PlacementDefinition;
-    public readonly Vector3 Dimensions;
-    public readonly ObjectType ObjType;
-    public readonly List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule> PlacementRules;
-    public readonly List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint> PlacementConstraints;
-
     public PlacementQuery(
         SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition placementDefinition,
         Vector3 dimensions,
@@ -31,4 +24,10 @@ public struct PlacementQuery
         Dimensions = dimensions;
         ObjType = objType;
     }
+
+    public readonly SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition PlacementDefinition;
+    public readonly Vector3 Dimensions;
+    public readonly ObjectType ObjType;
+    public readonly List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule> PlacementRules;
+    public readonly List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint> PlacementConstraints;
 }

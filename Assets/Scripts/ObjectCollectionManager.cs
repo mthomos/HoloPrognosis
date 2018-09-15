@@ -6,14 +6,18 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
 {
     //Public Variables - For Editor
     public GameObject TreePrefab;
+    public GameObject TreeDemoPrefab;
     public GameObject FruitPrefab;
     public GameObject BoxPrefab;
     public Vector3 TreeSize;
     public Vector3 FruitSize;
     public Vector3 BoxSize;
+    public float FruitScale;
     public float ScaleFactor;
+    public int NumberOfFruits;
+    public bool Demo;
 
-    public GameObject createdTree;
+    private GameObject createdTree;
 
     private List<GameObject> ActiveHolograms = new List<GameObject>();
     private Dictionary<int, int> HandsForActiveHolograms = new Dictionary<int, int>();//key: id, value: hands
@@ -21,31 +25,47 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
 
     public void CreateTree(Vector3 positionCenter, Quaternion rotation)
     {
+        GameObject prefab;
+        if (Demo) prefab = TreeDemoPrefab;
+        else prefab = TreePrefab;
         // Stay center in the square but move down to the ground
-        var position = positionCenter - new Vector3(0, TreeSize.y * .5f, 0);
-        GameObject newObject = Instantiate(TreePrefab, position, rotation);
+        Vector3 position = positionCenter - new Vector3(0, TreeSize.y * .5f, 0);
+        GameObject newObject = Instantiate(prefab, position, rotation);
         newObject.name = "Tree";
         if (newObject != null)
         {
             newObject.transform.parent = gameObject.transform;
-            newObject.transform.localScale = RescaleToSameScaleFactor(TreePrefab);
+            newObject.transform.localScale = RescaleToSameScaleFactor(prefab);
             ActiveHolograms.Add(newObject);
             createdTree = newObject;
             HandsForActiveHolograms.Add(newObject.GetInstanceID(), -1);
         }
+        CreateFruits();
     }
 
-    public void CreateFruit(Vector3 positionCenter, Quaternion rotation)
+    public void CreateFruits()
     {
-        var position = positionCenter - new Vector3(0, FruitSize.y * .5f, 0);
-        GameObject newObject = Instantiate(FruitPrefab, position, rotation);
-        newObject.name = "Fruit";
-        if (newObject != null)
+        for (float i = 0.0f; i < (float)NumberOfFruits; i = i + 1.0f)
         {
-            newObject.transform.parent = gameObject.transform;
-            newObject.transform.localScale = RescaleToSameScaleFactor(FruitPrefab);
-            ActiveHolograms.Add(newObject);
-            HandsForActiveHolograms.Add(newObject.GetInstanceID(), 1);
+            GameObject newFruit = Instantiate(FruitPrefab);
+            newFruit.name = "Fruit_" + i;
+            if (newFruit != null)
+            {
+                newFruit.transform.parent = createdTree.transform;
+                newFruit.transform.localScale = new Vector3(FruitScale, FruitScale, FruitScale);
+                Vector3 treePos = createdTree.transform.position;
+                Vector3 treeSize = createdTree.GetComponent<Renderer>().bounds.size / 1.5f;
+                float theta = 2.0f * Mathf.PI * (i / (float)NumberOfFruits + 1);
+                float y = Random.Range(treeSize.y / 1.3f, treeSize.y);
+                float x = (Mathf.Cos(theta) * treeSize.x) + treePos.x;
+                float z = (Mathf.Sin(theta) * treeSize.z) + treePos.z;
+                Vector3 pos = new Vector3(x, y, z);
+                pos = createdTree.GetComponent<CapsuleCollider>().bounds.ClosestPoint(pos);
+                newFruit.transform.position = pos;
+                if (createdTree.GetComponent<Renderer>().bounds.Contains(pos))
+                    Debug.Log(newFruit.name + "Inside");
+                HandsForActiveHolograms.Add(newFruit.GetInstanceID(), 1);
+            }
         }
     }
 
@@ -137,5 +157,10 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             hands = 1;
         }
         return hands;
+    }
+
+    public void setActiveHologram(int objectID, int hands)
+    {
+        HandsForActiveHolograms.Add(objectID, hands);
     }
 }

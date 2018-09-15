@@ -82,24 +82,27 @@ namespace HoloPrognosis
             Vector3 focusPos = FocusedObject.transform.position; //The player gazes at the item which will catch
             Vector3 firstHand = trackingHands.ElementAt(0).Value.transform.position; //The position of user's hand in the Holospace
             Vector3 secondHand = trackingHands.ElementAt(1).Value.transform.position; //The position of user's hand in the Holospace
-            Bounds focusedObjectBounds = FocusedObject.GetComponent<Renderer>().bounds; //The graphical bounds of the focused objects
-            focusedObjectBounds.Expand(.1f);
-            if (focusedObjectBounds.Contains(firstHand) && focusedObjectBounds.Contains(secondHand))
+            if (FocusedObject != null)
             {
+                Bounds focusedObjectBounds = FocusedObject.GetComponent<Renderer>().bounds; //The graphical bounds of the focused objects
+                focusedObjectBounds.Expand(.15f);
+                if (focusedObjectBounds.Contains(firstHand) && focusedObjectBounds.Contains(secondHand))
+                {
                     ChangeObjectColor(trackingHands[trackingHands.ElementAt(0).Key], TouchedColor);
                     ChangeObjectColor(trackingHands[trackingHands.ElementAt(1).Key], TouchedColor);
                     ObjectTouched = true;
                     ManipulationWithTwoHands = true;
                     TouchedObject = FocusedObject;
                     EnableOutline(FocusedObject);
-            }
-            else
-            {
-                ChangeObjectColor(trackingHands[trackingHands.ElementAt(0).Key], DefaultColor);
-                ChangeObjectColor(trackingHands[trackingHands.ElementAt(1).Key], DefaultColor);
-                ObjectTouched = false;
-                TouchedObject = null;
-                DisableOutline(FocusedObject);
+                }
+                else
+                {
+                    ChangeObjectColor(trackingHands[trackingHands.ElementAt(0).Key], DefaultColor);
+                    ChangeObjectColor(trackingHands[trackingHands.ElementAt(1).Key], DefaultColor);
+                    ObjectTouched = false;
+                    TouchedObject = null;
+                    DisableOutline(FocusedObject);
+                }
             }
         }
 
@@ -107,27 +110,28 @@ namespace HoloPrognosis
         {
             Vector3 focusPos = FocusedObject.transform.position; //The player gazes at the item which will catch
             Vector3 handPos = trackingHands.ElementAt(0).Value.transform.position; //The position of user's hand in the Holospace
-
-            // Another approach : Using graphical bounds of the object and expand them
             Bounds focusedObjectBounds = FocusedObject.GetComponent<Renderer>().bounds; //The graphical bounds of the focused objects
-            focusedObjectBounds.Expand(.1f);
-            if (focusedObjectBounds.Contains(handPos))
+            focusedObjectBounds.Expand(.15f);
+            if (FocusedObject != null)
             {
-                if (!objectManipulationInProgress)
+                if (focusedObjectBounds.Contains(handPos))
                 {
-                    ChangeObjectColor(trackingHands[trackingHands.ElementAt(0).Key], TouchedColor);
-                    ObjectTouched = true;
-                    ManipulationWithTwoHands = false;
-                    TouchedObject = FocusedObject;
-                    EnableOutline(FocusedObject);
+                    if (!objectManipulationInProgress)
+                    {
+                        ChangeObjectColor(trackingHands[trackingHands.ElementAt(0).Key], TouchedColor);
+                        ObjectTouched = true;
+                        ManipulationWithTwoHands = false;
+                        TouchedObject = FocusedObject;
+                        EnableOutline(TouchedObject);
+                    }
                 }
-            }
-            else
-            {
-                ChangeObjectColor(trackingHands[trackingHands.ElementAt(0).Key], DefaultColor);
-                ObjectTouched = false;
-                TouchedObject = null;
-                DisableOutline(FocusedObject);
+                else
+                {
+                    ChangeObjectColor(trackingHands[trackingHands.ElementAt(0).Key], DefaultColor);
+                    ObjectTouched = false;
+                    TouchedObject = null;
+                    DisableOutline(FocusedObject);
+                }
             }
         }
 
@@ -156,10 +160,11 @@ namespace HoloPrognosis
                 var outline = focusedObject.GetComponentInChildren<Outline>();
                 if(outline == null)
                 {
+                    //Create Outline
                     outline = gameObject.AddComponent<Outline>();
                     outline.OutlineMode = Outline.Mode.OutlineAll;
-                    if (!objectManipulationInProgress) outline.OutlineColor = Color.red;
                     outline.OutlineWidth = 5f;
+                    if (!objectManipulationInProgress) outline.OutlineColor = Color.red;
                     outline.enabled = true;
                 }
                 else
@@ -228,6 +233,7 @@ namespace HoloPrognosis
             if (trackingHands.ContainsKey(args.source.id) && objectManipulationInProgress)
             {
                 DisableOutline(ManipulatedObject);
+                EnableGravity(ManipulatedObject);
                 ChangeObjectColor(trackingHands[args.source.id], DefaultColor);
                 if (!ManipulationWithTwoHands)
                 {
@@ -251,6 +257,7 @@ namespace HoloPrognosis
             {
                 ChangeObjectColor(trackingHands[args.source.id], DefaultColor);
                 DisableOutline(ManipulatedObject);
+                EnableGravity(ManipulatedObject);
                 if (!ManipulationWithTwoHands)
                 {
                     objectManipulationInProgress = false;
@@ -319,6 +326,11 @@ namespace HoloPrognosis
                 trackingHands.Remove(id);
                 Destroy(obj);
             }
+        }
+
+        private void EnableGravity(GameObject obj)
+        {
+            obj.GetComponent<Rigidbody>().useGravity = true;
         }
 
         void OnDestroy()

@@ -8,8 +8,8 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
 {
     //Public Variables - For Editor
     //Scan surface variables, for ease -> public
-    public float MinAreaForStats = 1.0f; // both floor and wall surfaces
-    public float MinAreaForComplete = 3.0f; // for floor
+    public float MinAreaForStats = 2.0f; // both floor and wall surfaces
+    public float MinAreaForComplete = 4.0f; // for floor
     public float MinHorizAreaForComplete = 1.0f; // for horizontal surfaces not only walls
     public float MinWallAreaForComplete = 0.0f; // for walls only
     //Debug displays

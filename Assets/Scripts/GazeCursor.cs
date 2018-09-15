@@ -35,10 +35,10 @@ public class GazeCursor : MonoBehaviour
         if (Physics.Raycast(gazeOrigin, gazeDirection, out hitInfo))
         {
             cursorMeshRenderer.enabled = true;
-            this.transform.position = hitInfo.point;
-            this.transform.rotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal);
+            gameObject.transform.position = hitInfo.point;
+            gameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal);
             FocusedObject = hitInfo.collider.gameObject;
-            if (FocusedObject.name == "Tree" || FocusedObject.name == "Box") FocusedObject = null;
+            if (FocusedObject.name == "Fruit") FocusedObject = hitInfo.collider.gameObject;
         }
         else
             cursorMeshRenderer.enabled = false;

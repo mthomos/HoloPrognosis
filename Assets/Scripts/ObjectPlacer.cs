@@ -2,19 +2,13 @@
 using HoloToolkit.Unity;
 using UnityEngine;
 using System;
-using Random = UnityEngine.Random;
 
 public class ObjectPlacer : MonoBehaviour
 {
-    public int NumberOfFruits;
     public SpatialUnderstandingCustomMesh SpatialUnderstandingMesh;
     public Material OccludedMaterial;
-
-    private Queue<PlacementResult> _results = new Queue<PlacementResult>();
-    private bool treeCreated = false;
-    private bool fruitsQueriesCreated = false;
-    private int fruitsCreated = 0;
-    private GameObject tree;
+    public float boxTreeDistance;
+    private Queue<PlacementResult> results = new Queue<PlacementResult>();
 
     void Start()
     {
@@ -23,16 +17,7 @@ public class ObjectPlacer : MonoBehaviour
 
     void Update()
     {
-        if(treeCreated && !fruitsQueriesCreated)
-        {
-            List<PlacementQuery> queries = new List<PlacementQuery>();
-            queries.AddRange(AddFruits());
-            GetLocationsFromSolver(queries);
-            SpatialUnderstandingState.Instance.SpaceQueryDescription = "Fruits queries";
-            fruitsQueriesCreated = true;
-        }
         ProcessPlacementResults();
-
     }
 
     private void HideGridEnableOcclulsion()
@@ -53,52 +38,43 @@ public class ObjectPlacer : MonoBehaviour
         List<PlacementQuery> queries = new List<PlacementQuery>();
         queries.AddRange(AddTree());
         queries.AddRange(AddBox());
-        //Don't create fruits yet ,first place
         GetLocationsFromSolver(queries);
     }
 
     public List<PlacementQuery> AddTree()
     {
-        SpatialUnderstandingState.Instance.SpaceQueryDescription = "Creating Tree";
         return CreateLocationQueriesForSolver(1, ObjectCollectionManager.Instance.TreeSize, ObjectType.Tree);
     }
 
-    public List<PlacementQuery> AddFruits()
+    public List<PlacementQuery> AddFruit()
     {
-        return CreateLocationQueriesForSolver(NumberOfFruits, ObjectCollectionManager.Instance.FruitSize, ObjectType.Fruit);
+        return CreateLocationQueriesForSolver(1, ObjectCollectionManager.Instance.FruitSize, ObjectType.Fruit);
     }
 
     public List<PlacementQuery> AddBox()
     {
-        SpatialUnderstandingState.Instance.SpaceQueryDescription = "Creating Box";
         return CreateLocationQueriesForSolver(1, ObjectCollectionManager.Instance.BoxSize, ObjectType.Box);
     }
 
     private void ProcessPlacementResults()
     {
-        if (_results.Count > 0)
+        if (results.Count > 0)
         {
-            var toPlace = _results.Dequeue();
+            var toPlace = results.Dequeue();
             Quaternion rotation = Quaternion.LookRotation(toPlace.Normal, Vector3.up);
 
             switch (toPlace.ObjType)
             {
                 case ObjectType.Tree:
                     ObjectCollectionManager.Instance.CreateTree(toPlace.Position, rotation);
-                    SpatialUnderstandingState.Instance.SpaceQueryDescription = "Tree Created";
-                    tree = ObjectCollectionManager.Instance.createdTree;
-                    treeCreated = true;
                     break;
+                    /*
                 case ObjectType.Fruit:
                     ObjectCollectionManager.Instance.CreateFruit(toPlace.Position, rotation);
-                    fruitsCreated++;
-                    SpatialUnderstandingState.Instance.SpaceQueryDescription = "Creating Fruits " + fruitsCreated + "/" + NumberOfFruits;
-                    if (fruitsCreated == NumberOfFruits)
-                        SpatialUnderstandingState.Instance.SpaceQueryDescription = " ";
                     break;
+                    */
                 case ObjectType.Box:
                     ObjectCollectionManager.Instance.CreateBox(toPlace.Position, rotation);
-                    SpatialUnderstandingState.Instance.SpaceQueryDescription = "Box Created";
                     break;
             }
         }
@@ -114,10 +90,7 @@ public class ObjectPlacer : MonoBehaviour
                                         placementQueries[i].ObjType,
                                         placementQueries[i].PlacementRules,
                                         placementQueries[i].PlacementConstraints);
-            if(placementQueries[i].ObjType == ObjectType.Fruit)
-                SpatialUnderstandingState.Instance.SpaceQueryDescription = "Queries Fruits " + i + "/" + NumberOfFruits;
-            if (result != null) _results.Enqueue(result);
-            else SpatialUnderstandingState.Instance.SpaceQueryDescription += "is null";
+            if (result != null) results.Enqueue(result);
         }
     }
 
@@ -125,8 +98,8 @@ public class ObjectPlacer : MonoBehaviour
         SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition placementDefinition,
         Vector3 boxFullDims,
         ObjectType objType,
-        List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule> placementRules,
-        List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint> placementConstraints)
+        List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule> placementRules = null,
+        List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint> placementConstraints = null)
     {
 
         // New query
@@ -147,63 +120,45 @@ public class ObjectPlacer : MonoBehaviour
         return null;
     }
 
-    private List<PlacementQuery> CreateLocationQueriesForSolver(int prefabCount, Vector3 boxFullDims, ObjectType objType)
+    private List<PlacementQuery> CreateLocationQueriesForSolver(int prefabCount, Vector3 fullDims, ObjectType objType)
     {
         List<PlacementQuery> placementQueries = new List<PlacementQuery>();
-        Vector3 halfBoxDims = boxFullDims * .5f;
-        float distanceFromOtherObjects = halfBoxDims.x > halfBoxDims.z ? halfBoxDims.x * 1f : halfBoxDims.z * 1f;
+        Vector3 halfDims = fullDims * .5f;
 
         for (int i = 0; i < prefabCount; i++)
         {
-            List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule> placementRules;
-
+            var placementRules = new List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule> { };
             var placementConstraints = new List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint>();
-            SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition placementDefinition;
+            var placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_InMidAir(halfDims);
 
             if (objType == ObjectType.Tree)
             {
                 placementRules = new List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule>{};
                 placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_NearCenter());
-                placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_OnFloor(halfBoxDims);
+                placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_OnFloor(halfDims);
             }
-            else if (objType == ObjectType.Fruit && treeCreated)
+            else if (objType == ObjectType.Fruit)
             {
                 placementRules = new List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule>
                 {
-                SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule.Create_AwayFromOtherObjects(distanceFromOtherObjects)
+                SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule.Create_AwayFromOtherObjects(halfDims.x)
                 };
-
-                float x = Random.Range(-2f, 2f);
-                float y = Random.Range(-.5f, 1f);
-                float z = Random.Range(-2f, 2f);
-
-                Vector3 fruitPosition = new Vector3(tree.transform.position.x + x + halfBoxDims.x,
-                                                    tree.transform.position.y + y,
-                                                    tree.transform.position.z + z + halfBoxDims.z);
-                fruitPosition = ObjectCollectionManager.Instance.TreePrefab.GetComponent<Renderer>().bounds.ClosestPoint(fruitPosition);
-                placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_NearCenter());
-                placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_NearPoint(fruitPosition, .01f, .15f));
-                placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_InMidAir(halfBoxDims);
+                placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_NearWall());
+                placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_InMidAir(halfDims);
             }
             else if (objType == ObjectType.Box)
             {
                 placementRules = new List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule>
                 {
-                SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule.Create_AwayFromOtherObjects(0.1f)
+                SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule.Create_AwayFromOtherObjects(boxTreeDistance)
                 };
-
                 placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_NearWall());
-                placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_InMidAir(halfBoxDims);
-            }
-            else
-            {
-                placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_InMidAir(halfBoxDims);
-                placementRules = new List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule>{};
+                placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_OnFloor(halfDims);
             }
 
             placementQueries.Add(
                 new PlacementQuery(placementDefinition,
-                    boxFullDims,
+                    fullDims,
                     objType,
                     placementRules,
                     placementConstraints
