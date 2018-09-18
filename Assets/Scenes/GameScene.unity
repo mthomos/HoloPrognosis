@@ -345,6 +345,9 @@ MonoBehaviour:
   DefaultColor: {r: 0, g: 1, b: 0, a: 1}
   TapColor: {r: 0, g: 0, b: 1, a: 1}
   TouchedColor: {r: 1, g: 0, b: 1, a: 1}
+  OutlineHoldColor: {r: 0, g: 0, b: 1, a: 1}
+  OutlineDefaultColor: {r: 1, g: 0, b: 0, a: 1}
+  OutlineManipulateColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!1 &416328711
 GameObject:
   m_ObjectHideFlags: 0
@@ -473,59 +476,6 @@ MonoBehaviour:
     type: 2}
   m_PrefabInternal: {fileID: 1827575316}
   m_Script: {fileID: 11500000, guid: dfadc27178601dd4ca1793492f9e2539, type: 3}
---- !u!1001 &564948653
-Prefab:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 2065139992}
-    m_Modifications:
-    - target: {fileID: 4291771312900530, guid: e6196d2de7fd5774ebc5af62838fb1c8, type: 2}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4291771312900530, guid: e6196d2de7fd5774ebc5af62838fb1c8, type: 2}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4291771312900530, guid: e6196d2de7fd5774ebc5af62838fb1c8, type: 2}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4291771312900530, guid: e6196d2de7fd5774ebc5af62838fb1c8, type: 2}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4291771312900530, guid: e6196d2de7fd5774ebc5af62838fb1c8, type: 2}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4291771312900530, guid: e6196d2de7fd5774ebc5af62838fb1c8, type: 2}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4291771312900530, guid: e6196d2de7fd5774ebc5af62838fb1c8, type: 2}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4291771312900530, guid: e6196d2de7fd5774ebc5af62838fb1c8, type: 2}
-      propertyPath: m_RootOrder
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 114250984775131334, guid: e6196d2de7fd5774ebc5af62838fb1c8,
-        type: 2}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 114250984775131334, guid: e6196d2de7fd5774ebc5af62838fb1c8, type: 2}
-  m_ParentPrefab: {fileID: 100100000, guid: e6196d2de7fd5774ebc5af62838fb1c8, type: 2}
-  m_IsPrefabParent: 0
---- !u!4 &564948654 stripped
-Transform:
-  m_PrefabParentObject: {fileID: 4291771312900530, guid: e6196d2de7fd5774ebc5af62838fb1c8,
-    type: 2}
-  m_PrefabInternal: {fileID: 564948653}
 --- !u!1 &790716439
 GameObject:
   m_ObjectHideFlags: 0
@@ -569,7 +519,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SpatialUnderstandingMesh: {fileID: 434274831}
   OccludedMaterial: {fileID: 2100000, guid: df172103f5fba4a4d8636aeca60cb0d7, type: 2}
-  boxTreeDistance: 1.5
+  boxTreeDistance: 2
 --- !u!114 &790716442
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -582,17 +532,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TreePrefab: {fileID: 137650, guid: 826b6a0b570e8460990010fa615b5a2a, type: 2}
-  TreeDemoPrefab: {fileID: 1449595589315624, guid: e6196d2de7fd5774ebc5af62838fb1c8,
-    type: 2}
   FruitPrefab: {fileID: 156766, guid: 3aabfd067b606a54bbacbd458f3f9e01, type: 2}
   BoxPrefab: {fileID: 100000, guid: 23fc59362ba1e264eb5b636821ad929a, type: 2}
-  TreeSize: {x: 0.7, y: 1.8, z: 0.7}
-  FruitSize: {x: 1.2, y: 1.2, z: 1.2}
+  TreeSize: {x: 1, y: 2.2, z: 1}
+  FruitSize: {x: 1, y: 1, z: 1}
   BoxSize: {x: 0.5, y: 1, z: 0.5}
-  FruitScale: 0
-  ScaleFactor: 0
+  FruitScale: 1.2
   NumberOfFruits: 4
-  Demo: 0
+  Demo: 1
+  TreeDemoPrefab: {fileID: 1198309765264102, guid: 102ef1bf7cb0687478c573a4645ba80d,
+    type: 2}
 --- !u!1001 &1045876286
 Prefab:
   m_ObjectHideFlags: 0
@@ -902,8 +851,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children:
-  - {fileID: 564948654}
+  m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

@@ -80,7 +80,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfadc27178601dd4ca1793492f9e2539, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ImportMeshPeriod: 0
+  ImportMeshPeriod: 1
   meshMaterial: {fileID: 2100000, guid: 6cec46d5b336e2a4b9b2e1d3e8e3754c, type: 2}
   MaxFrameTime: 25
   CreateMeshColliders: 1
@@ -111,7 +111,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2a98b181acba5549af3d852c7664623, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TrianglesPerCubicMeter: 400
+  TrianglesPerCubicMeter: 500
   TimeBetweenUpdates: 2
   observerVolumeType: 0
   extents: {x: 10, y: 10, z: 10}

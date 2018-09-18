@@ -1,13 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.XR.WSA.Input;
 
 namespace HoloPrognosis
 {
-    /// <summary>
-    /// HandsTrackingController : TO_DO
-    /// </summary>
     public class HandsTrackingController : MonoBehaviour
     {
         //Public Variables - For Editor
@@ -19,6 +17,9 @@ namespace HoloPrognosis
         public Color DefaultColor = Color.green;
         public Color TapColor = Color.white;
         public Color TouchedColor = Color.magenta;
+        public Color OutlineHoldColor = Color.blue;
+        public Color OutlineDefaultColor = Color.red;
+        public Color OutlineManipulateColor = Color.green;
         //Private Variables
         //Booleans
         private bool ObjectTouched = false;
@@ -26,7 +27,7 @@ namespace HoloPrognosis
         private bool ManipulationWithTwoHands = false;
         // trackingHands: In this dictionary, hands which generate intaractions and scanned by Hololens are stored
         private Dictionary<uint, GameObject> trackingHands = new Dictionary<uint, GameObject>();
-        /* 
+        /*
         Summary: handAndManipulatedObjectCombo
         In this dictionary we store the the hand that manipulate a particular object, so we can know for every
         hand (interraction input) which Object manipulates
@@ -38,6 +39,9 @@ namespace HoloPrognosis
         private GameObject ManipulatedObject;// GameObject which is being Manipulated by the user
         private GameObject FocusedObject; // GameObject which the user gazes at
         private GestureRecognizer gestureRecognizer;
+        //Experimental
+        private bool areGesturesEnabled;
+        private bool colorOutlineChanged;
 
         void Awake()
         {
@@ -45,12 +49,15 @@ namespace HoloPrognosis
             InteractionManager.InteractionSourceUpdated += InteractionManager_InteractionSourceUpdated;
             InteractionManager.InteractionSourceLost += InteractionManager_InteractionSourceLost;
             gestureRecognizer = new GestureRecognizer();
-            gestureRecognizer.SetRecognizableGestures(GestureSettings.Tap | GestureSettings.ManipulationTranslate);
+            gestureRecognizer.SetRecognizableGestures(GestureSettings.Tap | GestureSettings.ManipulationTranslate | GestureSettings.Hold);
             gestureRecognizer.Tapped += GestureRecognizer_Tapped;
             gestureRecognizer.ManipulationStarted += GestureRecognizer_ManipulationStarted;
             gestureRecognizer.ManipulationCompleted += GestureRecognizer_ManipulationCompleted;
             gestureRecognizer.ManipulationCanceled += GestureRecognizer_ManipulationCanceled;
-            gestureRecognizer.ManipulationUpdated += GestureRecognizer_ManipulationUpdated; 
+            gestureRecognizer.ManipulationUpdated += GestureRecognizer_ManipulationUpdated;
+            gestureRecognizer.HoldStarted += GestureRecognizer_HoldStarted;
+            gestureRecognizer.HoldCanceled += GestureRecognizer_HoldCanceled;
+            gestureRecognizer.HoldCompleted += GestureRecognizer_HoldCompleted;
             gestureRecognizer.StartCapturingGestures();
             cursor = GameObject.Find("Cursor").GetComponent<GazeCursor>();
 
@@ -59,6 +66,11 @@ namespace HoloPrognosis
         void Update()
         {
             FocusedObject = cursor.getFocusedObject();
+            if (!areGesturesEnabled && FocusedObject != null)
+            {
+                gestureRecognizer.StartCapturingGestures();
+                areGesturesEnabled = true;
+            }
             if (FocusedObject != null)
             {
                 int HandsNeeded = ObjectCollectionManager.Instance.GetHandsNeededForManipulation(FocusedObject.GetInstanceID());
@@ -73,6 +85,14 @@ namespace HoloPrognosis
                             ManipulationForTwoHands();
                             break;
                     }
+                }
+            }
+            else
+            {
+                if (areGesturesEnabled)
+                {
+                    gestureRecognizer.CancelGestures();
+                    areGesturesEnabled = false;
                 }
             }
         }
@@ -122,7 +142,11 @@ namespace HoloPrognosis
                         ObjectTouched = true;
                         ManipulationWithTwoHands = false;
                         TouchedObject = FocusedObject;
-                        EnableOutline(TouchedObject);
+                        if (!colorOutlineChanged)
+                        {
+                            EnableOutline(TouchedObject);
+                            colorOutlineChanged = true;
+                        }
                     }
                 }
                 else
@@ -131,6 +155,7 @@ namespace HoloPrognosis
                     ObjectTouched = false;
                     TouchedObject = null;
                     DisableOutline(FocusedObject);
+                    colorOutlineChanged = false;
                 }
             }
         }
@@ -140,7 +165,11 @@ namespace HoloPrognosis
             if (focusedObject != null)
             {
                 var outline = focusedObject.GetComponentInChildren<Outline>();
-                if (outline != null) outline.OutlineColor = color;
+                if (outline != null)
+                {
+                    if (outline.enabled == false) outline.enabled = true;
+                    outline.OutlineColor = color;
+                }
             }
         }
 
@@ -164,12 +193,14 @@ namespace HoloPrognosis
                     outline = gameObject.AddComponent<Outline>();
                     outline.OutlineMode = Outline.Mode.OutlineAll;
                     outline.OutlineWidth = 5f;
-                    if (!objectManipulationInProgress) outline.OutlineColor = Color.red;
+                    if (!objectManipulationInProgress && outline.OutlineColor != OutlineDefaultColor)
+                        outline.OutlineColor = OutlineDefaultColor;
                     outline.enabled = true;
                 }
                 else
                 {
-                    if (!objectManipulationInProgress) outline.OutlineColor = Color.red;
+                    if (!objectManipulationInProgress && outline.OutlineColor!=OutlineDefaultColor)
+                        outline.OutlineColor = OutlineDefaultColor;
                     outline.enabled = true;
                 }
             }
@@ -189,7 +220,7 @@ namespace HoloPrognosis
             {
                 objectManipulationInProgress = true;
                 ManipulatedObject = TouchedObject;
-                ChangeColorOutline(ManipulatedObject, Color.green);
+                ChangeColorOutline(ManipulatedObject, OutlineManipulateColor);
                 if (!ManipulationWithTwoHands)
                 {
                     GameObject currentHandObject;
@@ -214,7 +245,7 @@ namespace HoloPrognosis
             {
                 if (!ManipulationWithTwoHands)
                 {
-                    GameObject currentHandObject;// OR = trackingHands[id];
+                    GameObject currentHandObject;
                     trackingHands.TryGetValue(id, out currentHandObject);
                     GameObject currentManipulatedObject = handAndManipulatedObjectCombo[id];
                     currentManipulatedObject.transform.position = currentHandObject.transform.position;
@@ -328,6 +359,40 @@ namespace HoloPrognosis
             }
         }
 
+        private void GestureRecognizer_HoldStarted(HoldStartedEventArgs args)
+        {
+            uint id = args.source.id;
+            if (TouchedObject != null)
+                ChangeColorOutline(TouchedObject, OutlineHoldColor);
+            if (ManipulatedObject != null)
+                ChangeColorOutline(ManipulatedObject, OutlineHoldColor);
+            if (FocusedObject != null)
+                ChangeColorOutline(FocusedObject, OutlineHoldColor);
+        }
+
+        private void GestureRecognizer_HoldCanceled(HoldCanceledEventArgs args)
+        {
+            uint id = args.source.id;
+            if (TouchedObject != null)
+                ChangeColorOutline(TouchedObject, Color.white);
+            if (ManipulatedObject != null)
+                ChangeColorOutline(ManipulatedObject, Color.white);
+            if (FocusedObject != null)
+                ChangeColorOutline(FocusedObject, Color.white);
+        }
+
+        private void GestureRecognizer_HoldCompleted(HoldCompletedEventArgs args)
+        {
+            uint id = args.source.id;
+            if (TouchedObject != null)
+                ChangeColorOutline(TouchedObject, Color.white);
+            if (ManipulatedObject != null)
+                ChangeColorOutline(ManipulatedObject, Color.white);
+            if (FocusedObject != null)
+                ChangeColorOutline(FocusedObject, Color.white);
+        }
+
+
         private void EnableGravity(GameObject obj)
         {
             obj.GetComponent<Rigidbody>().useGravity = true;
@@ -338,12 +403,15 @@ namespace HoloPrognosis
             InteractionManager.InteractionSourceDetected -= InteractionManager_InteractionSourceDetected;
             InteractionManager.InteractionSourceUpdated -= InteractionManager_InteractionSourceUpdated;
             InteractionManager.InteractionSourceLost -= InteractionManager_InteractionSourceLost;
+            gestureRecognizer.StopCapturingGestures();
             gestureRecognizer.Tapped -= GestureRecognizer_Tapped;
             gestureRecognizer.ManipulationStarted -= GestureRecognizer_ManipulationStarted;
             gestureRecognizer.ManipulationCompleted -= GestureRecognizer_ManipulationCompleted;
             gestureRecognizer.ManipulationCanceled -= GestureRecognizer_ManipulationCanceled;
             gestureRecognizer.ManipulationUpdated -= GestureRecognizer_ManipulationUpdated;
-            gestureRecognizer.StopCapturingGestures();
+            gestureRecognizer.HoldStarted -= GestureRecognizer_HoldStarted;
+            gestureRecognizer.HoldCanceled -= GestureRecognizer_HoldCanceled;
+            gestureRecognizer.HoldCompleted -= GestureRecognizer_HoldCompleted;
         }
     }
 }

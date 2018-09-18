@@ -6,19 +6,19 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
 {
     //Public Variables - For Editor
     public GameObject TreePrefab;
-    public GameObject TreeDemoPrefab;
     public GameObject FruitPrefab;
     public GameObject BoxPrefab;
     public Vector3 TreeSize;
     public Vector3 FruitSize;
     public Vector3 BoxSize;
     public float FruitScale;
-    public float ScaleFactor;
     public int NumberOfFruits;
+    //Demo variables
     public bool Demo;
+    public GameObject TreeDemoPrefab;
 
     private GameObject createdTree;
-
+    private float ScaleFactor;
     private List<GameObject> ActiveHolograms = new List<GameObject>();
     private Dictionary<int, int> HandsForActiveHolograms = new Dictionary<int, int>();//key: id, value: hands
 
@@ -35,12 +35,16 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         if (newObject != null)
         {
             newObject.transform.parent = gameObject.transform;
-            newObject.transform.localScale = RescaleToSameScaleFactor(prefab);
+            newObject.transform.localScale = RescaleToSameScaleFactor(TreePrefab);
             ActiveHolograms.Add(newObject);
             createdTree = newObject;
             HandsForActiveHolograms.Add(newObject.GetInstanceID(), -1);
+            SpatialUnderstandingState.Instance.SpaceQueryDescription = "";
         }
-        CreateFruits();
+        if (Demo)
+            DemoFun();
+        else
+            CreateFruits();
     }
 
     public void CreateFruits()
@@ -81,6 +85,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             newObject.transform.localScale = RescaleToSameScaleFactor(BoxPrefab);
             ActiveHolograms.Add(newObject);
             HandsForActiveHolograms.Add(newObject.GetInstanceID(), -1);
+            SpatialUnderstandingState.Instance.SpaceQueryDescription = "";
         }
     }
 
@@ -162,5 +167,17 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
     public void setActiveHologram(int objectID, int hands)
     {
         HandsForActiveHolograms.Add(objectID, hands);
+    }
+
+    public void DemoFun()
+    {
+        GameObject child;
+        for (int i = 0; i < createdTree.transform.childCount; i++)
+        {
+            child = gameObject.transform.GetChild(i).gameObject;
+            child.name = "Fruit";
+            //child.transform.localScale = new Vector3(FruitScale, FruitScale, FruitScale);
+            ObjectCollectionManager.Instance.setActiveHologram(child.GetInstanceID(), 1);
+        }
     }
 }
