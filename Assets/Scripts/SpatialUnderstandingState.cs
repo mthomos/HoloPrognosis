@@ -74,7 +74,7 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
                     case SpatialUnderstanding.ScanStates.Finishing:
                         return "Finalizing scan";
                     case SpatialUnderstanding.ScanStates.Done:
-                        return " ";
+                        return "Scan Done";
                     default:
                         return "ScanState = " + SpatialUnderstanding.Instance.ScanState;
                 }
@@ -135,7 +135,6 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
         // Update display text
         DebugDisplay.text = PrimaryText;
         DebugDisplay.color = PrimaryColor;
-        //DebugSubDisplay.text = DetailsText;
     }
 
     private void Start()
@@ -163,7 +162,7 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
             _triggered = true;
             EventManager.StopListening("tap", TapListener);
             Placer.CreateScene();
-            SpaceQueryDescription = "";
+            SpaceQueryDescription = " ";
         }
     }
 }

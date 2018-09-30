@@ -1163,7 +1163,7 @@ SphereCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.05312843
+  m_Radius: 0.06
   m_Center: {x: 0.0003049299, y: 0.052477553, z: 0.000054197386}
 --- !u!135 &135231281647440512
 SphereCollider:
@@ -1175,7 +1175,7 @@ SphereCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.05312843
+  m_Radius: 0.06
   m_Center: {x: 0.0003049299, y: 0.052477553, z: 0.000054197386}
 --- !u!135 &135232349125238286
 SphereCollider:
@@ -1187,7 +1187,7 @@ SphereCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.05312843
+  m_Radius: 0.06
   m_Center: {x: 0.0003049299, y: 0.052477553, z: 0.000054197386}
 --- !u!135 &135323686932086594
 SphereCollider:
@@ -1199,7 +1199,7 @@ SphereCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.05312843
+  m_Radius: 0.06
   m_Center: {x: 0.0003049299, y: 0.052477553, z: 0.000054197386}
 --- !u!135 &135378783999465436
 SphereCollider:
@@ -1211,7 +1211,7 @@ SphereCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.05312843
+  m_Radius: 0.06
   m_Center: {x: 0.0003049299, y: 0.052477553, z: 0.000054197386}
 --- !u!135 &135408849760649990
 SphereCollider:
@@ -1223,7 +1223,7 @@ SphereCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.05312843
+  m_Radius: 0.06
   m_Center: {x: 0.0003049299, y: 0.052477553, z: 0.000054197386}
 --- !u!135 &135418071958012090
 SphereCollider:
@@ -1235,7 +1235,7 @@ SphereCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.05312843
+  m_Radius: 0.06
   m_Center: {x: 0.0003049299, y: 0.052477553, z: 0.000054197386}
 --- !u!135 &135520590655168306
 SphereCollider:
@@ -1247,7 +1247,7 @@ SphereCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.05312843
+  m_Radius: 0.06
   m_Center: {x: 0.0003049299, y: 0.052477553, z: 0.000054197386}
 --- !u!135 &135761115065018984
 SphereCollider:
@@ -1259,7 +1259,7 @@ SphereCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.05312843
+  m_Radius: 0.06
   m_Center: {x: 0.0003049299, y: 0.052477553, z: 0.000054197386}
 --- !u!135 &135876977307060788
 SphereCollider:
@@ -1271,7 +1271,7 @@ SphereCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.05312843
+  m_Radius: 0.06
   m_Center: {x: 0.0003049299, y: 0.052477553, z: 0.000054197386}
 --- !u!136 &136437869029102044
 CapsuleCollider:

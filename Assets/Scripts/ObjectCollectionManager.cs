@@ -21,7 +21,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
     private float ScaleFactor;
     private List<GameObject> ActiveHolograms = new List<GameObject>();
     private Dictionary<int, int> HandsForActiveHolograms = new Dictionary<int, int>();//key: id, value: hands
-
+    private bool treeCreated, boxCreated;
 
     public void CreateTree(Vector3 positionCenter, Quaternion rotation)
     {
@@ -39,7 +39,8 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             ActiveHolograms.Add(newObject);
             createdTree = newObject;
             HandsForActiveHolograms.Add(newObject.GetInstanceID(), -1);
-            SpatialUnderstandingState.Instance.SpaceQueryDescription = "";
+            treeCreated = true;
+            checkIfWordCreated();
         }
         if (Demo)
             DemoFun();
@@ -86,9 +87,10 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             ActiveHolograms.Add(newObject);
             HandsForActiveHolograms.Add(newObject.GetInstanceID(), -1);
             SpatialUnderstandingState.Instance.SpaceQueryDescription = "";
+            boxCreated = true;
+            checkIfWordCreated();
         }
     }
-
 
     private void AddMeshColliderToAllChildren(GameObject obj)
     {
@@ -150,6 +152,15 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         return result;
     }
 
+    private void checkIfWordCreated()
+    {
+        if (boxCreated && treeCreated)
+        {
+            SpatialUnderstandingState.Instance.SpaceQueryDescription = "";
+            GameObject.Find("Spatial Understanding").GetComponent<SpatialUnderstandingState>().enabled = false;
+        }
+    }
+
     public int GetHandsNeededForManipulation(int objectID)
     {
         int hands;
@@ -176,6 +187,11 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         {
             child = gameObject.transform.GetChild(i).gameObject;
             child.name = "Fruit";
+            child.GetComponent<Interpolator>();
+            Interpolator interpolator = child.AddComponent<Interpolator>();
+            interpolator.SmoothLerpToTarget = true;
+            interpolator.SmoothPositionLerpRatio = 0.5f;
+            interpolator.PositionPerSecond = 40.0f;
             //child.transform.localScale = new Vector3(FruitScale, FruitScale, FruitScale);
             ObjectCollectionManager.Instance.setActiveHologram(child.GetInstanceID(), 1);
         }

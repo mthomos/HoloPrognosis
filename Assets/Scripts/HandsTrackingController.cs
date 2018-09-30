@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.XR.WSA.Input;
+using HoloToolkit.Unity;
 
 namespace HoloPrognosis
 {
@@ -20,34 +21,34 @@ namespace HoloPrognosis
         public Color OutlineHoldColor = Color.blue;
         public Color OutlineDefaultColor = Color.red;
         public Color OutlineManipulateColor = Color.green;
+        public Color HoldFinished = Color.white;
         //Private Variables
         //Booleans
         private bool ObjectTouched = false;
-        private bool objectManipulationInProgress = false;
+        private bool ObjectManipulationInProgress = false;
         private bool ManipulationWithTwoHands = false;
         // trackingHands: In this dictionary, hands which generate intaractions and scanned by Hololens are stored
         private Dictionary<uint, GameObject> trackingHands = new Dictionary<uint, GameObject>();
-        /*
-        Summary: handAndManipulatedObjectCombo
-        In this dictionary we store the the hand that manipulate a particular object, so we can know for every
-        hand (interraction input) which Object manipulates
-        Key : Hand uid , Value: Object which is being manipulated
-        */
-        private Dictionary<uint, GameObject> handAndManipulatedObjectCombo = new Dictionary<uint, GameObject>();
         //Checking Manipulation Objects
         private GameObject TouchedObject; // GameObject which user touched and is candidate for Manipulation
         private GameObject ManipulatedObject;// GameObject which is being Manipulated by the user
         private GameObject FocusedObject; // GameObject which the user gazes at
         private GestureRecognizer gestureRecognizer;
         //Experimental
-        private bool areGesturesEnabled;
         private bool colorOutlineChanged;
-
+        //
+        private int clicker;
+        private float lastClickTime = .0f;
+        private bool clickTriggered;
+        private bool doubleClickTriggered;
+        //
         void Awake()
         {
             InteractionManager.InteractionSourceDetected += InteractionManager_InteractionSourceDetected;
             InteractionManager.InteractionSourceUpdated += InteractionManager_InteractionSourceUpdated;
             InteractionManager.InteractionSourceLost += InteractionManager_InteractionSourceLost;
+            InteractionManager.InteractionSourceReleased += InteractionManager_InteractionSourceReleased;
+            InteractionManager.InteractionSourcePressed += InteractionManager_InteractionSourcePressed;
             gestureRecognizer = new GestureRecognizer();
             gestureRecognizer.SetRecognizableGestures(GestureSettings.Tap | GestureSettings.ManipulationTranslate | GestureSettings.Hold);
             gestureRecognizer.Tapped += GestureRecognizer_Tapped;
@@ -60,21 +61,15 @@ namespace HoloPrognosis
             gestureRecognizer.HoldCompleted += GestureRecognizer_HoldCompleted;
             gestureRecognizer.StartCapturingGestures();
             cursor = GameObject.Find("Cursor").GetComponent<GazeCursor>();
-
         }
 
         void Update()
         {
             FocusedObject = cursor.getFocusedObject();
-            if (!areGesturesEnabled && FocusedObject != null)
-            {
-                gestureRecognizer.StartCapturingGestures();
-                areGesturesEnabled = true;
-            }
             if (FocusedObject != null)
             {
                 int HandsNeeded = ObjectCollectionManager.Instance.GetHandsNeededForManipulation(FocusedObject.GetInstanceID());
-                if (HandsNeeded <= trackingHands.Count && HandsNeeded > 0 && FocusedObject != null)
+                if (HandsNeeded <= trackingHands.Count && HandsNeeded > 0)
                 {
                     switch (HandsNeeded)
                     {
@@ -87,42 +82,22 @@ namespace HoloPrognosis
                     }
                 }
             }
-            else
-            {
-                if (areGesturesEnabled)
-                {
-                    gestureRecognizer.CancelGestures();
-                    areGesturesEnabled = false;
-                }
-            }
+            //Check for clcker
+            CheckForClicker();
         }
 
-        private void ManipulationForTwoHands()
+        private void CheckForClicker()
         {
-            Vector3 focusPos = FocusedObject.transform.position; //The player gazes at the item which will catch
-            Vector3 firstHand = trackingHands.ElementAt(0).Value.transform.position; //The position of user's hand in the Holospace
-            Vector3 secondHand = trackingHands.ElementAt(1).Value.transform.position; //The position of user's hand in the Holospace
-            if (FocusedObject != null)
+            if (doubleClickTriggered == true)
             {
-                Bounds focusedObjectBounds = FocusedObject.GetComponent<Renderer>().bounds; //The graphical bounds of the focused objects
-                focusedObjectBounds.Expand(.15f);
-                if (focusedObjectBounds.Contains(firstHand) && focusedObjectBounds.Contains(secondHand))
-                {
-                    ChangeObjectColor(trackingHands[trackingHands.ElementAt(0).Key], TouchedColor);
-                    ChangeObjectColor(trackingHands[trackingHands.ElementAt(1).Key], TouchedColor);
-                    ObjectTouched = true;
-                    ManipulationWithTwoHands = true;
-                    TouchedObject = FocusedObject;
-                    EnableOutline(FocusedObject);
-                }
-                else
-                {
-                    ChangeObjectColor(trackingHands[trackingHands.ElementAt(0).Key], DefaultColor);
-                    ChangeObjectColor(trackingHands[trackingHands.ElementAt(1).Key], DefaultColor);
-                    ObjectTouched = false;
-                    TouchedObject = null;
-                    DisableOutline(FocusedObject);
-                }
+                clickTriggered = false;
+                doubleClickTriggered = false;
+                EventManager.TriggerEvent("double_click");
+            }
+            if (doubleClickTriggered == false && clickTriggered == true)
+            {
+                clickTriggered = false;
+                EventManager.TriggerEvent("click");
             }
         }
 
@@ -132,31 +107,79 @@ namespace HoloPrognosis
             Vector3 handPos = trackingHands.ElementAt(0).Value.transform.position; //The position of user's hand in the Holospace
             Bounds focusedObjectBounds = FocusedObject.GetComponent<Renderer>().bounds; //The graphical bounds of the focused objects
             focusedObjectBounds.Expand(.15f);
-            if (FocusedObject != null)
+            if (focusedObjectBounds.Contains(handPos))
             {
-                if (focusedObjectBounds.Contains(handPos))
+                if (!ObjectManipulationInProgress)
                 {
-                    if (!objectManipulationInProgress)
+                    ChangeObjectColor(trackingHands[trackingHands.ElementAt(0).Key], TouchedColor);
+                    ObjectTouched = true;
+                    ManipulationWithTwoHands = false;
+                    TouchedObject = FocusedObject;
+                    if (!colorOutlineChanged)
                     {
-                        ChangeObjectColor(trackingHands[trackingHands.ElementAt(0).Key], TouchedColor);
-                        ObjectTouched = true;
-                        ManipulationWithTwoHands = false;
-                        TouchedObject = FocusedObject;
-                        if (!colorOutlineChanged)
-                        {
-                            EnableOutline(TouchedObject);
-                            colorOutlineChanged = true;
-                        }
+                        EnableOutline(TouchedObject);
+                        colorOutlineChanged = true;
                     }
                 }
-                else
+            }
+            else
+            {
+                ChangeObjectColor(trackingHands[trackingHands.ElementAt(0).Key], DefaultColor);
+                ObjectTouched = false;
+                TouchedObject = null;
+                DisableOutline(FocusedObject);
+                colorOutlineChanged = false;
+            }
+        }
+
+        private void ManipulationForTwoHands()
+        {
+            Vector3 focusPos = FocusedObject.transform.position; //The player gazes at the item which will catch
+            Vector3 firstHand = trackingHands.ElementAt(0).Value.transform.position; //The position of user's hand in the Holospace
+            Vector3 secondHand = trackingHands.ElementAt(1).Value.transform.position; //The position of user's hand in the Holospace
+            Bounds focusedObjectBounds = FocusedObject.GetComponent<Renderer>().bounds; //The graphical bounds of the focused objects
+            focusedObjectBounds.Expand(.15f);
+            if (focusedObjectBounds.Contains(firstHand) && focusedObjectBounds.Contains(secondHand))
+            {
+                if (!ObjectManipulationInProgress)
                 {
-                    ChangeObjectColor(trackingHands[trackingHands.ElementAt(0).Key], DefaultColor);
-                    ObjectTouched = false;
-                    TouchedObject = null;
-                    DisableOutline(FocusedObject);
-                    colorOutlineChanged = false;
+                    ChangeObjectColor(trackingHands[trackingHands.ElementAt(0).Key], TouchedColor);
+                    ChangeObjectColor(trackingHands[trackingHands.ElementAt(1).Key], TouchedColor);
+                    ObjectTouched = true;
+                    ManipulationWithTwoHands = true;
+                    TouchedObject = FocusedObject;
+                    if (!colorOutlineChanged)
+                    {
+                        EnableOutline(TouchedObject);
+                        colorOutlineChanged = true;
+                    }
                 }
+            }
+            else
+            {
+                ChangeObjectColor(trackingHands[trackingHands.ElementAt(0).Key], DefaultColor);
+                ChangeObjectColor(trackingHands[trackingHands.ElementAt(1).Key], DefaultColor);
+                ObjectTouched = false;
+                TouchedObject = null;
+                DisableOutline(FocusedObject);
+                colorOutlineChanged = false;
+            }
+        }
+
+        private void EnableOutline(GameObject focusedObject)
+        {
+            if (focusedObject != null)
+            {
+                var outline = focusedObject.GetComponent<Outline>();
+                if(outline == null)
+                {
+                    //Create Outline
+                    outline = gameObject.AddComponent<Outline>();
+                    outline.OutlineMode = Outline.Mode.OutlineAll;
+                    outline.OutlineWidth = 5f;
+                }
+                outline.OutlineColor = OutlineDefaultColor;
+                outline.enabled = true;
             }
         }
 
@@ -164,7 +187,7 @@ namespace HoloPrognosis
         {
             if (focusedObject != null)
             {
-                var outline = focusedObject.GetComponentInChildren<Outline>();
+                var outline = focusedObject.GetComponent<Outline>();
                 if (outline != null)
                 {
                     if (outline.enabled == false) outline.enabled = true;
@@ -177,40 +200,15 @@ namespace HoloPrognosis
         {
             if (focusedObject != null)
             {
-                var outline = focusedObject.GetComponentInChildren<Outline>();
+                var outline = focusedObject.GetComponent<Outline>();
                 if (outline != null) outline.enabled = false;
-            }
-        }
-
-        private void EnableOutline(GameObject focusedObject)
-        {
-            if (focusedObject != null)
-            {
-                var outline = focusedObject.GetComponentInChildren<Outline>();
-                if(outline == null)
-                {
-                    //Create Outline
-                    outline = gameObject.AddComponent<Outline>();
-                    outline.OutlineMode = Outline.Mode.OutlineAll;
-                    outline.OutlineWidth = 5f;
-                    if (!objectManipulationInProgress && outline.OutlineColor != OutlineDefaultColor)
-                        outline.OutlineColor = OutlineDefaultColor;
-                    outline.enabled = true;
-                }
-                else
-                {
-                    if (!objectManipulationInProgress && outline.OutlineColor!=OutlineDefaultColor)
-                        outline.OutlineColor = OutlineDefaultColor;
-                    outline.enabled = true;
-                }
             }
         }
 
         private void ChangeObjectColor(GameObject obj, Color color)
         {            
-            var rend = obj.GetComponentInChildren<Renderer>();
-            if (rend)
-                rend.material.color = color;
+            var rend = obj.GetComponent<Renderer>();
+            if (rend) rend.material.color = color;
         }
 
         private void GestureRecognizer_ManipulationStarted(ManipulationStartedEventArgs args)
@@ -218,22 +216,20 @@ namespace HoloPrognosis
             uint id = args.source.id;
             if (trackingHands.ContainsKey(id) && ObjectTouched)
             {
-                objectManipulationInProgress = true;
+                ObjectManipulationInProgress = true;
                 ManipulatedObject = TouchedObject;
                 ChangeColorOutline(ManipulatedObject, OutlineManipulateColor);
                 if (!ManipulationWithTwoHands)
                 {
-                    GameObject currentHandObject;
-                    trackingHands.TryGetValue(id, out currentHandObject);
+                    GameObject currentHandObject = trackingHands[id];
                     ManipulatedObject.transform.position = currentHandObject.transform.position;
-                    handAndManipulatedObjectCombo.Add(id, ManipulatedObject);
                 }
                 else
                 {
-                    GameObject firstHand = trackingHands.ElementAt(0).Value;
-                    GameObject secondHand = trackingHands.ElementAt(1).Value;
-                    ManipulatedObject.transform.position = Vector3.Lerp(firstHand.transform.position, secondHand.transform.position, .5f);
-                    handAndManipulatedObjectCombo.Add(id, ManipulatedObject);
+                    GameObject firstHandObject = trackingHands.ElementAt(0).Value;
+                    GameObject secondHandObject = trackingHands.ElementAt(1).Value;
+                    ManipulatedObject.transform.position = Vector3.Lerp(firstHandObject.transform.position, secondHandObject.transform.position, .5f);
+
                 }
             }
         }
@@ -241,66 +237,64 @@ namespace HoloPrognosis
         private void GestureRecognizer_ManipulationUpdated(ManipulationUpdatedEventArgs args)
         {
             uint id = args.source.id;
-            if (trackingHands.ContainsKey(args.source.id) && objectManipulationInProgress)
+            if (trackingHands.ContainsKey(args.source.id) && ObjectManipulationInProgress)
             {
                 if (!ManipulationWithTwoHands)
                 {
-                    GameObject currentHandObject;
-                    trackingHands.TryGetValue(id, out currentHandObject);
-                    GameObject currentManipulatedObject = handAndManipulatedObjectCombo[id];
-                    currentManipulatedObject.transform.position = currentHandObject.transform.position;
+                    GameObject currentHandObject = trackingHands[id];
+                    Interpolator interpolator = ManipulatedObject.GetComponent<Interpolator>();
+                    interpolator.SetTargetPosition(currentHandObject.transform.position);
+                    //ManipulatedObject.transform.position = currentHandObject.transform.position;
                 }
                 else
                 {
                     GameObject firstHand = trackingHands.ElementAt(0).Value;
                     GameObject secondHand = trackingHands.ElementAt(1).Value;
-                    ManipulatedObject.transform.position = Vector3.Lerp(firstHand.transform.position, secondHand.transform.position, .5f);
+                    //ManipulatedObject.transform.position = Vector3.Lerp(firstHand.transform.position, secondHand.transform.position, .5f);
+                    Interpolator interpolator = ManipulatedObject.GetComponent<Interpolator>();
+                    interpolator.SetTargetPosition(Vector3.Lerp(firstHand.transform.position, secondHand.transform.position, .5f));
                 }
             }
         }
 
         void GestureRecognizer_ManipulationCompleted(ManipulationCompletedEventArgs args)
         {
-            if (trackingHands.ContainsKey(args.source.id) && objectManipulationInProgress)
+            if (trackingHands.ContainsKey(args.source.id) && ObjectManipulationInProgress)
             {
                 DisableOutline(ManipulatedObject);
                 EnableGravity(ManipulatedObject);
                 ChangeObjectColor(trackingHands[args.source.id], DefaultColor);
                 if (!ManipulationWithTwoHands)
                 {
-                    objectManipulationInProgress = false;
+                    ObjectManipulationInProgress = false;
                     ManipulatedObject = null;
-                    handAndManipulatedObjectCombo.Remove(args.source.id);
                 }
                 else
                 {
                     ManipulationWithTwoHands = false;
-                    objectManipulationInProgress = false;
+                    ObjectManipulationInProgress = false;
                     ManipulatedObject = null;
-                    handAndManipulatedObjectCombo.Clear();
                 }
             }
         }
 
         private void GestureRecognizer_ManipulationCanceled(ManipulationCanceledEventArgs args)
         {
-            if (trackingHands.ContainsKey(args.source.id) && objectManipulationInProgress)
+            if (trackingHands.ContainsKey(args.source.id) && ObjectManipulationInProgress)
             {
-                ChangeObjectColor(trackingHands[args.source.id], DefaultColor);
                 DisableOutline(ManipulatedObject);
                 EnableGravity(ManipulatedObject);
+                ChangeObjectColor(trackingHands[args.source.id], DefaultColor);
                 if (!ManipulationWithTwoHands)
                 {
-                    objectManipulationInProgress = false;
+                    ObjectManipulationInProgress = false;
                     ManipulatedObject = null;
-                    handAndManipulatedObjectCombo.Remove(args.source.id);
                 }
                 else
                 {
                     ManipulationWithTwoHands = false;
-                    objectManipulationInProgress = false;
+                    ObjectManipulationInProgress = false;
                     ManipulatedObject = null;
-                    handAndManipulatedObjectCombo.Clear();
                 }
             }
         }
@@ -315,53 +309,8 @@ namespace HoloPrognosis
             EventManager.TriggerEvent("tap");
         }
 
-        private void InteractionManager_InteractionSourceDetected(InteractionSourceDetectedEventArgs obj)
-        {
-            uint id = obj.state.source.id;
-            if (obj.state.source.kind == InteractionSourceKind.Hand)
-            {
-
-                var hand = Instantiate(TrackingObject) as GameObject;
-                Vector3 pos;
-
-                if (obj.state.sourcePose.TryGetPosition(out pos))
-                    hand.transform.position = pos;
-
-                trackingHands.Add(id, hand);
-            }
-        }
-
-        private void InteractionManager_InteractionSourceUpdated(InteractionSourceUpdatedEventArgs args)
-        {
-            uint id = args.state.source.id;
-
-            if (trackingHands.ContainsKey(id) && args.state.source.kind == InteractionSourceKind.Hand)
-            {
-                Vector3 pos;
-                Quaternion rot;
-                if (args.state.sourcePose.TryGetPosition(out pos))
-                    trackingHands[id].transform.position = pos;
-
-                if (args.state.sourcePose.TryGetRotation(out rot))
-                    trackingHands[id].transform.rotation = rot;
-            }
-        }   
-
-        private void InteractionManager_InteractionSourceLost(InteractionSourceLostEventArgs args)
-        {
-            uint id = args.state.source.id;
-
-            if (trackingHands.ContainsKey(id) && args.state.source.kind == InteractionSourceKind.Hand)
-            {
-                var obj = trackingHands[id];
-                trackingHands.Remove(id);
-                Destroy(obj);
-            }
-        }
-
         private void GestureRecognizer_HoldStarted(HoldStartedEventArgs args)
         {
-            uint id = args.source.id;
             if (TouchedObject != null)
                 ChangeColorOutline(TouchedObject, OutlineHoldColor);
             if (ManipulatedObject != null)
@@ -372,30 +321,111 @@ namespace HoloPrognosis
 
         private void GestureRecognizer_HoldCanceled(HoldCanceledEventArgs args)
         {
-            uint id = args.source.id;
             if (TouchedObject != null)
-                ChangeColorOutline(TouchedObject, Color.white);
+                ChangeColorOutline(TouchedObject, HoldFinished);
             if (ManipulatedObject != null)
-                ChangeColorOutline(ManipulatedObject, Color.white);
+                ChangeColorOutline(ManipulatedObject, HoldFinished);
             if (FocusedObject != null)
-                ChangeColorOutline(FocusedObject, Color.white);
+                ChangeColorOutline(FocusedObject, HoldFinished);
         }
 
         private void GestureRecognizer_HoldCompleted(HoldCompletedEventArgs args)
         {
-            uint id = args.source.id;
             if (TouchedObject != null)
-                ChangeColorOutline(TouchedObject, Color.white);
+                ChangeColorOutline(TouchedObject, HoldFinished);
             if (ManipulatedObject != null)
-                ChangeColorOutline(ManipulatedObject, Color.white);
+                ChangeColorOutline(ManipulatedObject, HoldFinished);
             if (FocusedObject != null)
-                ChangeColorOutline(FocusedObject, Color.white);
+                ChangeColorOutline(FocusedObject, HoldFinished);
         }
 
+        private void InteractionManager_InteractionSourceDetected(InteractionSourceDetectedEventArgs obj)
+        {
+            if (obj.state.source.kind == InteractionSourceKind.Hand)
+            {
+                //Create hand object/cube
+                var hand = Instantiate(TrackingObject) as GameObject;
+                Vector3 pos;
+
+                if (obj.state.sourcePose.TryGetPosition(out pos))
+                    hand.transform.position = pos;
+                //Add detected hand to hand dictionary
+                trackingHands.Add(obj.state.source.id, hand);
+            }
+        }
+
+        private void InteractionManager_InteractionSourceUpdated(InteractionSourceUpdatedEventArgs args)
+        {
+            uint id = args.state.source.id;
+
+            if (trackingHands.ContainsKey(id) && args.state.source.kind == InteractionSourceKind.Hand)
+            {
+                Vector3 pos;
+                if (args.state.sourcePose.TryGetPosition(out pos))
+                    trackingHands[id].transform.position = pos;
+            }
+        }   
+
+        private void InteractionManager_InteractionSourceLost(InteractionSourceLostEventArgs args)
+        {
+            uint id = args.state.source.id;
+
+            if (trackingHands.ContainsKey(id) && args.state.source.kind == InteractionSourceKind.Hand)
+            {
+                Destroy(trackingHands[id]);
+                trackingHands.Remove(id);
+            }
+        }
+
+        private void InteractionManager_InteractionSourceReleased(InteractionSourceReleasedEventArgs args)
+        {
+            uint id = args.state.source.id;
+
+            if (trackingHands.ContainsKey(id) && args.state.source.kind == InteractionSourceKind.Hand)
+            {
+                Destroy(trackingHands[id]);
+                trackingHands.Remove(id);
+            }
+        }
+
+        private void InteractionManager_InteractionSourcePressed(InteractionSourcePressedEventArgs args)
+        {
+            if (args.state.source.kind == InteractionSourceKind.Controller)
+            {
+                clicker++;
+                StatusText.text = "Clicker clicked:" + clicker; ;
+                if (FocusedObject != null)
+                {
+                    var outline = FocusedObject.GetComponent<Outline>();
+                    if (outline != null)
+                    {
+                        if (outline.enabled == false)
+                            EnableOutline(FocusedObject);
+                        else
+                            DisableOutline(FocusedObject);
+                    }
+                }
+                if (!clickTriggered)
+                {
+                    clickTriggered = true;
+                    lastClickTime = Time.time;
+                }
+                else
+                {
+                    if (Time.time - lastClickTime < 1.5f)
+                        doubleClickTriggered = true;
+                }
+            }
+        }
 
         private void EnableGravity(GameObject obj)
         {
             obj.GetComponent<Rigidbody>().useGravity = true;
+        }
+
+        private void DisableGravity(GameObject obj)
+        {
+            obj.GetComponent<Rigidbody>().useGravity = false;
         }
 
         void OnDestroy()
