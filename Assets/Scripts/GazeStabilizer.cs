@@ -48,7 +48,7 @@ public class GazeStabilizer
 
     public float euclideanDistance(Vector3 point)
     {
-        return Mathf.Sqrt(Mathf.Pow(point.x, 2) + Mathf.Pow(point.y, 2) + Mathf.Pow(point.z, 2));
+        return Vector3.Magnitude(point);
     }
 
     public float getStandardDeviation(ArrayList List)

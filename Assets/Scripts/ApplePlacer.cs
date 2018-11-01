@@ -81,8 +81,8 @@ public class ApplePlacer : MonoBehaviour {
 
     public float pointDistanceInTrig(Vector3 point , Vector3 t1, Vector3 t2, Vector3 t3)
     {
-       return Mathf.Sqrt(Mathf.Pow(point.x - t1.x, 2) + Mathf.Pow(point.y - t1.y, 2) + Mathf.Pow(point.z - t1.z, 2)) +
-                Mathf.Sqrt(Mathf.Pow(point.x - t2.x, 2) + Mathf.Pow(point.y - t2.y, 2) + Mathf.Pow(point.z - t2.z, 2)) +
-                Mathf.Sqrt(Mathf.Pow(point.x - t3.x, 2) + Mathf.Pow(point.y - t3.y, 2) + Mathf.Pow(point.z - t3.z, 2));
+       return Vector3.Magnitude(point -t1) +
+                Vector3.Magnitude(point -t2) +
+                Vector3.Magnitude(point -t3);
     }
 }

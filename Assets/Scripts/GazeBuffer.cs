@@ -88,7 +88,7 @@ public class GazeBuffer
 
     public float euclideanDistance(Vector3 point)
     {
-        return Mathf.Sqrt(Mathf.Pow(point.x, 2) + Mathf.Pow(point.y, 2) + Mathf.Pow(point.z, 2));
+        return Vector3.Magnitude(point);
     }
 
     private void UpdateStandardDeviation()

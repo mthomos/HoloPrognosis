@@ -7,15 +7,13 @@ using UnityEngine.Events;
 public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
 {
     //Public Variables - For Editor
-    //Scan surface variables, for ease -> public
     public float MinAreaForStats = 2.0f; // both floor and wall surfaces
     public float MinAreaForComplete = 4.0f; // for floor
     public float MinHorizAreaForComplete = 1.0f; // for horizontal surfaces not only walls
     public float MinWallAreaForComplete = 0.0f; // for walls only
     //Debug displays
     public TextMesh DebugDisplay;
-    //public TextMesh DebugSubDisplay;
-    public ObjectPlacer Placer;
+    public FlowController flowController;
     public string SpaceQueryDescription;
     //Private Variables
     private bool _triggered;
@@ -26,12 +24,10 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
     {
         get
         {
-            // Only allow this when we are actually scanning
             if ((SpatialUnderstanding.Instance.ScanState != SpatialUnderstanding.ScanStates.Scanning) ||
                 (!SpatialUnderstanding.Instance.AllowSpatialUnderstanding))
                 return false;
 
-            // Query the current playspace stats
             IntPtr statsPtr = SpatialUnderstanding.Instance.UnderstandingDLL.GetStaticPlayspaceStatsPtr();
             if (SpatialUnderstandingDll.Imports.QueryPlayspaceStats(statsPtr) == 0)
                 return false;
@@ -66,7 +62,6 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
                         //Just for case
                         if (SpatialUnderstandingDll.Imports.QueryPlayspaceStats(statsPtr) == 0)
                             return "playspace stats query failed";
-
                         if (DoesScanMeetMinBarForCompletion)
                             return "Space scanned, air tap to finalize your playspace";
 
@@ -96,7 +91,7 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
 
         }
     }
-    //OK
+
     public string DetailsText
     {
         get
@@ -161,7 +156,7 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
         {
             _triggered = true;
             EventManager.StopListening("tap", TapListener);
-            Placer.CreateScene();
+            flowController.Prepare();
             SpaceQueryDescription = " ";
         }
     }

@@ -8,29 +8,41 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
     public GameObject TreePrefab;
     public GameObject FruitPrefab;
     public GameObject BoxPrefab;
+    public GameObject CalibrationPointPrefab;
     public Vector3 TreeSize;
     public Vector3 FruitSize;
     public Vector3 BoxSize;
+    public Vector3 CalibrationPointSize;
     public float FruitScale;
     public int NumberOfFruits;
-    //Demo variables
-    public bool Demo;
-    public GameObject TreeDemoPrefab;
 
     private GameObject createdTree;
+    private GameObject createdBox;
     private float ScaleFactor;
     private List<GameObject> ActiveHolograms = new List<GameObject>();
     private Dictionary<int, int> HandsForActiveHolograms = new Dictionary<int, int>();//key: id, value: hands
     private bool treeCreated, boxCreated;
 
+    public void CreateCalibrationPoint(Vector3 positionCenter, Quaternion rotation)
+    {
+        // Stay center in the square but move down to the ground
+        var position = positionCenter - new Vector3(0, CalibrationPointSize.y * .5f, 0);
+        GameObject newObject = Instantiate(CalibrationPointPrefab, position, rotation);
+        newObject.name = "Calibration";
+        newObject.tag = "Calibration";
+        if (newObject != null)
+        {
+            newObject.transform.parent = gameObject.transform;
+            newObject.transform.localScale = RescaleToSameScaleFactor(CalibrationPointPrefab);
+            ActiveHolograms.Add(newObject);
+        }
+    }
+
     public void CreateTree(Vector3 positionCenter, Quaternion rotation)
     {
-        GameObject prefab;
-        if (Demo) prefab = TreeDemoPrefab;
-        else prefab = TreePrefab;
         // Stay center in the square but move down to the ground
         Vector3 position = positionCenter - new Vector3(0, TreeSize.y * .5f, 0);
-        GameObject newObject = Instantiate(prefab, position, rotation);
+        GameObject newObject = Instantiate(TreePrefab, position, rotation);
         newObject.name = "Tree";
         if (newObject != null)
         {
@@ -40,37 +52,8 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             createdTree = newObject;
             HandsForActiveHolograms.Add(newObject.GetInstanceID(), -1);
             treeCreated = true;
-            checkIfWordCreated();
-        }
-        if (Demo)
-            DemoFun();
-        else
-            CreateFruits();
-    }
-
-    public void CreateFruits()
-    {
-        for (float i = 0.0f; i < (float)NumberOfFruits; i = i + 1.0f)
-        {
-            GameObject newFruit = Instantiate(FruitPrefab);
-            newFruit.name = "Fruit_" + i;
-            if (newFruit != null)
-            {
-                newFruit.transform.parent = createdTree.transform;
-                newFruit.transform.localScale = new Vector3(FruitScale, FruitScale, FruitScale);
-                Vector3 treePos = createdTree.transform.position;
-                Vector3 treeSize = createdTree.GetComponent<Renderer>().bounds.size / 1.5f;
-                float theta = 2.0f * Mathf.PI * (i / (float)NumberOfFruits + 1);
-                float y = Random.Range(treeSize.y / 1.3f, treeSize.y);
-                float x = (Mathf.Cos(theta) * treeSize.x) + treePos.x;
-                float z = (Mathf.Sin(theta) * treeSize.z) + treePos.z;
-                Vector3 pos = new Vector3(x, y, z);
-                pos = createdTree.GetComponent<CapsuleCollider>().bounds.ClosestPoint(pos);
-                newFruit.transform.position = pos;
-                if (createdTree.GetComponent<Renderer>().bounds.Contains(pos))
-                    Debug.Log(newFruit.name + "Inside");
-                HandsForActiveHolograms.Add(newFruit.GetInstanceID(), 1);
-            }
+            checkIfWorldCreated();
+            SetFruitProps();
         }
     }
 
@@ -86,9 +69,10 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             newObject.transform.localScale = RescaleToSameScaleFactor(BoxPrefab);
             ActiveHolograms.Add(newObject);
             HandsForActiveHolograms.Add(newObject.GetInstanceID(), -1);
-            SpatialUnderstandingState.Instance.SpaceQueryDescription = "";
             boxCreated = true;
-            checkIfWordCreated();
+            checkIfWorldCreated();
+            newObject.GetComponent<Renderer>().enabled = false;
+            createdBox = newObject;
         }
     }
 
@@ -100,7 +84,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
 
     private Vector3 RescaleToSameScaleFactor(GameObject objectToScale)
     {
-        if (ScaleFactor == 0f)  CalculateScaleFactor();
+        if (ScaleFactor == 0f) CalculateScaleFactor();
         return objectToScale.transform.localScale * ScaleFactor;
     }
 
@@ -152,7 +136,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         return result;
     }
 
-    private void checkIfWordCreated()
+    private void checkIfWorldCreated()
     {
         if (boxCreated && treeCreated)
         {
@@ -180,20 +164,56 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         HandsForActiveHolograms.Add(objectID, hands);
     }
 
-    public void DemoFun()
+    public void SetFruitProps()
     {
         GameObject child;
         for (int i = 0; i < createdTree.transform.childCount; i++)
         {
             child = gameObject.transform.GetChild(i).gameObject;
-            child.name = "Fruit";
-            child.GetComponent<Interpolator>();
+            child.tag = "User";
+            /*
             Interpolator interpolator = child.AddComponent<Interpolator>();
             interpolator.SmoothLerpToTarget = true;
             interpolator.SmoothPositionLerpRatio = 0.5f;
             interpolator.PositionPerSecond = 40.0f;
-            //child.transform.localScale = new Vector3(FruitScale, FruitScale, FruitScale);
-            ObjectCollectionManager.Instance.setActiveHologram(child.GetInstanceID(), 1);
+            */
+            setActiveHologram(child.GetInstanceID(), 1);
+        }
+    }
+
+    public void ClearScene()
+    {
+        foreach (GameObject i in ActiveHolograms)
+        {
+            Destroy(i);
+        }
+        ActiveHolograms.Clear();
+        HandsForActiveHolograms.Clear();
+    }
+
+    public void appearBox(int counter, Vector3 initPos)
+    {
+        Vector3 handRef = initPos - Camera.main.transform.position;
+        if (counter%2==0)
+        {
+            handRef.z = -handRef.z;
+        }
+        else
+        {
+            handRef.x = -handRef.x;
+        }
+        handRef.y = Camera.main.transform.position.y - 0.05f;
+        Vector3 newPos = handRef + Camera.main.transform.position;
+        createdBox.transform.position = newPos;
+        createdBox.GetComponent<Renderer>().enabled = true;
+    }
+
+    public void disappearBox()
+    {
+        Renderer[] rend = createdBox.GetComponentsInChildren<Renderer>();
+        foreach (Renderer i in rend)
+        {
+            i.enabled = false;
         }
     }
 }

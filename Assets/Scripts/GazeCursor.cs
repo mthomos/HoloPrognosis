@@ -3,49 +3,94 @@
 public class GazeCursor : MonoBehaviour
 {
     //Public Variables-For Editor
-    public bool useBuffer = false;
+    public TextMesh StatusText; // Text for debugging (for now)
+    public FlowController flowController;
     //Private Variables
     private GameObject FocusedObject; // The object which user is staring at
-    private GazeBuffer buffer; // Gaze stabilizer
+    //private bool calibrationMode = false;
+    private bool calculationMode = false;
+    private bool trainingMode = false;
+    private float height = .0f;
+    //Cached variables
     private Renderer cursorMeshRenderer; // Using this to disable cursor
-    private RaycastHit hitInfo; //Better for this variable to be cached
-    private Vector3 gazeOrigin; // same
-    private Vector3 gazeDirection; // same
-    
+    private RaycastHit hitInfo;
+    private Vector3 gazeOrigin;
+    private Vector3 gazeDirection;
+    private Camera mainCamera;
+
     void Start ()
     {
-        buffer = new GazeBuffer();
-        cursorMeshRenderer = gameObject.GetComponentInChildren<Renderer>();
+        cursorMeshRenderer = gameObject.GetComponent<Renderer>();
+        mainCamera = Camera.main;
     }
-	
-	void Update ()
+
+    void Update()
     {
-        gazeOrigin = Camera.main.transform.position;
-        gazeDirection = Camera.main.transform.forward;
-
-        if (Physics.Raycast(gazeOrigin, gazeDirection, out hitInfo) && useBuffer)
-        {
-            buffer.addSamples(gazeOrigin, gazeDirection);
-            buffer.UpdateStability(gazeOrigin, gazeDirection);
-            gazeOrigin = buffer.getStableGazeOrigin();
-            gazeDirection = buffer.getStableGazeForward();
-        }
-
-
+        gazeOrigin = mainCamera.transform.position;
+        gazeDirection = mainCamera.transform.forward;
         if (Physics.Raycast(gazeOrigin, gazeDirection, out hitInfo))
         {
             cursorMeshRenderer.enabled = true;
             gameObject.transform.position = hitInfo.point;
             gameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal);
-            FocusedObject = hitInfo.collider.gameObject;
-            if (FocusedObject.name == "Fruit") FocusedObject = hitInfo.collider.gameObject;
+
+            if (calculationMode)
+                calculateHeight();
+            else if (trainingMode) // Use for gameplay
+                refreshFocusedObject();
+            else // for !training
+                FocusedObject = hitInfo.collider.gameObject;
         }
         else
             cursorMeshRenderer.enabled = false;
+    }
+
+    private void calculateHeight()
+    {
+        //refreshUserHeight
+        float tempHeight = Mathf.Abs(hitInfo.point.y - mainCamera.transform.position.y);
+        if (height < tempHeight)
+            height = tempHeight;
+        if (hitInfo.collider.gameObject.CompareTag("Calibration"))
+        {
+            //Terminate Calculation
+            flowController.finishCalculateMode(height);
+            calculationMode = false;
+        }
+    }
+    private void refreshFocusedObject()
+    {
+        if (FocusedObject.CompareTag("User") && FocusedObject != hitInfo.collider.gameObject)
+            FocusedObject = hitInfo.collider.gameObject;
+    }
+
+    public void setCalculationMode()
+    {
+        calculationMode = true;
+        //calibrationMode = false;
+        trainingMode = false;
+        FocusedObject = null;
+    }
+
+    public void setTrainingMode()
+    {
+        calculationMode = false;
+        //calibrationMode = false;
+        trainingMode = true;
+        FocusedObject = null;
+    }
+
+    public void setGenericUse()
+    {
+        calculationMode = false;
+        //calibrationMode = false;
+        trainingMode = false;
+        FocusedObject = null;
     }
 
     public GameObject getFocusedObject()
     {
         return FocusedObject;
     }
+
 }

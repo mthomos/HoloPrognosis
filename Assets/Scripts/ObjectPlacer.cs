@@ -8,6 +8,7 @@ public class ObjectPlacer : MonoBehaviour
     public SpatialUnderstandingCustomMesh SpatialUnderstandingMesh;
     public Material OccludedMaterial;
     public float boxTreeDistance;
+    //
     private Queue<PlacementResult> results = new Queue<PlacementResult>();
 
     void Start()
@@ -25,14 +26,25 @@ public class ObjectPlacer : MonoBehaviour
         SpatialUnderstandingMesh.MeshMaterial = OccludedMaterial;
     }
 
+    public void CreateCablirationScene()
+    {
+        if (!SpatialUnderstanding.Instance.AllowSpatialUnderstanding)
+            return;
+
+        SpatialUnderstandingDllObjectPlacement.Solver_Init();
+        HideGridEnableOcclulsion();
+
+        List<PlacementQuery> queries = new List<PlacementQuery>();
+        queries.AddRange(AddCalibrationPoint());
+        GetLocationsFromSolver(queries);
+    }
+
     public void CreateScene()
     {
         if (!SpatialUnderstanding.Instance.AllowSpatialUnderstanding)
             return;
 
         SpatialUnderstandingDllObjectPlacement.Solver_Init();
-
-        SpatialUnderstandingState.Instance.SpaceQueryDescription = "Generating World";
         HideGridEnableOcclulsion();
 
         List<PlacementQuery> queries = new List<PlacementQuery>();
@@ -56,6 +68,11 @@ public class ObjectPlacer : MonoBehaviour
         return CreateLocationQueriesForSolver(1, ObjectCollectionManager.Instance.BoxSize, ObjectType.Box);
     }
 
+    public List<PlacementQuery> AddCalibrationPoint()
+    {
+        return CreateLocationQueriesForSolver(1, ObjectCollectionManager.Instance.CalibrationPointSize, ObjectType.CalibrationPoint);
+    }
+
     private void ProcessPlacementResults()
     {
         if (results.Count > 0)
@@ -68,14 +85,13 @@ public class ObjectPlacer : MonoBehaviour
                 case ObjectType.Tree:
                     ObjectCollectionManager.Instance.CreateTree(toPlace.Position, rotation);
                     break;
-                    /*
-                case ObjectType.Fruit:
-                    ObjectCollectionManager.Instance.CreateFruit(toPlace.Position, rotation);
-                    break;
-                    */
                 case ObjectType.Box:
                     ObjectCollectionManager.Instance.CreateBox(toPlace.Position, rotation);
                     break;
+                case ObjectType.CalibrationPoint:
+                    ObjectCollectionManager.Instance.CreateCalibrationPoint(toPlace.Position, rotation);
+                    break;
+
             }
         }
     }
@@ -153,6 +169,13 @@ public class ObjectPlacer : MonoBehaviour
                 SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule.Create_AwayFromOtherObjects(boxTreeDistance)
                 };
                 placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_NearWall());
+                placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_OnFloor(halfDims);
+            }
+
+            else if (objType == ObjectType.CalibrationPoint)
+            {
+                placementRules = new List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule> { };
+                placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_NearCenter());
                 placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_OnFloor(halfDims);
             }
 
