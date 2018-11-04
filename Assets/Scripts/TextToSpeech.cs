@@ -13,33 +13,10 @@ using System.Threading.Tasks;
 
 namespace HoloToolkit.Unity
 {
-    public enum TextToSpeechVoice
-    {
-        /// <summary>
-        /// The default system voice.
-        /// </summary>
-        Default,
-
-        /// <summary>
-        /// Microsoft David Mobile
-        /// </summary>
-        David,
-
-        /// <summary>
-        /// Microsoft Mark Mobile
-        /// </summary>
-        Mark,
-
-        /// <summary>
-        /// Microsoft Zira Mobile
-        /// </summary>
-        Zira,
-    }
 
     [RequireComponent(typeof(AudioSource))]
     public class TextToSpeech : MonoBehaviour
     {
-        [Tooltip("The audio source where speech will be played.")]
         [SerializeField]
         private AudioSource audioSource;
 
@@ -48,7 +25,6 @@ namespace HoloToolkit.Unity
         /// </summary>
         public AudioSource AudioSource { get { return audioSource; } set { audioSource = value; } }
 
-        private TextToSpeechVoice voice = TextToSpeechVoice.Default;
 
 #if !UNITY_EDITOR && UNITY_WSA
         private SpeechSynthesizer synthesizer;
@@ -176,30 +152,6 @@ namespace HoloToolkit.Unity
                     // This is good since it frees up Unity to keep running anyway.
                     Task.Run(async () =>
                     {
-                        // Change voice?
-                        if (voice != TextToSpeechVoice.Default)
-                        {
-                            // Get name
-                            var voiceName = Enum.GetName(typeof(TextToSpeechVoice), voice);
-
-                            // See if it's never been found or is changing
-                            if ((voiceInfo == null) || (!voiceInfo.DisplayName.Contains(voiceName)))
-                            {
-                                // Search for voice info
-                                voiceInfo = SpeechSynthesizer.AllVoices.Where(v => v.DisplayName.Contains(voiceName)).FirstOrDefault();
-
-                                // If found, select
-                                if (voiceInfo != null)
-                                {
-                                    synthesizer.Voice = voiceInfo;
-                                }
-                                else
-                                {
-                                    Debug.LogErrorFormat("TTS voice {0} could not be found.", voiceName);
-                                }
-                            }
-                        }
-
                         // Speak and get stream
                         var speechStream = await speakFunc();
 
