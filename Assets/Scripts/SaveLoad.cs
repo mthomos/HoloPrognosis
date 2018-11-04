@@ -1,11 +1,10 @@
 ﻿using UnityEngine;
 using System.IO;
-//using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Collections.Generic;
 
 public static class SaveLoad
 {
-    /*
     public static List<SessionData> savedGames = new List<SessionData>();
 
     public static void Save(SessionData data)
@@ -32,5 +31,4 @@ public static class SaveLoad
             }
         }
     }
-    */
 }

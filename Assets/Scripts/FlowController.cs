@@ -1,4 +1,11 @@
-﻿using System;
+﻿/* TODO
+ *  store value of height in DB
+ *  check db if height value exists in DB
+ *  otherwise calculateHeight()
+ *  store data to DB
+ */
+
+using HoloToolkit.Unity;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,20 +16,23 @@ public class FlowController : MonoBehaviour
     public GazeCursor gazeCursor;
     public TextMesh DebugText;
     public HandsTrackingController handsTrackingController;
+    public TextToSpeech textToSpeechManager;
     //
-    private bool heightCalculationDone = false;
-    private bool calibrationDone = false;
-    private bool scanDone = false;
-    //
+    private bool trainingMode = false;
     private GameObject calibrationPoint;
     private float userHeight;
+    private float handHeight;
+    private float handDistance;
     private List<CalibrationController> calibrationControllers;
-    float maxCalibrationDistance;
     //Create timer variables
     public float waitTime;
     private float timer;
     private bool timerEnabled = false;
-
+    //
+    private bool handAboveBoxInProgress;
+    //private bool manipulatedHandAboveBox;
+    private float manipulationTimer;
+    public float waitHandTime;
 	// Use this for initialization
 	void Start ()
     {
@@ -32,24 +42,25 @@ public class FlowController : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
     {
-        if (timerEnabled)
+        if (timerEnabled && trainingMode)
             refreshTimer();
 	}
 
     public void Prepare()
     {
-        scanDone = true;
         placer.CreateCablirationScene();
         //Create UI point
         calibrationPoint = GameObject.FindGameObjectWithTag("Calibration");
         calibrationPoint.AddComponent<DirectionIndicator>();
         //Set GazeCursor for height calculation
         gazeCursor.setCalculationMode();
+        textToSpeechManager.SpeakSsml("Now we should begin the calibration process. First you should at the red calibration point on the floor, " +
+            "so we calculate you height. Height is needed by the training program");
     }
 
     public void finishCalculateMode(float height)
     {
-        heightCalculationDone = true;
+        textToSpeechManager.SpeakSsml("Your height has been calculated succesfully");
         //Store value
         userHeight = height;
         //Destroy calibrationPoint for height calculation
@@ -64,9 +75,7 @@ public class FlowController : MonoBehaviour
 
     public void calibrationFinished()
     {
-
-        calibrationDone = true;
-        maxCalibrationDistance = maxValue(calibrationControllers);
+        maxValue(calibrationControllers, out handDistance, out handHeight);
         //Create play scene
         ObjectCollectionManager.Instance.ClearScene();
         placer.CreateScene();
@@ -79,6 +88,7 @@ public class FlowController : MonoBehaviour
         handsTrackingController.enableDataCollection();
         //Enable Timer
         enableTimer();
+        trainingMode = true;
     }
 
     public int addCalibrationController(CalibrationController controller, float time)
@@ -90,7 +100,12 @@ public class FlowController : MonoBehaviour
 
     public float getHeadDistanceLimit()
     {
-        return maxCalibrationDistance;
+        return handDistance;
+    }
+
+    public float getHandHeight()
+    {
+        return handHeight;
     }
 
     private void refreshTimer()
@@ -133,16 +148,57 @@ public class FlowController : MonoBehaviour
         timer = 0.0f;
     }
 
-    private float maxValue(List<CalibrationController> list)
+    private void maxValue(List<CalibrationController> list, out float maxD, out float maxH)
     {
-        float max = -1.0f;
+        maxD = -1.0f;
+        maxH = -1.0f;
         foreach(CalibrationController i in list)
         {
-            if (i.getDistance() > max)
-                max = i.getDistance();
+            if (i.getDistance() > maxD)
+                maxD = i.getDistance();
+            if (i.getHandHeight() > maxH)
+                maxH = i.getHandHeight();
         }
-        //reduce value by 2cm
-        max -= 0.03f;
-        return max;
+    }
+
+    public void checkIfAboveBox(Vector3 pos)
+    {
+        GameObject createdBox = ObjectCollectionManager.Instance.getCreatedBox();
+        Rect box = new Rect(createdBox.transform.position.x, createdBox.transform.position.z, createdBox.GetComponent<BoxCollider>().size.x / 2, createdBox.GetComponent<BoxCollider>().size.z / 2);
+        if (handAboveBoxInProgress)
+        {
+            if (box.Contains(pos))
+            {
+                if(Time.time - manipulationTimer > waitHandTime)
+                {
+                    // Audio - UI feedback
+                    handsTrackingController.freeToRelease();
+                }
+            }
+            else
+            {
+                //Reset Timer and bools
+                handAboveBoxInProgress = false;
+                handsTrackingController.resetManipulation();
+            }
+        }
+        else
+        {
+            if (box.Contains(pos))
+            {
+                handAboveBoxInProgress = true;
+                manipulationTimer = Time.time;
+            }
+        }
+    }
+
+    public void userSaidYes()
+    {
+
+    }
+
+    public void userSaidNo()
+    {
+
     }
 }

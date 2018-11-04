@@ -216,4 +216,9 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             i.enabled = false;
         }
     }
+
+    public GameObject getCreatedBox()
+    {
+        return createdBox;
+    }
 }

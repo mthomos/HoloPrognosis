@@ -47,8 +47,8 @@ public class GazeCursor : MonoBehaviour
 
     private void calculateHeight()
     {
-        //refreshUserHeight
         float tempHeight = Mathf.Abs(hitInfo.point.y - mainCamera.transform.position.y);
+        // We get the max value of height detected by Hololens
         if (height < tempHeight)
             height = tempHeight;
         if (hitInfo.collider.gameObject.CompareTag("Calibration"))
@@ -67,7 +67,6 @@ public class GazeCursor : MonoBehaviour
     public void setCalculationMode()
     {
         calculationMode = true;
-        //calibrationMode = false;
         trainingMode = false;
         FocusedObject = null;
     }
@@ -75,7 +74,6 @@ public class GazeCursor : MonoBehaviour
     public void setTrainingMode()
     {
         calculationMode = false;
-        //calibrationMode = false;
         trainingMode = true;
         FocusedObject = null;
     }
@@ -83,7 +81,6 @@ public class GazeCursor : MonoBehaviour
     public void setGenericUse()
     {
         calculationMode = false;
-        //calibrationMode = false;
         trainingMode = false;
         FocusedObject = null;
     }

@@ -6,6 +6,7 @@ using UnityEngine.Events;
 
 public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
 {
+    public TextToSpeech textToSpeechManager;
     //Public Variables - For Editor
     public float MinAreaForStats = 2.0f; // both floor and wall surfaces
     public float MinAreaForComplete = 4.0f; // for floor
@@ -92,39 +93,6 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
         }
     }
 
-    public string DetailsText
-    {
-        get
-        {
-            if (SpatialUnderstanding.Instance.ScanState == SpatialUnderstanding.ScanStates.None)
-                return "";
-
-            // Scanning stats get second priority
-            if ((SpatialUnderstanding.Instance.ScanState == SpatialUnderstanding.ScanStates.Scanning) &&
-                (SpatialUnderstanding.Instance.AllowSpatialUnderstanding))
-            {
-                IntPtr statsPtr = SpatialUnderstanding.Instance.UnderstandingDLL.GetStaticPlayspaceStatsPtr();
-                if (SpatialUnderstandingDll.Imports.QueryPlayspaceStats(statsPtr) == 0)
-                {
-                    return "Playspace stats query failed";
-                }
-                SpatialUnderstandingDll.Imports.PlayspaceStats stats = SpatialUnderstanding.Instance.UnderstandingDLL.GetStaticPlayspaceStats();
-
-                // Start showing the stats when they are no longer zero
-                if (stats.TotalSurfaceArea > MinAreaForStats)
-                {
-                    SpatialMappingManager.Instance.DrawVisualMeshes = false;
-                    string subDisplayText = string.Format("totalArea={0:0.0}, horiz={1:0.0}, wall={2:0.0}", stats.TotalSurfaceArea, stats.HorizSurfaceArea, stats.WallSurfaceArea);
-                    subDisplayText += string.Format("\nnumFloorCells={0}, numCeilingCells={1}, numPlatformCells={2}", stats.NumFloor, stats.NumCeiling, stats.NumPlatform);
-                    subDisplayText += string.Format("\npaintMode={0}, seenCells={1}, notSeen={2}", stats.CellCount_IsPaintMode, stats.CellCount_IsSeenQualtiy_Seen + stats.CellCount_IsSeenQualtiy_Good, stats.CellCount_IsSeenQualtiy_None);
-                    return subDisplayText;
-                }
-                return "";
-            }
-            return "";
-        }
-    }
-
     private void Update_DebugDisplay()
     {
         // Update display text
@@ -136,6 +104,7 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
     {
         TapListener = new UnityAction(Tap_Triggered);
         EventManager.StartListening("tap", TapListener);
+        textToSpeechManager.SpeakSsml("Move around the place for the scanning process");
     }
 
     private void Tap_Triggered()
