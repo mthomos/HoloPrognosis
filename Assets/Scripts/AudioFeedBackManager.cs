@@ -15,9 +15,6 @@ public class AudioFeedBackManager : MonoBehaviour
 
     void Start()
     {
-        //if (PersistentKeywords)
-         //   this.gameObject.DontDestroyOnLoad();
-        
         int keywordCount = Keywords.Count;
         if (keywordCount > 0)
         {
@@ -84,6 +81,9 @@ public class AudioFeedBackManager : MonoBehaviour
         {
             flowController.userSaidNo();
         }
+        else if (text.Contains("Finsish"))
+        {
+            flowController.userRequestedFinish();
+        }
     }
-
 }

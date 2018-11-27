@@ -50,16 +50,15 @@ public class HandsTrackingController : MonoBehaviour
     private GameObject ManipulatedObject;// GameObject which is being Manipulated by the user
     private GameObject FocusedObject; // GameObject which the user gazes at
     private GestureRecognizer gestureRecognizer;
-    private InteractionAnalysis interactionAnalysis;
+    private DataScript dataScript;
     private CalibrationController calibrationController;
-    //Data
-    private Vector3 privPos = Vector3.zero;
-    private float privTime = .0f;
+    private GameObject tappedFocusedObject;
     //Training
     private int manipulationCounter;
     private Vector3 initHandPos;
     private Vector3 initUserPos;
     public float offset;
+
     void Awake()
     {
         InteractionManager.InteractionSourceDetected += InteractionManager_InteractionSourceDetected;
@@ -77,13 +76,31 @@ public class HandsTrackingController : MonoBehaviour
         gestureRecognizer.HoldCanceled += GestureRecognizer_HoldCanceled;
         gestureRecognizer.HoldCompleted += GestureRecognizer_HoldCompleted;
         gestureRecognizer.StartCapturingGestures();
-        interactionAnalysis = GameObject.Find("Data").GetComponent<InteractionAnalysis>();
+        //Enable Data Collection
+        if(DataCollectionMode)
+            dataScript = GameObject.Find("Data").GetComponent<DataScript>();
     }
 
     void Update()
     {
         if(TrainingMode)
             CheckForHands();
+    }
+
+    void OnDestroy()
+    {
+        InteractionManager.InteractionSourceDetected -= InteractionManager_InteractionSourceDetected;
+        InteractionManager.InteractionSourceUpdated -= InteractionManager_InteractionSourceUpdated;
+        InteractionManager.InteractionSourceLost -= InteractionManager_InteractionSourceLost;
+        gestureRecognizer.StopCapturingGestures();
+        gestureRecognizer.Tapped -= GestureRecognizer_Tapped;
+        gestureRecognizer.ManipulationStarted -= GestureRecognizer_ManipulationStarted;
+        gestureRecognizer.ManipulationCompleted -= GestureRecognizer_ManipulationCompleted;
+        gestureRecognizer.ManipulationCanceled -= GestureRecognizer_ManipulationCanceled;
+        gestureRecognizer.ManipulationUpdated -= GestureRecognizer_ManipulationUpdated;
+        gestureRecognizer.HoldStarted -= GestureRecognizer_HoldStarted;
+        gestureRecognizer.HoldCanceled -= GestureRecognizer_HoldCanceled;
+        gestureRecognizer.HoldCompleted -= GestureRecognizer_HoldCompleted;
     }
 
     private void CheckForHands()
@@ -113,7 +130,7 @@ public class HandsTrackingController : MonoBehaviour
         Vector3 focusPos = FocusedObject.transform.position; //The player gazes at the item which will catch
         Vector3 handPos = trackingHands.ElementAt(0).Value.hand.transform.position; //The position of user's hand in the Holospace
         Bounds focusedObjectBounds = FocusedObject.GetComponent<Renderer>().bounds; //The graphical bounds of the focused objects
-        focusedObjectBounds.Expand(.15f);
+        focusedObjectBounds.Expand(.10f);
         if (focusedObjectBounds.Contains(handPos))
         {
             if (!ObjectManipulationInProgress)
@@ -122,13 +139,15 @@ public class HandsTrackingController : MonoBehaviour
                 ObjectTouched = true;
                 ManipulationWithTwoHands = false;
                 TouchedObject = FocusedObject;
+                //Refresh Outline
                 if (!ColorOutlineChanged)
                 {
                     EnableOutline(TouchedObject);
                     ColorOutlineChanged = true;
                 }
-                //Data
-                interactionAnalysis.interactionTouched();
+                //Gather data
+                if (DataCollectionMode)
+                    dataScript.interactionTouched();
             }
         }
         else
@@ -138,8 +157,6 @@ public class HandsTrackingController : MonoBehaviour
             TouchedObject = null;
             DisableOutline(FocusedObject);
             ColorOutlineChanged = false;
-            //Data
-            interactionAnalysis.interactionNotTouched();
         }
     }
 
@@ -149,7 +166,7 @@ public class HandsTrackingController : MonoBehaviour
         Vector3 firstHand = trackingHands.ElementAt(0).Value.hand.transform.position; //The position of user's hand in the Holospace
         Vector3 secondHand = trackingHands.ElementAt(1).Value.hand.transform.position; //The position of user's hand in the Holospace
         Bounds focusedObjectBounds = FocusedObject.GetComponent<Renderer>().bounds; //The graphical bounds of the focused objects
-        focusedObjectBounds.Expand(.15f);
+        focusedObjectBounds.Expand(.10f);
         if (focusedObjectBounds.Contains(firstHand) && focusedObjectBounds.Contains(secondHand))
         {
             if (!ObjectManipulationInProgress)
@@ -164,7 +181,8 @@ public class HandsTrackingController : MonoBehaviour
                     ColorOutlineChanged = true;
                 }
                 //Data
-                interactionAnalysis.interactionTouched();
+                if (DataCollectionMode)
+                    dataScript.interactionTouched();
             }
         }
         else
@@ -174,8 +192,6 @@ public class HandsTrackingController : MonoBehaviour
             TouchedObject = null;
             DisableOutline(FocusedObject);
             ColorOutlineChanged = false;
-            //Data
-            interactionAnalysis.interactionNotTouched();
         }
     }
 
@@ -219,9 +235,12 @@ public class HandsTrackingController : MonoBehaviour
     }
 
     private void ChangeObjectColor(GameObject obj, Color color)
-    {            
+    {
+        /*
         var rend = obj.GetComponent<Renderer>();
         if (rend) rend.material.color = color;
+        */
+        obj.GetComponent<Renderer>().material.color = color;
     }
 
     private void ChangeObjectColor(Dictionary<uint, HandStruct> dictionary, Color color)
@@ -238,14 +257,18 @@ public class HandsTrackingController : MonoBehaviour
         if (trackingHands.ContainsKey(id) && ObjectTouched)
         {
             ObjectManipulationInProgress = true;
+            //Reset Gravity
+            releaseGravity = false;
             ManipulatedObject = TouchedObject;
+            //Viusal feedback
             ChangeColorOutline(ManipulatedObject, OutlineManipulateColor);
+            //Store initial position of hand and head
             initHandPos = ManipulatedObject.transform.position;
             initUserPos = Camera.main.transform.position;
             //Disable Wind
             if(ManipulatedObject.GetComponent<AppleScript>() != null)
                 ManipulatedObject.GetComponent<AppleScript>().disableWind();
-            if (!ManipulationWithTwoHands)
+            if (!ManipulationWithTwoHands) // for ore hand
             {
                 ManipulatedObject.transform.position = trackingHands[id].hand.transform.position;
             }
@@ -257,9 +280,11 @@ public class HandsTrackingController : MonoBehaviour
             }
             if (TrainingMode)
                 ObjectCollectionManager.Instance.appearBox(manipulationCounter, initHandPos);
-            //Data
-            interactionAnalysis.manipulationStarted();
+            //Gather data
+            if (DataCollectionMode)
+                dataScript.manipulationStarted();
         }
+        EventManager.TriggerEvent("manipulation_started");
     }
 
     private void GestureRecognizer_ManipulationUpdated(ManipulationUpdatedEventArgs args)
@@ -268,18 +293,20 @@ public class HandsTrackingController : MonoBehaviour
         {
             if (!ManipulationWithTwoHands)
             {
-                if (getDistanceObjects(trackingHands[args.source.id].hand.transform , Camera.main.transform) > flowController.getHeadDistanceLimit() - offset &&
-                    getDistanceObjects(trackingHands[args.source.id].hand.transform, Camera.main.transform) < flowController.getHeadDistanceLimit() + offset &&
-                    trackingHands[args.source.id].hand.transform.position.y > flowController.getHandHeight() - offset &&
-                    trackingHands[args.source.id].hand.transform.position.y < flowController.getHandHeight() + offset &&
-                    (Camera.main.transform.position.x - initUserPos.x) > - offset &&
-                    (Camera.main.transform.position.x - initUserPos.x) < offset &&
-                    (Camera.main.transform.position.x - initUserPos.x) > -offset &&
-                    (Camera.main.transform.position.z - initUserPos.z) < offset )
+                if (getDistanceObjects(trackingHands[args.source.id].hand.transform , Camera.main.transform) > flowController.getHeadDistanceLimit() - offset && // Check head-hand distance
+                    //getDistanceObjects(trackingHands[args.source.id].hand.transform, Camera.main.transform) < flowController.getHeadDistanceLimit() + offset &&
+                    trackingHands[args.source.id].hand.transform.position.y > flowController.getHandHeight() - offset && // Check hand height
+                    //trackingHands[args.source.id].hand.transform.position.y < flowController.getHandHeight() + offset &&
+                    (Camera.main.transform.position.x - initUserPos.x) > - 2*offset &&  // Check head/body position
+                    (Camera.main.transform.position.x - initUserPos.x) < 2*offset &&
+                    (Camera.main.transform.position.z - initUserPos.z) > -2*offset &&
+                    (Camera.main.transform.position.z - initUserPos.z) < 2*offset)
 
                 {
+                    //Move hand
                     ManipulatedObject.transform.position = trackingHands[args.source.id].hand.transform.position;
-                    flowController.checkIfAboveBox(ManipulatedObject.transform.position);
+                    if (TrainingMode)
+                        flowController.checkIfAboveBox(ManipulatedObject.transform.position);
                 }
                 else
                 {
@@ -299,9 +326,41 @@ public class HandsTrackingController : MonoBehaviour
                 ManipulatedObject.transform.position = Vector3.Lerp(firstHand.transform.position, secondHand.transform.position, .5f);
             }
         }
+        EventManager.TriggerEvent("manipulation_updated");
     }
 
     private void GestureRecognizer_ManipulationCompleted(ManipulationCompletedEventArgs args)
+    {
+        if (trackingHands.ContainsKey(args.source.id) && ObjectManipulationInProgress)
+        {
+            DisableOutline(ManipulatedObject);
+            if (releaseGravity)
+            {
+                manipulationCounter++;
+                EnableGravity(ManipulatedObject);
+            }
+            ChangeObjectColor(trackingHands[args.source.id].hand, DefaultColor);
+            if (!ManipulationWithTwoHands)
+            {
+                ObjectManipulationInProgress = false;
+                ManipulatedObject = null;
+                TouchedObject = null;
+            }
+            else
+            {
+                ManipulationWithTwoHands = false;
+                ObjectManipulationInProgress = false;
+                ManipulatedObject = null;
+                TouchedObject = null;
+            }
+            //Data
+            if (DataCollectionMode)
+                dataScript.manipulationEnded();
+        }
+        EventManager.TriggerEvent("manipulation_completed");
+    }
+
+    private void GestureRecognizer_ManipulationCanceled(ManipulationCanceledEventArgs args)
     {
         if (trackingHands.ContainsKey(args.source.id) && ObjectManipulationInProgress)
         {
@@ -327,53 +386,24 @@ public class HandsTrackingController : MonoBehaviour
                 TouchedObject = null;
             }
             //Data
-            interactionAnalysis.manipulationFinished();
+            if (DataCollectionMode)
+                dataScript.manipulationEnded();
         }
-    }
-
-    private void GestureRecognizer_ManipulationCanceled(ManipulationCanceledEventArgs args)
-    {
-        if (trackingHands.ContainsKey(args.source.id) && ObjectManipulationInProgress)
-        {
-            DisableOutline(ManipulatedObject);
-            EnableGravity(ManipulatedObject);
-            ChangeObjectColor(trackingHands[args.source.id].hand, DefaultColor);
-            if (!ManipulationWithTwoHands)
-            {
-                ObjectManipulationInProgress = false;
-                ManipulatedObject = null;
-                TouchedObject = null;
-            }
-            else
-            {
-                ManipulationWithTwoHands = false;
-                ObjectManipulationInProgress = false;
-                ManipulatedObject = null;
-                TouchedObject = null;
-            }
-            //Data
-            interactionAnalysis.manipulationCanceled();
-        }
+        EventManager.TriggerEvent("manipulation_canceled");
     }
 
     private void GestureRecognizer_Tapped(TappedEventArgs args)
     {            
         uint id = args.source.id;
-        if (trackingHands.ContainsKey(id))
-        {
-            ChangeObjectColor(trackingHands[id].hand, TapColor);
-        }
+        if (FocusedObject != null)
+            tappedFocusedObject = FocusedObject;
         EventManager.TriggerEvent("tap");
     }
 
     private void GestureRecognizer_HoldStarted(HoldStartedEventArgs args)
     {
         if (TouchedObject != null)
-        {
             ChangeColorOutline(TouchedObject, OutlineHoldColor);
-            //Data
-            interactionAnalysis.interactionHold();
-        }
     }
 
     private void GestureRecognizer_HoldCanceled(HoldCanceledEventArgs args)
@@ -406,24 +436,20 @@ public class HandsTrackingController : MonoBehaviour
                 StatusText.text = "Left hand";
                 trackingHands.Add(obj.state.source.id, new HandStruct(hand, obj.state.source.id, false));
                 if (HandCalibrationMode)
-                    calibrationController = new CalibrationController(false, Time.time);
+                    calibrationController = new CalibrationController(false);
             }
             else  //right hand
             {
                 StatusText.text = "Right hand";
                 trackingHands.Add(obj.state.source.id, new HandStruct(hand, obj.state.source.id, true));
                 if (HandCalibrationMode)
-                    calibrationController = new CalibrationController(true, Time.time);
+                    calibrationController = new CalibrationController(true);
             }
-            /*
-            if (heading.x > 0)
-                trackingHands.Add(obj.state.source.id, new HandStruct(hand, obj.state.source.id, true));
-            else
-                trackingHands.Add(obj.state.source.id, new HandStruct(hand, obj.state.source.id, false));
-            */
-            //Data
-            if(DataCollectionMode)
-                interactionAnalysis.interactionDetected();
+            if (HandCalibrationMode && DataCollectionMode)
+            {
+                float height = Mathf.Abs(pos.y - Camera.main.transform.position.y);
+                dataScript.addValue(pos, height);
+            }
         }
     }
 
@@ -435,22 +461,13 @@ public class HandsTrackingController : MonoBehaviour
             Vector3 pos;
             if (args.state.sourcePose.TryGetPosition(out pos))
                 trackingHands[id].hand.transform.position = pos;
-            float time = Time.time;
             if (HandCalibrationMode)
             {
                 float dist = Mathf.Sqrt(Mathf.Pow(Camera.main.transform.position.x - pos.x, 2) + Mathf.Pow(Camera.main.transform.position.z - pos.z, 2));
-                float height = Mathf.Abs(Camera.main.transform.position.y - pos.y);
+                float height = Mathf.Abs(pos.y - Camera.main.transform.position.y);
                 calibrationController.addValue(dist, height);
-            }
-            if (DataCollectionMode)
-            {
-                if (privPos != Vector3.zero)
-                {
-                    Vector3 tremor = (pos - privPos) / (time - privTime);
-                    interactionAnalysis.addTremorValue(tremor);
-                }
-                privTime = time;
-                privPos = pos;
+                if (DataCollectionMode)
+                    dataScript.addValue(pos, height);
             }
         }
     }   
@@ -511,22 +528,6 @@ public class HandsTrackingController : MonoBehaviour
         obj.GetComponent<Rigidbody>().useGravity = false;
     }
 
-    void OnDestroy()
-    {                        
-        InteractionManager.InteractionSourceDetected -= InteractionManager_InteractionSourceDetected;
-        InteractionManager.InteractionSourceUpdated -= InteractionManager_InteractionSourceUpdated;
-        InteractionManager.InteractionSourceLost -= InteractionManager_InteractionSourceLost;
-        gestureRecognizer.StopCapturingGestures();
-        gestureRecognizer.Tapped -= GestureRecognizer_Tapped;
-        gestureRecognizer.ManipulationStarted -= GestureRecognizer_ManipulationStarted;
-        gestureRecognizer.ManipulationCompleted -= GestureRecognizer_ManipulationCompleted;
-        gestureRecognizer.ManipulationCanceled -= GestureRecognizer_ManipulationCanceled;
-        gestureRecognizer.ManipulationUpdated -= GestureRecognizer_ManipulationUpdated;
-        gestureRecognizer.HoldStarted -= GestureRecognizer_HoldStarted;
-        gestureRecognizer.HoldCanceled -= GestureRecognizer_HoldCanceled;
-        gestureRecognizer.HoldCompleted -= GestureRecognizer_HoldCompleted;
-    }
-
     private float getDistanceObjects(Transform obj1, Transform obj2)
     {
         return Vector3.Magnitude(obj1.position - obj2.position); 
@@ -566,5 +567,10 @@ public class HandsTrackingController : MonoBehaviour
     public void freeToRelease()
     {
         releaseGravity = true;
+    }
+
+    public GameObject getTappedObject()
+    {
+        return tappedFocusedObject;
     }
 }

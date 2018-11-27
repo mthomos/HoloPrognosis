@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - Calibration
+  - UI
   layers:
   - Default
   - TransparentFX

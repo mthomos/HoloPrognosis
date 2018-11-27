@@ -66,6 +66,7 @@ public class DirectionIndicator : MonoBehaviour
     public void Update()
     {
         if (DirectionIndicatorObject == null) return;
+        if (Cursor == null) return;
 
         // Direction from the Main Camera to this script's parent gameObject.
         camToObjectDirection = gameObject.transform.position - mainCamera.transform.position;
@@ -118,5 +119,10 @@ public class DirectionIndicator : MonoBehaviour
 
         // Find the rotation from the facing direction to the target object.
         rotation = Quaternion.LookRotation(cameraTransform.forward, cursorIndicatorDirection) * directionIndicatorDefaultRotation;
+    }
+
+    public void setCursor(GazeCursor newCursor)
+    {
+        Cursor = newCursor.gameObject;
     }
 }

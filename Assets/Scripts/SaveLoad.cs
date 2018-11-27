@@ -1,35 +1,60 @@
 ﻿using UnityEngine;
-using System.IO;
 using System.Collections.Generic;
+using HoloToolkit.Unity;
+using System;
+using System.IO;
 
-public static class SaveLoad
+/*
+ * Setting file formation
+ * Each option in a new line
+ * Audio feedback enabled : 0 , 1
+ * Graphic feedback enabled : 0, 1
+ * Clicker enabled : 0,1
+ */
+//parse each line
+//string[] codes  = string.Split(',');
+
+public class SaveLoad : Singleton<SaveLoad>
 {
-    /*
-    public static List<SessionData> savedGames = new List<SessionData>();
+    private string dir = Application.persistentDataPath + "/../";
+    private List<int> localSettings;
 
-    public static void Save(SessionData data)
+    public List<int> LoadSettings()
     {
-        SaveLoad.savedGames.Add(data);
-        BinaryFormatter bf = new BinaryFormatter();
-        var fileName = "/session_" + data.date.ToString("d") + "_" + data.date.Hour.ToString() +":" + data.date.Minute.ToString() + ".sd";
-        FileStream file = File.Create(Application.persistentDataPath + fileName ); //you can call it anything you want
-        bf.Serialize(file, SaveLoad.savedGames);
-        file.Close();
-    }
+        List<int> settings = new List<int>();
+        string settingsPath =  dir + "settings.txt";
 
-    public static void Load()
-    {
-        string[] files = Directory.GetFiles(Application.persistentDataPath, "session_*.*");
-        foreach (string name in files)
+        if (!File.Exists(settingsPath)) //First run setting.txt doesn't exist
+            SaveSettings(new List<int> { 1, 1, 1 });
+
+        try
         {
-            if (File.Exists(Application.persistentDataPath + "/"+ name))
+            using (StreamReader sr = new StreamReader(new FileStream(settingsPath, FileMode.Open)))
             {
-                BinaryFormatter bf = new BinaryFormatter();
-                FileStream file = File.Open(Application.persistentDataPath + "/" + name, FileMode.Open);
-                SaveLoad.savedGames.Add((SessionData)bf.Deserialize(file));
-                file.Close();
+                string line;
+                while ((line = sr.ReadLine()) != null)
+                {
+                    settings.Add((int)Char.GetNumericValue(line.ToCharArray()[0]));
+                }
             }
         }
+        catch (Exception e)
+        {
+            settings.Add(1); // Default value
+            Debug.LogError("Failed to read line and  " + e.Message);
+        }
+        localSettings = settings;
+        return settings;
     }
-    */
+
+    public void SaveSettings(List<int> settings)
+    {
+        string newPath =   dir + "settings.txt";
+        StreamWriter writer = new StreamWriter(new FileStream(newPath, FileMode.OpenOrCreate)); //Overwrite file
+        foreach (int i in  settings)
+        {
+            writer.WriteLine(i.ToString());
+        }
+        writer.Dispose();
+    }
 }

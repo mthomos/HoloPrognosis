@@ -8,18 +8,20 @@ public class TagAlongForDisplay : MonoBehaviour
     public float SmoothingFactor = 0.5f;
     public float PositionOffsetX, PositionOffsetY, PositionOffsetZ;
 
-    protected Interpolator interpolator;
+    private Interpolator interpolator;
+    private Camera mainCamera;
 
     void Start()
     {
         interpolator = gameObject.GetComponent<Interpolator>();
         interpolator.SmoothLerpToTarget = true;
         interpolator.SmoothPositionLerpRatio = SmoothingFactor;
+        mainCamera = Camera.main;
     }
 
     void Update()
     {
-        Vector3 tagalongTargetPosition = Camera.main.transform.position + Camera.main.transform.forward * TagalongDistance;
+        Vector3 tagalongTargetPosition = mainCamera.transform.position + mainCamera.transform.forward * TagalongDistance;
         tagalongTargetPosition.x = tagalongTargetPosition.x + PositionOffsetX;
         tagalongTargetPosition.y = tagalongTargetPosition.y + PositionOffsetY;
         tagalongTargetPosition.z = tagalongTargetPosition.z + PositionOffsetZ;

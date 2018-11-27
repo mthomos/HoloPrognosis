@@ -1,7 +1,6 @@
 ﻿using System;
 using UnityEngine;
 using HoloToolkit.Unity;
-using HoloToolkit.Unity.SpatialMapping;
 using UnityEngine.Events;
 
 public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
@@ -125,8 +124,9 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
         {
             _triggered = true;
             EventManager.StopListening("tap", TapListener);
-            flowController.Prepare();
-            SpaceQueryDescription = " ";
+            flowController.createUI();
+            //Disable this object
+            //gameObject.SetActive(false);
         }
     }
 }

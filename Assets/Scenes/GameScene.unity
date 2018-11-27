@@ -340,11 +340,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05a3178927ff11545912e55cd39b294c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cursor: {fileID: 0}
+  cursor: {fileID: 938779208}
   StatusText: {fileID: 1468260356}
   TrackingObject: {fileID: 1000012877390514, guid: 43d58a7e551e2f7498b5ea9a27732208,
     type: 2}
-  flowController: {fileID: 0}
+  flowController: {fileID: 790716443}
   DefaultColor: {r: 0, g: 1, b: 0, a: 1}
   TapColor: {r: 0, g: 0, b: 1, a: 1}
   TouchedColor: {r: 1, g: 0, b: 1, a: 1}
@@ -352,6 +352,7 @@ MonoBehaviour:
   OutlineDefaultColor: {r: 1, g: 0, b: 0, a: 1}
   OutlineManipulateColor: {r: 0, g: 1, b: 0, a: 1}
   HoldFinished: {r: 1, g: 1, b: 1, a: 1}
+  offset: 0
 --- !u!1 &416328711
 GameObject:
   m_ObjectHideFlags: 0
@@ -506,7 +507,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 597000652}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f91fd8c776983ea4da09f1a6a4698588, type: 3}
+  m_Script: {fileID: 11500000, guid: 2e9006c676a877c49828d3b9ab56ecda, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!4 &597000654
@@ -581,7 +582,8 @@ MonoBehaviour:
   TreePrefab: {fileID: 137650, guid: 826b6a0b570e8460990010fa615b5a2a, type: 2}
   FruitPrefab: {fileID: 156766, guid: 3aabfd067b606a54bbacbd458f3f9e01, type: 2}
   BoxPrefab: {fileID: 100000, guid: 23fc59362ba1e264eb5b636821ad929a, type: 2}
-  CalibrationPointPrefab: {fileID: 0}
+  CalibrationPointPrefab: {fileID: 1017960391432010, guid: 2a3f7f7b7f001b542a1922c9db04c1ee,
+    type: 2}
   TreeSize: {x: 1, y: 2.2, z: 1}
   FruitSize: {x: 1, y: 1, z: 1}
   BoxSize: {x: 0.5, y: 1, z: 0.5}
@@ -603,8 +605,14 @@ MonoBehaviour:
   gazeCursor: {fileID: 938779208}
   DebugText: {fileID: 1468260356}
   handsTrackingController: {fileID: 347611045}
-  textToSpeechManager: {fileID: 0}
-  waitTime: 0
+  textToSpeechManager: {fileID: 1813667713}
+  menuPrefab: {fileID: 1672783827181400, guid: 05232526afb792242a7298f15b9de98c, type: 2}
+  settingsPrefab: {fileID: 1088184999046684, guid: b81efc2adc456d04d86bc69f2d5d56ed,
+    type: 2}
+  playPrefab: {fileID: 1220657350938134, guid: 4df115b964c04024080f6917e0a7e4b7, type: 2}
+  menuDistance: 1.5
+  waitTimeMinutes: 0
+  waitHandTime: 4
 --- !u!1 &938779204
 GameObject:
   m_ObjectHideFlags: 0
@@ -672,7 +680,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 938779204}
   m_LocalRotation: {x: 0.5, y: 0.5, z: 0.5, w: 0.5}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0.09, y: 0, z: 0.0577}
   m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -877,64 +885,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &1360278100
-Prefab:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 400000, guid: 23fc59362ba1e264eb5b636821ad929a, type: 2}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 23fc59362ba1e264eb5b636821ad929a, type: 2}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 23fc59362ba1e264eb5b636821ad929a, type: 2}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 23fc59362ba1e264eb5b636821ad929a, type: 2}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 23fc59362ba1e264eb5b636821ad929a, type: 2}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 23fc59362ba1e264eb5b636821ad929a, type: 2}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 23fc59362ba1e264eb5b636821ad929a, type: 2}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 23fc59362ba1e264eb5b636821ad929a, type: 2}
-      propertyPath: m_RootOrder
-      value: 11
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_ParentPrefab: {fileID: 100100000, guid: 23fc59362ba1e264eb5b636821ad929a, type: 2}
-  m_IsPrefabParent: 0
---- !u!1 &1360278101 stripped
-GameObject:
-  m_PrefabParentObject: {fileID: 100000, guid: 23fc59362ba1e264eb5b636821ad929a, type: 2}
-  m_PrefabInternal: {fileID: 1360278100}
---- !u!65 &1360278102
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1360278101}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.87345374, y: 0.95253253, z: 0.83772016}
-  m_Center: {x: -0.016865283, y: 0.4704858, z: -0.0045656413}
 --- !u!1 &1384301313
 GameObject:
   m_ObjectHideFlags: 0

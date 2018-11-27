@@ -194,15 +194,18 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
     public void appearBox(int counter, Vector3 initPos)
     {
         Vector3 handRef = initPos - Camera.main.transform.position;
+        float tempX = handRef.x;
         if (counter%2==0)
         {
-            handRef.z = -handRef.z;
+            handRef.x = handRef.z;
+            handRef.z = tempX;
         }
         else
         {
-            handRef.x = -handRef.x;
+            handRef.x = -handRef.z;
+            handRef.z = -tempX;
         }
-        handRef.y = Camera.main.transform.position.y - 0.05f;
+        handRef.y = Camera.main.transform.position.y - 0.1f;
         Vector3 newPos = handRef + Camera.main.transform.position;
         createdBox.transform.position = newPos;
         createdBox.GetComponent<Renderer>().enabled = true;
