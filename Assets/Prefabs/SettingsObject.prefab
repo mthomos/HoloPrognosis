@@ -69,10 +69,9 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4716958138410194}
-  - component: {fileID: 114587462918302674}
   m_Layer: 0
   m_Name: SettingsObject
-  m_TagString: Untagged
+  m_TagString: UI
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -236,7 +235,7 @@ Transform:
   m_GameObject: {fileID: 1442136912510174}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
   m_Children:
   - {fileID: 4869804734514812}
   - {fileID: 4140607294610956}
@@ -264,8 +263,8 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1031594881760582}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.2, y: 0, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalPosition: {x: 0.5, y: 0, z: 0}
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
   m_Children:
   - {fileID: 4500537537085434}
   - {fileID: 4803026629205806}
@@ -293,7 +292,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1546647114829744}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.035, z: 0}
+  m_LocalPosition: {x: 0, y: -0.02, z: 0}
   m_LocalScale: {x: 0.003, y: 0.003, z: 1}
   m_Children: []
   m_Father: {fileID: 4890055385997214}
@@ -358,7 +357,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1088184999046684}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.023737669, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4051203268176518}
@@ -400,8 +399,8 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1383738531839786}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.1, y: 0, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalPosition: {x: 0.25, y: 0, z: 0}
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
   m_Children:
   - {fileID: 4299639764052994}
   - {fileID: 4450973775749246}
@@ -823,11 +822,7 @@ TextMesh:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1546647114829744}
-  m_Text: 'Clicker Enabled:
-
-    Yes
-
-'
+  m_Text: "Clicker Enabled: \nOn"
   m_OffsetZ: 0
   m_CharacterSize: 1
   m_LineSpacing: 1
@@ -862,17 +857,3 @@ TextMesh:
   m_Color:
     serializedVersion: 2
     rgba: 4294967295
---- !u!114 &114587462918302674
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1088184999046684}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 78fed57a856103e40864186f1b669c69, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  PositionUpdateSpeed: 30
-  SmoothingFactor: 0.5
-  dist: 1

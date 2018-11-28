@@ -58,20 +58,15 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
                 switch (SpatialUnderstanding.Instance.ScanState)
                 {
                     case SpatialUnderstanding.ScanStates.Scanning:
-                        IntPtr statsPtr = SpatialUnderstanding.Instance.UnderstandingDLL.GetStaticPlayspaceStatsPtr();
-                        //Just for case
-                        if (SpatialUnderstandingDll.Imports.QueryPlayspaceStats(statsPtr) == 0)
-                            return "playspace stats query failed";
                         if (DoesScanMeetMinBarForCompletion)
                             return "Space scanned, air tap to finalize your playspace";
-
                         return "Walk around and scan in your playspace";
                     case SpatialUnderstanding.ScanStates.Finishing:
                         return "Finalizing scan";
                     case SpatialUnderstanding.ScanStates.Done:
-                        return "Scan Done";
+                        return string.Empty;
                     default:
-                        return "ScanState = " + SpatialUnderstanding.Instance.ScanState;
+                        return string.Empty;
                 }
             }
             else
@@ -88,7 +83,6 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
                 return Color.yellow;
             else
                 return Color.white;
-
         }
     }
 

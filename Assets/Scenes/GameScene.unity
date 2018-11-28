@@ -278,13 +278,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03f48fe5a1e7c9f4088344c151871c9e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  textToSpeechManager: {fileID: 0}
+  textToSpeechManager: {fileID: 1813667713}
   MinAreaForStats: 1
   MinAreaForComplete: 8
   MinHorizAreaForComplete: 5
   MinWallAreaForComplete: 0
   DebugDisplay: {fileID: 416328713}
-  flowController: {fileID: 0}
+  flowController: {fileID: 790716443}
   SpaceQueryDescription: 
 --- !u!4 &311475137
 Transform:
@@ -341,7 +341,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cursor: {fileID: 938779208}
-  StatusText: {fileID: 1468260356}
+  StatusText: {fileID: 416328713}
   TrackingObject: {fileID: 1000012877390514, guid: 43d58a7e551e2f7498b5ea9a27732208,
     type: 2}
   flowController: {fileID: 790716443}
@@ -352,7 +352,8 @@ MonoBehaviour:
   OutlineDefaultColor: {r: 1, g: 0, b: 0, a: 1}
   OutlineManipulateColor: {r: 0, g: 1, b: 0, a: 1}
   HoldFinished: {r: 1, g: 1, b: 1, a: 1}
-  offset: 0
+  offset: 0.2
+  bodyOffset: 0
 --- !u!1 &416328711
 GameObject:
   m_ObjectHideFlags: 0
@@ -366,7 +367,7 @@ GameObject:
   - component: {fileID: 416328715}
   - component: {fileID: 416328716}
   m_Layer: 0
-  m_Name: SpatialDisplay
+  m_Name: DebugDisplay
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -379,7 +380,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 416328711}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -0.2951, y: -0.0036, z: 0.0777}
   m_LocalScale: {x: 0.005, y: 0.005, z: 1}
   m_Children: []
   m_Father: {fileID: 1488041721}
@@ -534,6 +535,7 @@ GameObject:
   - component: {fileID: 790716441}
   - component: {fileID: 790716442}
   - component: {fileID: 790716443}
+  - component: {fileID: 790716444}
   m_Layer: 0
   m_Name: Utilities
   m_TagString: Untagged
@@ -584,12 +586,14 @@ MonoBehaviour:
   BoxPrefab: {fileID: 100000, guid: 23fc59362ba1e264eb5b636821ad929a, type: 2}
   CalibrationPointPrefab: {fileID: 1017960391432010, guid: 2a3f7f7b7f001b542a1922c9db04c1ee,
     type: 2}
-  TreeSize: {x: 1, y: 2.2, z: 1}
+  TreeSize: {x: 1.2, y: 3, z: 1.2}
   FruitSize: {x: 1, y: 1, z: 1}
   BoxSize: {x: 0.5, y: 1, z: 0.5}
   CalibrationPointSize: {x: 0, y: 0, z: 0}
+  menuSize: {x: 1.2, y: 0.6, z: 0.6}
   FruitScale: 1.2
   NumberOfFruits: 4
+  flowController: {fileID: 790716443}
 --- !u!114 &790716443
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -601,18 +605,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c559d499a8afe94f812b5c121fb5716, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  placer: {fileID: 790716441}
-  gazeCursor: {fileID: 938779208}
-  DebugText: {fileID: 1468260356}
-  handsTrackingController: {fileID: 347611045}
-  textToSpeechManager: {fileID: 1813667713}
-  menuPrefab: {fileID: 1672783827181400, guid: 05232526afb792242a7298f15b9de98c, type: 2}
+  menuPrefab: {fileID: 1973505965284976, guid: 05232526afb792242a7298f15b9de98c, type: 2}
   settingsPrefab: {fileID: 1088184999046684, guid: b81efc2adc456d04d86bc69f2d5d56ed,
     type: 2}
-  playPrefab: {fileID: 1220657350938134, guid: 4df115b964c04024080f6917e0a7e4b7, type: 2}
+  playPrefab: {fileID: 1163623399768020, guid: 4df115b964c04024080f6917e0a7e4b7, type: 2}
+  saveLoadScript: {fileID: 790716444}
+  placer: {fileID: 790716441}
+  gazeCursor: {fileID: 938779208}
+  DebugText: {fileID: 416328713}
+  handsTrackingController: {fileID: 347611045}
+  textToSpeechManager: {fileID: 1813667713}
   menuDistance: 1.5
-  waitTimeMinutes: 0
+  timerForRightPose: 2
+  timerForHighPose: 3
+  gameTimeMinutes: 0
   waitHandTime: 4
+--- !u!114 &790716444
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 790716439}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e124cf99f6d5b9499180bdff93a4e0b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &938779204
 GameObject:
   m_ObjectHideFlags: 0
@@ -697,132 +715,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b14439b8b5c5e64fbfb00350d00ec43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  StatusText: {fileID: 1170763319}
   flowController: {fileID: 790716443}
---- !u!1 &1170763315
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 5
-  m_Component:
-  - component: {fileID: 1170763316}
-  - component: {fileID: 1170763320}
-  - component: {fileID: 1170763319}
-  - component: {fileID: 1170763318}
-  - component: {fileID: 1170763317}
-  m_Layer: 0
-  m_Name: GazeCursorDisplay
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1170763316
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1170763315}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.005, y: 0.005, z: 1}
-  m_Children: []
-  m_Father: {fileID: 1488041721}
-  m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1170763317
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1170763315}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: db4ef3c9b2f42c847b9884751273dd56, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  TagalongDistance: 1.75
-  PositionUpdateSpeed: 10
-  SmoothingFactor: 0.6
-  PositionOffsetX: 0
-  PositionOffsetY: 0.1
-  PositionOffsetZ: 0
---- !u!114 &1170763318
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1170763315}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fb69de839bd015f4099b5bd2c45e53e5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  UseUnscaledTime: 1
-  PositionPerSecond: 30
-  RotationDegreesPerSecond: 720
-  RotationSpeedScaler: 0
-  ScalePerSecond: 5
-  SmoothLerpToTarget: 0
-  SmoothPositionLerpRatio: 0.5
-  SmoothRotationLerpRatio: 0.5
-  SmoothScaleLerpRatio: 0.5
---- !u!102 &1170763319
-TextMesh:
-  serializedVersion: 3
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1170763315}
-  m_Text: ' '
-  m_OffsetZ: 0
-  m_CharacterSize: 1
-  m_LineSpacing: 1
-  m_Anchor: 1
-  m_Alignment: 1
-  m_TabSize: 4
-  m_FontSize: 64
-  m_FontStyle: 0
-  m_RichText: 1
-  m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-  m_Color:
-    serializedVersion: 2
-    rgba: 4294967295
---- !u!23 &1170763320
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1170763315}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_Materials:
-  - {fileID: 10100, guid: 0000000000000000e000000000000000, type: 0}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 0
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
 --- !u!1 &1201047795
 GameObject:
   m_ObjectHideFlags: 0
@@ -925,130 +818,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 888688a06b673ef4f83e00b7957b3081, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &1468260354
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 5
-  m_Component:
-  - component: {fileID: 1468260355}
-  - component: {fileID: 1468260357}
-  - component: {fileID: 1468260356}
-  - component: {fileID: 1468260359}
-  - component: {fileID: 1468260358}
-  m_Layer: 0
-  m_Name: HandDisplay
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1468260355
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1468260354}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.005, y: 0.005, z: 1}
-  m_Children: []
-  m_Father: {fileID: 1488041721}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!102 &1468260356
-TextMesh:
-  serializedVersion: 3
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1468260354}
-  m_Text: ' '
-  m_OffsetZ: 0
-  m_CharacterSize: 1
-  m_LineSpacing: 1
-  m_Anchor: 1
-  m_Alignment: 1
-  m_TabSize: 4
-  m_FontSize: 64
-  m_FontStyle: 0
-  m_RichText: 1
-  m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-  m_Color:
-    serializedVersion: 2
-    rgba: 4294967295
---- !u!23 &1468260357
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1468260354}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_Materials:
-  - {fileID: 10100, guid: 0000000000000000e000000000000000, type: 0}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 0
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
---- !u!114 &1468260358
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1468260354}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: db4ef3c9b2f42c847b9884751273dd56, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  TagalongDistance: 1.75
-  PositionUpdateSpeed: 10
-  SmoothingFactor: 0.6
-  PositionOffsetX: 0
-  PositionOffsetY: -0.1
-  PositionOffsetZ: 0
---- !u!114 &1468260359
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1468260354}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fb69de839bd015f4099b5bd2c45e53e5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  UseUnscaledTime: 1
-  PositionPerSecond: 30
-  RotationDegreesPerSecond: 720
-  RotationSpeedScaler: 0
-  ScalePerSecond: 5
-  SmoothLerpToTarget: 0
-  SmoothPositionLerpRatio: 0.5
-  SmoothRotationLerpRatio: 0.5
-  SmoothScaleLerpRatio: 0.5
 --- !u!1 &1488041720
 GameObject:
   m_ObjectHideFlags: 0
@@ -1075,8 +844,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 416328712}
-  - {fileID: 1468260355}
-  - {fileID: 1170763316}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1090,6 +857,7 @@ GameObject:
   - component: {fileID: 1813667715}
   - component: {fileID: 1813667714}
   - component: {fileID: 1813667713}
+  - component: {fileID: 1813667716}
   m_Layer: 0
   m_Name: AudioManager
   m_TagString: Untagged
@@ -1202,6 +970,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1813667716
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1813667712}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1002160353, guid: f7b54ff4a43d4fcf81b4538b678e0bcc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_RoomSize: 1
 --- !u!1001 &1827575316
 Prefab:
   m_ObjectHideFlags: 0

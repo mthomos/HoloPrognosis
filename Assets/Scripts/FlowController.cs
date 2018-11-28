@@ -6,17 +6,18 @@ using UnityEngine;
 public class FlowController : MonoBehaviour
 {
     //Public Variables-For Editor
+    //
+    public GameObject menuPrefab;
+    public GameObject settingsPrefab;
+    public GameObject playPrefab;
+    //
+    public SaveLoad saveLoadScript;
     public ObjectPlacer placer;
     public GazeCursor gazeCursor;
     public TextMesh DebugText;
     public HandsTrackingController handsTrackingController;
     public TextToSpeech textToSpeechManager;
-    public GameObject menuPrefab;
-    public GameObject settingsPrefab;
-    public GameObject playPrefab;
     public float menuDistance;
-    public float waitTimeMinutes;
-    public float waitHandTime;
     // Settings
     private List<int> settings;
     private bool audioFeedbackEnabled = false;
@@ -25,16 +26,14 @@ public class FlowController : MonoBehaviour
     // Training
     private bool trainingMode = false;
     private float userHeight;
-    private float handHeight;
-    private float handDistance;
-    private List<CalibrationController> calibrationControllers = new List<CalibrationController>();
+    private CalibrationController rightController, leftController;
     //Create timer variables
     private float timer;
     private bool timerEnabled = false;
     //
     private bool handAboveBoxInProgress;
     private float manipulationTimer;
-    //
+    // Menu
     private GameObject menuScreen;
     private GameObject settingsScreen;
     private GameObject playScreen;
@@ -42,14 +41,17 @@ public class FlowController : MonoBehaviour
     private int inMenu = -1;
     //
     private bool rightHandEnabled = true;
-    private bool leftHandEnabled = false;
+    private bool leftHandEnabled = true;
+    //
+    public float timerForRightPose = 2.0f;
+    public float timerForHighPose = 3.0f;
+    public float gameTimeMinutes;
+    public float waitHandTime;
 
-    //Private methods
-
-	private void Start ()
+    private void Start ()
     {
         //Load Settings
-        settings = SaveLoad.Instance.LoadSettings();
+        settings = saveLoadScript.LoadSettings();
         for (int i=0; i< settings.Count; i++)
         {
             if(i==0)
@@ -78,7 +80,7 @@ public class FlowController : MonoBehaviour
 
     private void tapUiReceived()
     {
-        GameObject tappedObj = handsTrackingController.getTappedObject();
+        GameObject tappedObj = gazeCursor.getFocusedObject();
         if (tappedObj.CompareTag("UI"))
         {
             if (inMenu == 0) //Start Menu
@@ -102,44 +104,42 @@ public class FlowController : MonoBehaviour
                 {
                     audioFeedbackEnabled = (!audioFeedbackEnabled);
                     if (audioFeedbackEnabled)
-                        tappedObj.GetComponent<TextMesh>().text = "Audio Feedback:" + "\n" + "On";
+                        tappedObj.GetComponentInChildren<TextMesh>().text = "Audio Feedback:" + "\n" + "On";
                     else
-                        tappedObj.GetComponent<TextMesh>().text = "Audio Feedback:" + "\n" + "Off";
+                        tappedObj.GetComponentInChildren<TextMesh>().text = "Audio Feedback:" + "\n" + "Off";
                 }
                 else if (tappedObj.name == "ClickerButton")
                 {
                     clickerEnabled = !(clickerEnabled);
                     if (audioFeedbackEnabled)
-                        tappedObj.GetComponent<TextMesh>().text = "Clicker Enabled:" + "\n" + "On";
+                        tappedObj.GetComponentInChildren<TextMesh>().text = "Clicker Enabled:" + "\n" + "On";
                     else
-                        tappedObj.GetComponent<TextMesh>().text = "Clicker Enabled:" + "\n" + "Off";
+                        tappedObj.GetComponentInChildren<TextMesh>().text = "Clicker Enabled:" + "\n" + "Off";
                 }
-                else if (tappedObj.name == "AboutButton")
+                else if (tappedObj.name == "BackButton")
                 {
                     returnToStartMenu();
                 }
             }
             else if (inMenu == 2) // Play Menu
             {
-                if (tappedObj.name == "StartButton")
-                {
+                if (tappedObj.name == "PlayButton")
                     startPlaying();
-                }
                 else if (tappedObj.name == "RightHandButton")
                 {
                     rightHandEnabled = (!rightHandEnabled);
                     if (rightHandEnabled)
-                        tappedObj.GetComponent<TextMesh>().text = "Right Hand:" + "\n" + "On";
+                        tappedObj.GetComponentInChildren<TextMesh>().text = "Right Hand:" + "\n" + "Yes";
                     else
-                        tappedObj.GetComponent<TextMesh>().text = "Right Hand:" + "\n" + "Off";
+                        tappedObj.GetComponentInChildren<TextMesh>().text = "Right Hand:" + "\n" + "No";
                 }
                 else if (tappedObj.name == "LeftHandButton")
                 {
                     leftHandEnabled = (!leftHandEnabled);
                     if (rightHandEnabled)
-                        tappedObj.GetComponent<TextMesh>().text = "Left Hand:" + "\n" + "On";
+                        tappedObj.GetComponentInChildren<TextMesh>().text = "Left Hand:" + "\n" + "Yes";
                     else
-                        tappedObj.GetComponent<TextMesh>().text = "Left Hand:" + "\n" + "Off";
+                        tappedObj.GetComponentInChildren<TextMesh>().text = "Left Hand:" + "\n" + "No";
                 }
                 else if (tappedObj.name == "BackButton")
                 {
@@ -151,60 +151,59 @@ public class FlowController : MonoBehaviour
 
     private void moveToPlayScreen()
     {
-        currentMenu.SetActive(false);
-        if (playScreen == null)
-        {
-            //Create Play menu
-            Vector3 pos = Camera.main.transform.position + Camera.main.transform.forward * 1.5f;
-            Quaternion rot = Quaternion.LookRotation(pos - Camera.main.transform.position);
-            playScreen = Instantiate(playPrefab, pos, rot);
-        }
+        disableObject(currentMenu);
+        if (playScreen == null) //Create Play menu
+            playScreen = Instantiate(playPrefab, currentMenu.transform.position, currentMenu.transform.rotation);
+        else
+            enableObject(playScreen);
         currentMenu = playScreen;
-        menuScreen.SetActive(true);
-        inMenu = 0;
+        inMenu = 2;
     }
 
     private void moveToSettingsScreen()
     {
-        currentMenu.SetActive(false);
-        if (settingsScreen == null)
-        {
-            //Create Settings menu
-            Vector3 pos = Camera.main.transform.position + Camera.main.transform.forward * 1.5f;
-            Quaternion rot = Quaternion.LookRotation(pos - Camera.main.transform.position);
-            settingsScreen = Instantiate(settingsPrefab, pos, rot);
-        }
+        disableObject(currentMenu);
+        if (settingsScreen == null) //Create Settings menu
+            settingsScreen = Instantiate(settingsPrefab, currentMenu.transform.position, currentMenu.transform.rotation);
+        else
+            enableObject(settingsScreen);
         currentMenu = settingsScreen;
-        menuScreen.SetActive(true);
         inMenu = 1;
     }
 
     private void returnToStartMenu()
     {
-        currentMenu.SetActive(false);
+        disableObject(currentMenu);
         currentMenu = menuScreen;
-        menuScreen.SetActive(true);
-        inMenu = 2;
+        enableObject(currentMenu);
+        inMenu = 0;
     }
 
-    private void startPlaying()
+    private void enableObject(GameObject obj)
     {
-        currentMenu.SetActive(false);
-        EventManager.StopListening("tap", tapUiReceived);
-        //Preapare Calibration Scene
-        Prepare();
+        obj.SetActive(true);
+    }
+
+    private void disableObject(GameObject obj)
+    {
+        obj.SetActive(false);
     }
 
     private void refreshTimer()
     {
         timer += Time.deltaTime;
-        if (timer > waitTimeMinutes * 60)
+        if (timer > gameTimeMinutes * 60)
         {
             timer = 0f;
             finishGame();
         }
     }
 
+    public void calibrationMaxPose()
+    {
+        // Tell user to raise the hand for 2s
+        textToSpeechManager.SpeakSsml("Now Raise your hand as high as you can for two seconds"); 
+    }
     private void enableTimer()
     {
         timerEnabled = true;
@@ -216,36 +215,34 @@ public class FlowController : MonoBehaviour
         timerEnabled = false;
     }
 
-    private void maxValue(List<CalibrationController> list, out float maxD, out float maxH)
-    {
-        maxD = -1.0f;
-        maxH = -1.0f;
-        foreach (CalibrationController i in list)
-        {
-            if (i.getDistance() > maxD)
-                maxD = i.getDistance();
-            if (i.getHandHeight() > maxH)
-                maxH = i.getHandHeight();
-        }
-    }
-
     //Public methods
-
     public void createUI()
     {
         //First listen for taps
+        gazeCursor.setGenericUse();
         EventManager.StartListening("tap", tapUiReceived);
-        DebugText.text = "Menu Created";
         //Appear the menu in front of user
         Vector3 pos = Camera.main.transform.position + Camera.main.transform.forward * menuDistance;
-        menuScreen = Instantiate(menuPrefab, pos, Quaternion.LookRotation(pos - Camera.main.transform.position));
+        //Vector3 newPos = placer.create_possible_pos(ObjectCollectionManager.Instance.menuSize, ObjectType.Menu);
+        menuScreen = Instantiate(menuPrefab);
+        menuScreen.transform.position = pos;
+        //menuScreen.AddComponent<MenuScript>();
         inMenu = 0;
         currentMenu = menuScreen;
+        placer.HideGridEnableOcclulsion();
     }
 
-    public void Prepare()
+    public void startPlaying()
     {
-        placer.CreateCablirationScene();
+        disableObject(currentMenu);
+        EventManager.StopListening("tap", tapUiReceived);
+        //Preapare Calibration Scene
+        //placer.CreateCablirationScene();
+        enableCalibrationMode();
+    }
+
+    public void CalculateUserHeightProcess()
+    {
         //Create UI point
         GameObject calibrationPoint = GameObject.FindGameObjectWithTag("Calibration");
         calibrationPoint.AddComponent<DirectionIndicator>();
@@ -256,14 +253,14 @@ public class FlowController : MonoBehaviour
             "so we calculate your height. Height is needed by the training program");
     }
 
-    public void finishCalculateMode(float height)
+    public void enableCalibrationMode()
     {
-        textToSpeechManager.SpeakSsml("Your height has been calculated succesfully");
-        //Store value
-        userHeight = height;
+        //textToSpeechManager.SpeakSsml("Your height has been calculated succesfully");
+        //userHeight = height; 
         //Destroy calibrationPoint for height calculation
-        ObjectCollectionManager.Instance.ClearScene();
-        DebugText.text = "Calculation Finished";
+        //ObjectCollectionManager.Instance.ClearScene();
+
+        DebugText.text = "Place your hand in right angle pose for 2 seconds ";
         //Set generic use for gaze
         gazeCursor.setGenericUse();
         //Start hand calibration
@@ -272,22 +269,18 @@ public class FlowController : MonoBehaviour
 
     public void calibrationFinished()
     {
-        maxValue(calibrationControllers, out handDistance, out handHeight);
-        //Clear scene Create play scene
-        ObjectCollectionManager.Instance.ClearScene();
         placer.CreateScene();
         //UI/audio instructions
-        DebugText.text = "Calibration Finished";
-        //Set generic use for gaze
+        DebugText.text = "Calibration Finished. Play scene is loading";
+        //Set training use for gaze
         gazeCursor.setTrainingMode();
-        //Enable manipulation with hands
+        // Enable manipulation with hands
         handsTrackingController.enableHandManipulation();
-        handsTrackingController.enableDataCollection();
-        //Enable Timer
+        // Enable data collection
+        //handsTrackingController.enableDataCollection();
+        // Enable Timer
         enableTimer();
         trainingMode = true;
-        //EventManager.StartListening("manipulationStarted", manipulationStarted);
-        //EventManager.StartListening("manipulationUpdated", manipulationUpdated);
     }
 
     public void finishGame()
@@ -304,20 +297,61 @@ public class FlowController : MonoBehaviour
         //Present Summary of Session
     }
 
-    public int addCalibrationController(CalibrationController controller, float time)
+    public bool addCalibrationController(CalibrationController controller)
     {
-        calibrationControllers.Add(controller);
-        return calibrationControllers.Count;
+        if (controller.isRightHand())
+            rightController = controller;
+        else
+            leftController = controller;
+
+        if (rightController != null && leftController != null)
+            return true;
+        else
+            return false;
     }
 
-    public float getHeadDistanceLimit()
+    public float getHeadDistanceUpperLimit(bool hand)
     {
-        return handDistance;
+        if (hand)
+        {
+            if (rightController.getHighestPoseHeadHandDistance() > rightController.getRightPoseHeadHandDistance())
+            {
+                return rightController.getHighestPoseHeadHandDistance();
+            }
+            else
+                return rightController.getRightPoseHeadHandDistance();
+        }
+        else
+        {
+            if (leftController.getHighestPoseHeadHandDistance() > leftController.getRightPoseHeadHandDistance())
+            {
+                return leftController.getHighestPoseHeadHandDistance();
+            }
+            else
+                return leftController.getRightPoseHeadHandDistance();
+        }
     }
 
-    public float getHandHeight()
+    public float getHeadDisatnceLowerLimit(bool hand)
     {
-        return handHeight;
+        if (hand)
+        {
+            if (rightController.getHighestPoseHeadHandDistance() > rightController.getRightPoseHeadHandDistance())
+            {
+                return rightController.getRightPoseHeadHandDistance();
+            }
+            else
+                return rightController.getHighestPoseHeadHandDistance();
+        }
+        else
+        {
+            if (leftController.getHighestPoseHeadHandDistance() > leftController.getRightPoseHeadHandDistance())
+            {
+                return leftController.getRightPoseHeadHandDistance();
+            }
+            else
+                return leftController.getHighestPoseHeadHandDistance();
+        }
     }
 
     public void checkIfAboveBox(Vector3 pos)

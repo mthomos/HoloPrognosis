@@ -14,19 +14,22 @@ using System.IO;
 //parse each line
 //string[] codes  = string.Split(',');
 
-public class SaveLoad : Singleton<SaveLoad>
+public class SaveLoad : MonoBehaviour
 {
-    private string dir = Application.persistentDataPath + "/../";
-    private List<int> localSettings;
+    //private string dir;
+    private string settingsPath;
 
+    private void Start()
+    {
+        //dir = Application.persistentDataPath + "/../";
+        //settingsPath = dir + "settings.txt";
+        settingsPath = Path.Combine(Application.persistentDataPath, "settings.txt");
+        if (!File.Exists(settingsPath)) //First run setting.txt doesn't exist
+            CreateSettings(new List<int> { 1, 1, 1 });
+    }
     public List<int> LoadSettings()
     {
         List<int> settings = new List<int>();
-        string settingsPath =  dir + "settings.txt";
-
-        if (!File.Exists(settingsPath)) //First run setting.txt doesn't exist
-            SaveSettings(new List<int> { 1, 1, 1 });
-
         try
         {
             using (StreamReader sr = new StreamReader(new FileStream(settingsPath, FileMode.Open)))
@@ -42,19 +45,45 @@ public class SaveLoad : Singleton<SaveLoad>
         {
             settings.Add(1); // Default value
             Debug.LogError("Failed to read line and  " + e.Message);
-        }
-        localSettings = settings;
+        };
         return settings;
     }
 
     public void SaveSettings(List<int> settings)
     {
-        string newPath =   dir + "settings.txt";
-        StreamWriter writer = new StreamWriter(new FileStream(newPath, FileMode.OpenOrCreate)); //Overwrite file
+        /*
+        StreamWriter writer = new StreamWriter(new FileStream(settingsPath, FileMode.OpenOrCreate)); //Overwrite file
         foreach (int i in  settings)
         {
             writer.WriteLine(i.ToString());
         }
         writer.Dispose();
+        */
+        using (TextWriter writer = File.CreateText(settingsPath))
+        {
+            foreach (int i in settings)
+            {
+                writer.WriteLine(i.ToString());
+            }
+        }
+    }
+
+    private void CreateSettings(List<int> settings)
+    {
+        /*
+            StreamWriter writer = new StreamWriter(new FileStream(settingsPath, FileMode.CreateNew)); //Overwrite file
+            foreach (int i in settings)
+            {
+                writer.WriteLine(i.ToString());
+            }
+            writer.Dispose();
+        */
+        using (TextWriter writer = File.CreateText(settingsPath))
+        {
+            foreach (int i in settings)
+            {
+                writer.WriteLine(i.ToString());
+            }
+        }
     }
 }

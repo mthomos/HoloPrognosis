@@ -3,12 +3,10 @@
 public class GazeCursor : MonoBehaviour
 {
     //Public Variables-For Editor
-    public TextMesh StatusText; // Text for debugging (for now)
     public FlowController flowController;
     //Private Variables
     private GameObject FocusedObject; // The object which user is staring at
-    //private bool calibrationMode = false;
-    private bool calculationMode = false;
+    //private bool calculationMode = false;
     private bool trainingMode = false;
     private float height = .0f;
     //Cached variables
@@ -34,12 +32,18 @@ public class GazeCursor : MonoBehaviour
             gameObject.transform.position = hitInfo.point;
             gameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal);
 
+            /*
             if (calculationMode)
                 calculateHeight();
-            else if (trainingMode) // Use for gameplay
+            else
+            */
+            if (trainingMode) // Use for gameplay
                 refreshFocusedObject();
             else // for !training
-                FocusedObject = hitInfo.collider.gameObject;
+            {
+                if (hitInfo.collider.gameObject != null)
+                    FocusedObject = hitInfo.collider.gameObject;
+            }
         }
         else
             cursorMeshRenderer.enabled = false;
@@ -54,10 +58,11 @@ public class GazeCursor : MonoBehaviour
         if (hitInfo.collider.gameObject.CompareTag("Calibration"))
         {
             //Terminate Calculation
-            flowController.finishCalculateMode(height);
-            calculationMode = false;
+            flowController.enableCalibrationMode();
+            //calculationMode = false;
         }
     }
+
     private void refreshFocusedObject()
     {
         if (FocusedObject.CompareTag("User") && FocusedObject != hitInfo.collider.gameObject)
@@ -66,23 +71,23 @@ public class GazeCursor : MonoBehaviour
 
     public void setCalculationMode()
     {
-        calculationMode = true;
+        //calculationMode = true;
         trainingMode = false;
-        FocusedObject = null;
+        //FocusedObject = null;
     }
 
     public void setTrainingMode()
     {
-        calculationMode = false;
+        //calculationMode = false;
         trainingMode = true;
-        FocusedObject = null;
+        //FocusedObject = null;
     }
 
     public void setGenericUse()
     {
-        calculationMode = false;
+        //calculationMode = false;
         trainingMode = false;
-        FocusedObject = null;
+        //FocusedObject = null;
     }
 
     public GameObject getFocusedObject()

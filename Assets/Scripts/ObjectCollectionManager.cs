@@ -13,9 +13,10 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
     public Vector3 FruitSize;
     public Vector3 BoxSize;
     public Vector3 CalibrationPointSize;
+    public Vector3 menuSize =  new Vector3(1.2f, 0.6f, 0.6f);
     public float FruitScale;
     public int NumberOfFruits;
-
+    public FlowController flowController;
     private GameObject createdTree;
     private GameObject createdBox;
     private float ScaleFactor;
@@ -35,6 +36,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             newObject.transform.parent = gameObject.transform;
             newObject.transform.localScale = RescaleToSameScaleFactor(CalibrationPointPrefab);
             ActiveHolograms.Add(newObject);
+            flowController.enableCalibrationMode();
         }
     }
 
@@ -74,12 +76,6 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             newObject.GetComponent<Renderer>().enabled = false;
             createdBox = newObject;
         }
-    }
-
-    private void AddMeshColliderToAllChildren(GameObject obj)
-    {
-        for (int i = 0; i < obj.transform.childCount; i++)
-            obj.transform.GetChild(i).gameObject.AddComponent<MeshCollider>();
     }
 
     private Vector3 RescaleToSameScaleFactor(GameObject objectToScale)
@@ -213,11 +209,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
 
     public void disappearBox()
     {
-        Renderer[] rend = createdBox.GetComponentsInChildren<Renderer>();
-        foreach (Renderer i in rend)
-        {
-            i.enabled = false;
-        }
+        createdBox.SetActive(false);
     }
 
     public GameObject getCreatedBox()

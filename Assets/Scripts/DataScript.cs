@@ -5,8 +5,6 @@ using UnityEngine;
 
 class DataScript : MonoBehaviour
 {
-    private bool interactionInProgress;
-    private bool recordData;
     private bool requsetFinalize = false;
 
     private Dictionary<float, float> speed = new Dictionary<float, float>();
@@ -28,8 +26,6 @@ class DataScript : MonoBehaviour
 
     void Start()
     {
-        interactionInProgress = false;
-        recordData = false;
         EventManager.StartListening("box_collision", boxObjectCollision);
         EventManager.StartListening("floor_collision", floorObjectCollision);
     }

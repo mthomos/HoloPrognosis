@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Calibration
   - UI
+  - User
   layers:
   - Default
   - TransparentFX
