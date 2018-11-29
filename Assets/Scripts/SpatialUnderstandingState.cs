@@ -64,9 +64,9 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
                     case SpatialUnderstanding.ScanStates.Finishing:
                         return "Finalizing scan";
                     case SpatialUnderstanding.ScanStates.Done:
-                        return string.Empty;
+                        return "";
                     default:
-                        return string.Empty;
+                        return "";
                 }
             }
             else

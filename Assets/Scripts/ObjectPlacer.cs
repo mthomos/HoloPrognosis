@@ -8,7 +8,7 @@ public class ObjectPlacer : MonoBehaviour
     public SpatialUnderstandingCustomMesh SpatialUnderstandingMesh;
     public Material OccludedMaterial;
     public float boxTreeDistance;
-    //
+    // Private variables
     private Queue<PlacementResult> results = new Queue<PlacementResult>();
 
     void Start()

@@ -26,8 +26,8 @@ class DataScript : MonoBehaviour
 
     void Start()
     {
-        EventManager.StartListening("box_collision", boxObjectCollision);
-        EventManager.StartListening("floor_collision", floorObjectCollision);
+        //EventManager.StartListening("box_collision", boxObjectCollision);
+        //EventManager.StartListening("floor_collision", floorObjectCollision);
     }
 
     private void Update()
