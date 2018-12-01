@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using HoloToolkit.Unity;
 using UnityEngine;
 
@@ -13,32 +14,13 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
     public Vector3 FruitSize;
     public Vector3 BoxSize;
     public Vector3 CalibrationPointSize;
-    public Vector3 menuSize =  new Vector3(1.2f, 0.6f, 0.6f);
     public float FruitScale;
-    public int NumberOfFruits;
     public FlowController flowController;
     private GameObject createdTree;
     private GameObject createdBox;
     private float ScaleFactor;
     private List<GameObject> ActiveHolograms = new List<GameObject>();
-    private Dictionary<int, int> HandsForActiveHolograms = new Dictionary<int, int>();//key: id, value: hands
-    private bool treeCreated, boxCreated;
-
-    public void CreateCalibrationPoint(Vector3 positionCenter, Quaternion rotation)
-    {
-        // Stay center in the square but move down to the ground
-        var position = positionCenter - new Vector3(0, CalibrationPointSize.y * .5f, 0);
-        GameObject newObject = Instantiate(CalibrationPointPrefab, position, rotation);
-        newObject.name = "Calibration";
-        newObject.tag = "Calibration";
-        if (newObject != null)
-        {
-            newObject.transform.parent = gameObject.transform;
-            newObject.transform.localScale = RescaleToSameScaleFactor(CalibrationPointPrefab);
-            ActiveHolograms.Add(newObject);
-            flowController.enableCalibrationMode();
-        }
-    }
+    private bool boxCreated, treeCreated;
 
     public void CreateTree(Vector3 positionCenter, Quaternion rotation)
     {
@@ -49,32 +31,32 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         if (newObject != null)
         {
             newObject.transform.parent = gameObject.transform;
+            newObject.tag = "Dummy";
             newObject.transform.localScale = RescaleToSameScaleFactor(TreePrefab);
             ActiveHolograms.Add(newObject);
             createdTree = newObject;
-            HandsForActiveHolograms.Add(newObject.GetInstanceID(), -1);
-            treeCreated = true;
-            checkIfWorldCreated();
-            SetFruitProps();
+            SetProps();
         }
     }
 
     public void CreateBox(Vector3 positionCenter, Quaternion rotation)
     {
         // Stay center in the square but move down to the ground
-        var position = positionCenter - new Vector3(0, BoxSize.y * .5f, 0);
+        var position = positionCenter + new Vector3(0, BoxSize.y * .25f, 0);
         GameObject newObject = Instantiate(BoxPrefab, position, rotation);
         newObject.name = "Box";
         if (newObject != null)
         {
             newObject.transform.parent = gameObject.transform;
+            newObject.tag = "Dummy";
             newObject.transform.localScale = RescaleToSameScaleFactor(BoxPrefab);
             ActiveHolograms.Add(newObject);
-            HandsForActiveHolograms.Add(newObject.GetInstanceID(), -1);
-            boxCreated = true;
-            checkIfWorldCreated();
-            newObject.GetComponent<Renderer>().enabled = false;
             createdBox = newObject;
+            //newObject.transform.position.y = 2 * BoxSize.y;
+            //createdBox.SetActive(false);
+            boxCreated = true;
+            if (treeCreated && boxCreated)
+                flowController.PrepareNextManipulation();
         }
     }
 
@@ -132,88 +114,83 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         return result;
     }
 
-    private void checkIfWorldCreated()
-    {
-        if (boxCreated && treeCreated)
-        {
-            SpatialUnderstandingState.Instance.SpaceQueryDescription = "";
-            GameObject.Find("Spatial Understanding").GetComponent<SpatialUnderstandingState>().enabled = false;
-        }
-    }
-
-    public int GetHandsNeededForManipulation(int objectID)
-    {
-        int hands;
-        try
-        {
-            hands = HandsForActiveHolograms[objectID];
-        }
-        catch (KeyNotFoundException)
-        {
-            hands = 1;
-        }
-        return hands;
-    }
-
-    public void setActiveHologram(int objectID, int hands)
-    {
-        HandsForActiveHolograms.Add(objectID, hands);
-    }
-
-    public void SetFruitProps()
+    public void SetProps()
     {
         GameObject child;
         for (int i = 0; i < createdTree.transform.childCount; i++)
         {
-            child = gameObject.transform.GetChild(i).gameObject;
-            child.tag = "User";
-            /*
-            Interpolator interpolator = child.AddComponent<Interpolator>();
-            interpolator.SmoothLerpToTarget = true;
-            interpolator.SmoothPositionLerpRatio = 0.5f;
-            interpolator.PositionPerSecond = 40.0f;
-            */
-            setActiveHologram(child.GetInstanceID(), 1);
+            child = createdTree.transform.GetChild(i).gameObject;
+            child.AddComponent<AppleScript>();
         }
+        treeCreated = true;
+        if (treeCreated && boxCreated)
+            flowController.PrepareNextManipulation();
+    }
+    
+    public GameObject getLowestFruit(float threshold)
+    {
+        List<GameObject> list  = new List<GameObject>();
+        if (createdTree == null)
+            return null;
+        for (int i = 0; i < createdTree.transform.childCount; i++)
+        {
+            if ( createdTree.transform.GetChild(i).gameObject.transform.position.y > threshold)
+                list.Add(createdTree.transform.GetChild(i).gameObject);
+        }
+
+        List <GameObject> a = list.OrderBy(item => item.transform.position.y).ToList();
+        if (a[0] != null)
+            return a[0];
+        else
+            return null;
     }
 
     public void ClearScene()
     {
         foreach (GameObject i in ActiveHolograms)
-        {
             Destroy(i);
-        }
         ActiveHolograms.Clear();
-        HandsForActiveHolograms.Clear();
     }
 
     public void appearBox(int counter, Vector3 initPos)
     {
         Vector3 handRef = initPos - Camera.main.transform.position;
-        float tempX = handRef.x;
+        float magHR = Mathf.Sqrt(Mathf.Pow(handRef.x, 2) + Mathf.Pow(handRef.z, 2));
+        float cosf = handRef.x / magHR;
+        float sinf = handRef.z / magHR;
         if (counter%2==0)
         {
-            handRef.x = handRef.z;
-            handRef.z = tempX;
+            handRef.x = magHR * (-sinf);
+            handRef.z = magHR * (cosf);
         }
         else
         {
-            handRef.x = -handRef.z;
-            handRef.z = -tempX;
+            handRef.x = magHR * sinf;
+            handRef.z = magHR * (-cosf);
         }
-        handRef.y = Camera.main.transform.position.y - 0.1f;
+        handRef.y = initPos.y - 0.5f;
         Vector3 newPos = handRef + Camera.main.transform.position;
-        createdBox.transform.position = newPos;
-        createdBox.GetComponent<Renderer>().enabled = true;
+
+        createdBox.SetActive(true);
+        Vector3 dx = newPos - createdBox.transform.position;
+        //createdBox.transform.position = newPos;
+        for (int a = 0; a < createdBox.transform.childCount; a++)
+        {
+            //createdBox.transform.GetChild(a).gameObject.SetActive(true);
+            //createdBox.transform.GetChild(a).gameObject.transform.position += dx;
+        }
     }
 
     public void disappearBox()
     {
+        for (int a = 0; a < createdBox.transform.childCount; a++)
+            createdBox.transform.GetChild(a).gameObject.SetActive(false);
         createdBox.SetActive(false);
     }
 
     public GameObject getCreatedBox()
     {
+        createdBox.SetActive(true);
         return createdBox;
     }
 }

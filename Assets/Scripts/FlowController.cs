@@ -10,13 +10,13 @@ public class FlowController : MonoBehaviour
     public GameObject menuPrefab;
     public GameObject settingsPrefab;
     public GameObject playPrefab;
-    //
+    public GameObject resultsPrefab;
     public SaveLoad saveLoadScript;
     public ObjectPlacer placer;
     public GazeCursor gazeCursor;
     public TextMesh DebugText;
     public HandsTrackingController handsTrackingController;
-    public TextToSpeech textToSpeechManager;
+    //public TextToSpeech textToSpeechManager;
     public float menuDistance;
     // Settings
     private List<int> settings;
@@ -25,7 +25,6 @@ public class FlowController : MonoBehaviour
     private bool clickerEnabled = false;
     // Training
     private bool trainingMode = false;
-    private float userHeight;
     private CalibrationController rightController, leftController;
     //Create timer variables
     private float timer;
@@ -37,6 +36,7 @@ public class FlowController : MonoBehaviour
     private GameObject menuScreen;
     private GameObject settingsScreen;
     private GameObject playScreen;
+    private GameObject resultsScreen;
     private GameObject currentMenu;
     private int inMenu = -1;
     //
@@ -48,9 +48,15 @@ public class FlowController : MonoBehaviour
     public float gameTimeMinutes;
     public float waitHandTime;
 
+    private int success, fail;
+    private bool rightHandPlaying = false;
+
     private void Start ()
     {
+        EventManager.StartListening("box_collision", boxObjectCollision);
+        EventManager.StartListening("floor_collision", floorObjectCollision);
         //Load Settings
+        /*
         settings = saveLoadScript.LoadSettings();
         for (int i=0; i< settings.Count; i++)
         {
@@ -70,6 +76,67 @@ public class FlowController : MonoBehaviour
                     clickerEnabled = true;
             }
         }
+        */
+        audioFeedbackEnabled = false;
+        graphicalFeedbackEnabled = true;
+        clickerEnabled = true;
+    }
+
+    private void EnableOutline(GameObject focusedObject)
+    {
+        if (focusedObject != null)
+        {
+            var outline = focusedObject.GetComponent<Outline>();
+            if (outline == null)
+            {
+                //Create Outline
+                outline = gameObject.AddComponent<Outline>();
+                outline.OutlineMode = Outline.Mode.OutlineAll;
+                outline.OutlineWidth = 5f;
+            }
+            outline.OutlineColor = Color.magenta;
+            outline.enabled = true;
+        }
+    }
+
+    private void boxObjectCollision()
+    {
+        success++;
+        PrepareNextManipulation();
+    }
+
+    private void floorObjectCollision()
+    {
+        fail++;
+        PrepareNextManipulation();
+    }
+
+    public void PrepareNextManipulation()
+    {
+        if (!trainingMode)
+            return;
+        DebugText.text = "";
+        rightHandPlaying = !rightHandPlaying;
+        GameObject nowPlayingObject;
+        if(rightHandPlaying)
+        {
+            nowPlayingObject = ObjectCollectionManager.Instance.getLowestFruit(rightController.getHighestPoseHandHeight());
+            if (nowPlayingObject == null)
+                nowPlayingObject = ObjectCollectionManager.Instance.getLowestFruit(leftController.getHighestPoseHandHeight());
+        }
+        else
+        {
+            nowPlayingObject = ObjectCollectionManager.Instance.getLowestFruit(leftController.getHighestPoseHandHeight());
+            if (nowPlayingObject == null)
+                nowPlayingObject = ObjectCollectionManager.Instance.getLowestFruit(rightController.getHighestPoseHandHeight());
+        }
+        if (nowPlayingObject == null)
+            finishGame();
+        else
+        {
+            EnableOutline(nowPlayingObject);
+            nowPlayingObject.tag = "User";
+        }
     }
 
     private void Update ()
@@ -80,6 +147,11 @@ public class FlowController : MonoBehaviour
 
     private void tapUiReceived()
     {
+        if (trainingMode)
+        {
+            finishGame();
+            return;
+        }
         GameObject tappedObj = gazeCursor.getFocusedObject();
         if (tappedObj.CompareTag("UI"))
         {
@@ -146,6 +218,13 @@ public class FlowController : MonoBehaviour
                     returnToStartMenu();
                 }
             }
+            else if (inMenu == 3) // Results Menu
+            {
+                if (tappedObj.name == "BackButton")
+                {
+                    returnToStartMenu();
+                }
+            }
         }
     }
 
@@ -181,12 +260,14 @@ public class FlowController : MonoBehaviour
 
     private void enableObject(GameObject obj)
     {
-        obj.SetActive(true);
+        if (obj != null)
+            obj.SetActive(true);
     }
 
     private void disableObject(GameObject obj)
     {
-        obj.SetActive(false);
+        if(obj != null)
+            obj.SetActive(false);
     }
 
     private void refreshTimer()
@@ -202,7 +283,13 @@ public class FlowController : MonoBehaviour
     public void calibrationMaxPose()
     {
         // Tell user to raise the hand for 2s
-        textToSpeechManager.SpeakSsml("Now Raise your hand as high as you can for two seconds"); 
+        //textToSpeechManager.SpeakSsml("Now Raise your hand as high as you can for two seconds");
+        DebugText.text = "Raise your hand as high as you can. When ready open your palm";
+    }
+
+    public void TreeDone()
+    {
+         DebugText.text = " Tree Done";
     }
     private void enableTimer()
     {
@@ -223,9 +310,12 @@ public class FlowController : MonoBehaviour
         EventManager.StartListening("tap", tapUiReceived);
         //Appear the menu in front of user
         Vector3 pos = Camera.main.transform.position + Camera.main.transform.forward * menuDistance;
-        //Vector3 newPos = placer.create_possible_pos(ObjectCollectionManager.Instance.menuSize, ObjectType.Menu);
         menuScreen = Instantiate(menuPrefab);
         menuScreen.transform.position = pos;
+        Vector3 directionToTarget = Camera.main.transform.position - pos;
+        directionToTarget.y = 0.0f;
+        //if (directionToTarget.sqrMagnitude > 0.005f)
+        transform.rotation = Quaternion.LookRotation(-directionToTarget);
         //menuScreen.AddComponent<MenuScript>();
         inMenu = 0;
         currentMenu = menuScreen;
@@ -235,32 +325,9 @@ public class FlowController : MonoBehaviour
     public void startPlaying()
     {
         disableObject(currentMenu);
-        EventManager.StopListening("tap", tapUiReceived);
-        //Preapare Calibration Scene
-        //placer.CreateCablirationScene();
-        enableCalibrationMode();
-    }
-
-    public void CalculateUserHeightProcess()
-    {
-        //Create UI point
-        GameObject calibrationPoint = GameObject.FindGameObjectWithTag("Calibration");
-        calibrationPoint.AddComponent<DirectionIndicator>();
-        calibrationPoint.GetComponent<DirectionIndicator>().setCursor(gazeCursor);
-        //Set GazeCursor for height calculation
-        gazeCursor.setCalculationMode();
-        textToSpeechManager.SpeakSsml("Now we should begin the calibration process. First you should at the red calibration point on the floor, " +
-            "so we calculate your height. Height is needed by the training program");
-    }
-
-    public void enableCalibrationMode()
-    {
-        //textToSpeechManager.SpeakSsml("Your height has been calculated succesfully");
-        //userHeight = height; 
-        //Destroy calibrationPoint for height calculation
-        //ObjectCollectionManager.Instance.ClearScene();
-
+        //EventManager.StopListening("tap", tapUiReceived);
         DebugText.text = "Place your hand in right angle pose for 2 seconds ";
+        //Preapare Calibration Scene
         //Set generic use for gaze
         gazeCursor.setGenericUse();
         //Start hand calibration
@@ -270,8 +337,6 @@ public class FlowController : MonoBehaviour
     public void calibrationFinished()
     {
         placer.CreateScene();
-        //UI/audio instructions
-        DebugText.text = "Calibration Finished. Play scene is loading";
         //Set training use for gaze
         gazeCursor.setTrainingMode();
         // Enable manipulation with hands
@@ -279,22 +344,33 @@ public class FlowController : MonoBehaviour
         // Enable data collection
         //handsTrackingController.enableDataCollection();
         // Enable Timer
-        enableTimer();
+        // enableTimer();
         trainingMode = true;
     }
 
     public void finishGame()
     {
+        trainingMode = false;
         ObjectCollectionManager.Instance.ClearScene();
-        //Evaluate Hands
+        enableObject(currentMenu);
+        if (resultsScreen == null) //Create Results menu
+            resultsScreen = Instantiate(resultsPrefab, currentMenu.transform.position, currentMenu.transform.rotation);
+        else
+            enableObject(resultsScreen);
+        disableObject(currentMenu);
+        currentMenu = resultsScreen;
+        TextMesh suc =  currentMenu.transform.Find("Successes").gameObject.GetComponent<TextMesh>();
+        TextMesh failures = currentMenu.transform.Find("Failures").gameObject.GetComponent<TextMesh>();
+        suc.text = "Succeses : " + success;
+        failures.text = "Failures: " + fail;
+        inMenu = 3;
+        //Reset
         gazeCursor.setGenericUse();
-        //Retrieve Data
-        handsTrackingController.enableDataCollection();
-        //Process Data
-
-        //Store Data
-
-        //Present Summary of Session
+        trainingMode = false;
+        success = 0;
+        fail = 0;
+        rightController = null;
+        leftController = null;
     }
 
     public bool addCalibrationController(CalibrationController controller)
@@ -357,32 +433,14 @@ public class FlowController : MonoBehaviour
     public void checkIfAboveBox(Vector3 pos)
     {
         GameObject createdBox = ObjectCollectionManager.Instance.getCreatedBox();
-        Rect box = new Rect(createdBox.transform.position.x, createdBox.transform.position.z, createdBox.GetComponent<BoxCollider>().size.x / 2, createdBox.GetComponent<BoxCollider>().size.z / 2);
-        if (handAboveBoxInProgress)
+        Rect box = new Rect(createdBox.transform.position.x, createdBox.transform.position.z, createdBox.GetComponent<Renderer>().bounds.size.x / 2, createdBox.GetComponent<Renderer>().bounds.size.z / 2);
+
+        if (box.Contains(new Vector2(pos.x, pos.z)))
         {
-            if (box.Contains(pos))
-            {
-                if(Time.time - manipulationTimer > waitHandTime)
-                {
-                    // Audio - UI feedback
-                    handsTrackingController.freeToRelease();
-                }
-            }
-            else
-            {
-                //Reset Timer and bools
-                handAboveBoxInProgress = false;
-                handsTrackingController.resetManipulation();
-            }
+            handsTrackingController.enableOutlineToManipulated(Color.white);
         }
         else
-        {
-            if (box.Contains(pos))
-            {
-                handAboveBoxInProgress = true;
-                manipulationTimer = Time.time;
-            }
-        }
+            handsTrackingController.enableOutlineToManipulated(Color.red);
     }
 
     public void userSaidYes()
@@ -398,5 +456,10 @@ public class FlowController : MonoBehaviour
     public void userRequestedFinish()
     {
         throw new NotImplementedException();
+    }
+
+    public void printText(String text)
+    {
+        DebugText.text = text;
     }
 }

@@ -6,9 +6,7 @@ public enum ObjectType
 {
     Tree,
     Fruit,
-    Box,
-    CalibrationPoint,
-    Menu
+    Box
 }
 
 public struct PlacementQuery

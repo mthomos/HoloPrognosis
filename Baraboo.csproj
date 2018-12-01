@@ -13,14 +13,12 @@
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Full v3.5</TargetFrameworkProfile>
-    <CompilerResponseFile>
-    </CompilerResponseFile>
+    <CompilerResponseFile></CompilerResponseFile>
     <UnityProjectGenerator>VSTU</UnityProjectGenerator>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>WSAPlayer:21</UnityBuildTarget>
     <UnityVersion>2017.4.16f1</UnityVersion>
-    <RootNamespace>
-    </RootNamespace>
+    <RootNamespace></RootNamespace>
     <LangVersion>4</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -268,10 +266,7 @@
     <Compile Include="Assets\Common\Scripts\StartAwareSingleton.cs" />
     <Compile Include="Assets\Common\Scripts\WorldAnchorManager.cs" />
     <Compile Include="Assets\QuickOutline\Scripts\Outline.cs" />
-    <Compile Include="Assets\Scripts\ApplePlacer.cs" />
     <Compile Include="Assets\Scripts\AppleScript.cs" />
-    <Compile Include="Assets\Scripts\AudioFeedBackManager.cs" />
-    <Compile Include="Assets\Scripts\BaryCentricDistance.cs" />
     <Compile Include="Assets\Scripts\CalibrationController.cs" />
     <Compile Include="Assets\Scripts\ClickerController.cs" />
     <Compile Include="Assets\Scripts\DataScript.cs" />
@@ -288,7 +283,6 @@
     <Compile Include="Assets\Scripts\SaveLoad.cs" />
     <Compile Include="Assets\Scripts\SpatialUnderstandingState.cs" />
     <Compile Include="Assets\Scripts\TagAlongForDisplay.cs" />
-    <Compile Include="Assets\Scripts\TextToSpeech.cs" />
     <Compile Include="Assets\Scripts\WindEffect.cs" />
     <Compile Include="Assets\SpatialMapping\Scripts\DataEventArgs.cs" />
     <Compile Include="Assets\SpatialMapping\Scripts\ObjectSurfaceObserver.cs" />

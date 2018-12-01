@@ -10,8 +10,8 @@ GameObject:
   - component: {fileID: 400000}
   - component: {fileID: 3300000}
   - component: {fileID: 2300000}
-  - component: {fileID: 64617507508082060}
   - component: {fileID: 54183233224854440}
+  - component: {fileID: 64357748772292700}
   m_Layer: 0
   m_Name: cardboardBox_02
   m_TagString: Untagged
@@ -99,7 +99,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
---- !u!64 &64617507508082060
+--- !u!64 &64357748772292700
 MeshCollider:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}

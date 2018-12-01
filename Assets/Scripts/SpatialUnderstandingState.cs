@@ -5,7 +5,7 @@ using UnityEngine.Events;
 
 public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
 {
-    public TextToSpeech textToSpeechManager;
+    //public TextToSpeech textToSpeechManager;
     //Public Variables - For Editor
     public float MinAreaForStats = 2.0f; // both floor and wall surfaces
     public float MinAreaForComplete = 4.0f; // for floor
@@ -97,7 +97,6 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
     {
         TapListener = new UnityAction(Tap_Triggered);
         EventManager.StartListening("tap", TapListener);
-        textToSpeechManager.SpeakSsml("Move around the place for the scanning process");
     }
 
     private void Tap_Triggered()
@@ -119,8 +118,8 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
             _triggered = true;
             EventManager.StopListening("tap", TapListener);
             flowController.createUI();
+            //flowController.startPlaying();
             //Disable this object
-            //gameObject.SetActive(false);
         }
     }
 }

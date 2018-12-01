@@ -5,10 +5,8 @@ public class GazeCursor : MonoBehaviour
     //Public Variables-For Editor
     public FlowController flowController;
     //Private Variables
-    private GameObject FocusedObject; // The object which user is staring at
-    //private bool calculationMode = false;
+    private GameObject FocusedObject = null; // The object which user is staring at
     private bool trainingMode = false;
-    private float height = .0f;
     //Cached variables
     private Renderer cursorMeshRenderer; // Using this to disable cursor
     private RaycastHit hitInfo;
@@ -31,61 +29,37 @@ public class GazeCursor : MonoBehaviour
             cursorMeshRenderer.enabled = true;
             gameObject.transform.position = hitInfo.point;
             gameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal);
-
-            /*
-            if (calculationMode)
-                calculateHeight();
-            else
-            */
             if (trainingMode) // Use for gameplay
-                refreshFocusedObject();
+                refreshFocusedObjectTrainingMode();
             else // for !training
             {
-                if (hitInfo.collider.gameObject != null)
-                    FocusedObject = hitInfo.collider.gameObject;
+                refreshFocusedObjectGenericMode();
             }
         }
         else
             cursorMeshRenderer.enabled = false;
     }
-
-    private void calculateHeight()
+    private void refreshFocusedObjectTrainingMode()
     {
-        float tempHeight = Mathf.Abs(hitInfo.point.y - mainCamera.transform.position.y);
-        // We get the max value of height detected by Hololens
-        if (height < tempHeight)
-            height = tempHeight;
-        if (hitInfo.collider.gameObject.CompareTag("Calibration"))
-        {
-            //Terminate Calculation
-            flowController.enableCalibrationMode();
-            //calculationMode = false;
-        }
-    }
-
-    private void refreshFocusedObject()
-    {
-        if (FocusedObject.CompareTag("User") && FocusedObject != hitInfo.collider.gameObject)
+        if (hitInfo.collider.gameObject.CompareTag("User"))
             FocusedObject = hitInfo.collider.gameObject;
     }
 
-    public void setCalculationMode()
+    private void refreshFocusedObjectGenericMode()
     {
-        //calculationMode = true;
-        trainingMode = false;
-        //FocusedObject = null;
+        if (hitInfo.collider.gameObject.CompareTag("User") || 
+            hitInfo.collider.gameObject.CompareTag("UI") ||
+            hitInfo.collider.gameObject.CompareTag("Calibration"))
+            FocusedObject = hitInfo.collider.gameObject;
     }
-
     public void setTrainingMode()
     {
-        //calculationMode = false;
         trainingMode = true;
         //FocusedObject = null;
     }
 
     public void setGenericUse()
     {
-        //calculationMode = false;
         trainingMode = false;
         //FocusedObject = null;
     }

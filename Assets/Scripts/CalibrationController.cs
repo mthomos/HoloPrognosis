@@ -24,16 +24,16 @@
     {
         if (rightPoseInProgess)
         {
-            if (headHandDist > Right_Pose_headHandDistance)
+            //if (headHandDist > Right_Pose_headHandDistance)
                 Right_Pose_headHandDistance = headHandDist;
-            if (handHeight > Right_Pose_handHeight)
+            //if (handHeight > Right_Pose_handHeight)
                 Right_Pose_handHeight = handHeight;
         }
         else
         {
-            if (headHandDist > Highest_Pose_headHandDistance)
+            //if (headHandDist > Highest_Pose_headHandDistance)
                 Highest_Pose_headHandDistance = headHandDist;
-            if (handHeight > Highest_pose_handHeight)
+            //if (handHeight > Highest_pose_handHeight)
                 Highest_pose_handHeight = handHeight;
         }
     }
@@ -55,7 +55,10 @@
 
     public float getHighestPoseHandHeight()
     {
-        return Highest_pose_handHeight;
+        if (Highest_pose_handHeight> Right_Pose_handHeight )
+            return Highest_pose_handHeight;
+        else
+            return Right_Pose_handHeight;
     }
 
     public bool isRightHand()
