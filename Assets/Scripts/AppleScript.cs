@@ -2,26 +2,21 @@
 
 public class AppleScript : MonoBehaviour
 {
-    private bool triggered = false;
-    //private WindEffect effect;
+    private bool triggered = false; //Collision Triggered
+    private WindEffect effect;
     private bool windEnabled = false;
     // Use this for initialization
     void Start()
     {
-        /*
-        windEnabled = false;
         if (windEnabled)
             effect = GameObject.Find("Wind").GetComponent<WindEffect>();
-        */
     }
 
     // Update is called once per frame
     void Update()
     {
-        /*
         if(windEnabled)
             GetComponent<Rigidbody>().AddForce(effect.windDirection * effect.windSpeed);
-        */
     }
 
     void OnCollisionEnter(Collision collision)
@@ -38,7 +33,6 @@ public class AppleScript : MonoBehaviour
             gameObject.transform.parent = colObject.transform;
             if(gameObject.GetComponent<Outline>()!=null)
                 gameObject.GetComponent<Outline>().enabled = false;
-            //ObjectCollectionManager.Instance.disappearBox();
         }
         else
         {
@@ -50,9 +44,8 @@ public class AppleScript : MonoBehaviour
             }
             if(gameObject.GetComponent<Outline>()!=null)
                 gameObject.GetComponent<Outline>().enabled = false;
-            //Destroy(gameObject);
-            //ObjectCollectionManager.Instance.disappearBox();
         }
+        //ObjectCollectionManager.Instance.disappearBox();
     }
 
     public void disableWind()

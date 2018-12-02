@@ -118,8 +118,6 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
             _triggered = true;
             EventManager.StopListening("tap", TapListener);
             flowController.createUI();
-            //flowController.startPlaying();
-            //Disable this object
         }
     }
 }

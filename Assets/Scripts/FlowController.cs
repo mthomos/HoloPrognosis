@@ -42,11 +42,16 @@ public class FlowController : MonoBehaviour
     //
     private bool rightHandEnabled = true;
     private bool leftHandEnabled = true;
+    private bool treeIsShort = true;
     //
     public float timerForRightPose = 2.0f;
     public float timerForHighPose = 3.0f;
     public float gameTimeMinutes;
     public float waitHandTime;
+    //
+    public Vector3 smallSizeTree;
+    public Vector3 bigSizeTree;
+    //
 
     private int success, fail;
     private bool rightHandPlaying = false;
@@ -212,6 +217,15 @@ public class FlowController : MonoBehaviour
                         tappedObj.GetComponentInChildren<TextMesh>().text = "Left Hand:" + "\n" + "Yes";
                     else
                         tappedObj.GetComponentInChildren<TextMesh>().text = "Left Hand:" + "\n" + "No";
+                }
+
+                else if (tappedObj.name == "SizeTreeButton")
+                {
+                    treeIsShort = (!treeIsShort);
+                    if (treeIsShort)
+                        tappedObj.GetComponentInChildren<TextMesh>().text = "Tree Height:" + "\n" + "Short";
+                    else
+                        tappedObj.GetComponentInChildren<TextMesh>().text = "Tree Height:" + "\n" + "Tall";
                 }
                 else if (tappedObj.name == "BackButton")
                 {

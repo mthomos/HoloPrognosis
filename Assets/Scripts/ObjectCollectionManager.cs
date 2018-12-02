@@ -52,8 +52,6 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             newObject.transform.localScale = RescaleToSameScaleFactor(BoxPrefab);
             ActiveHolograms.Add(newObject);
             createdBox = newObject;
-            //newObject.transform.position.y = 2 * BoxSize.y;
-            //createdBox.SetActive(false);
             boxCreated = true;
             if (treeCreated && boxCreated)
                 flowController.PrepareNextManipulation();
@@ -121,6 +119,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         {
             child = createdTree.transform.GetChild(i).gameObject;
             child.AddComponent<AppleScript>();
+            ActiveHolograms.Add(child);
         }
         treeCreated = true;
         if (treeCreated && boxCreated)
@@ -172,13 +171,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         Vector3 newPos = handRef + Camera.main.transform.position;
 
         createdBox.SetActive(true);
-        Vector3 dx = newPos - createdBox.transform.position;
         //createdBox.transform.position = newPos;
-        for (int a = 0; a < createdBox.transform.childCount; a++)
-        {
-            //createdBox.transform.GetChild(a).gameObject.SetActive(true);
-            //createdBox.transform.GetChild(a).gameObject.transform.position += dx;
-        }
     }
 
     public void disappearBox()

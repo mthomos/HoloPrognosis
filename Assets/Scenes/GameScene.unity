@@ -613,11 +613,13 @@ MonoBehaviour:
   gazeCursor: {fileID: 938779208}
   DebugText: {fileID: 1672231911}
   handsTrackingController: {fileID: 347611045}
-  menuDistance: 1.5
+  menuDistance: 2
   timerForRightPose: 2
   timerForHighPose: 3
   gameTimeMinutes: 0
   waitHandTime: 4
+  smallSizeTree: {x: 0.8, y: 2.1, z: 0.8}
+  bigSizeTree: {x: 1, y: 2.8, z: 1}
 --- !u!114 &790716444
 MonoBehaviour:
   m_ObjectHideFlags: 0
