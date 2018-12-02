@@ -52,6 +52,7 @@ public class FlowController : MonoBehaviour
     public Vector3 smallSizeTree;
     public Vector3 bigSizeTree;
     //
+    private GameObject gate;
 
     private int success, fail;
     private bool rightHandPlaying = false;
@@ -85,23 +86,6 @@ public class FlowController : MonoBehaviour
         audioFeedbackEnabled = false;
         graphicalFeedbackEnabled = true;
         clickerEnabled = true;
-    }
-
-    private void EnableOutline(GameObject focusedObject)
-    {
-        if (focusedObject != null)
-        {
-            var outline = focusedObject.GetComponent<Outline>();
-            if (outline == null)
-            {
-                //Create Outline
-                outline = gameObject.AddComponent<Outline>();
-                outline.OutlineMode = Outline.Mode.OutlineAll;
-                outline.OutlineWidth = 5f;
-            }
-            outline.OutlineColor = Color.magenta;
-            outline.enabled = true;
-        }
     }
 
     private void boxObjectCollision()
@@ -139,7 +123,7 @@ public class FlowController : MonoBehaviour
             finishGame();
         else
         {
-            EnableOutline(nowPlayingObject);
+            UtilitiesScript.Instance.EnableOutline(nowPlayingObject, null);
             nowPlayingObject.tag = "User";
         }
     }
@@ -147,7 +131,14 @@ public class FlowController : MonoBehaviour
     private void Update ()
     {
         if (timerEnabled && trainingMode)
+        {
             refreshTimer();
+            // Calculate distance of manipulated object and gate
+            if (gate == null)
+                gate = ObjectCollectionManager.Instance.getCreatedGate();
+
+
+        }
 	}
 
     private void tapUiReceived()
@@ -244,44 +235,32 @@ public class FlowController : MonoBehaviour
 
     private void moveToPlayScreen()
     {
-        disableObject(currentMenu);
+         UtilitiesScript.Instance.disableObject(currentMenu);
         if (playScreen == null) //Create Play menu
             playScreen = Instantiate(playPrefab, currentMenu.transform.position, currentMenu.transform.rotation);
         else
-            enableObject(playScreen);
+             UtilitiesScript.Instance.enableObject(playScreen);
         currentMenu = playScreen;
         inMenu = 2;
     }
 
     private void moveToSettingsScreen()
     {
-        disableObject(currentMenu);
+         UtilitiesScript.Instance.disableObject(currentMenu);
         if (settingsScreen == null) //Create Settings menu
             settingsScreen = Instantiate(settingsPrefab, currentMenu.transform.position, currentMenu.transform.rotation);
         else
-            enableObject(settingsScreen);
+             UtilitiesScript.Instance.enableObject(settingsScreen);
         currentMenu = settingsScreen;
         inMenu = 1;
     }
 
     private void returnToStartMenu()
     {
-        disableObject(currentMenu);
+         UtilitiesScript.Instance.disableObject(currentMenu);
         currentMenu = menuScreen;
-        enableObject(currentMenu);
+         UtilitiesScript.Instance.enableObject(currentMenu);
         inMenu = 0;
-    }
-
-    private void enableObject(GameObject obj)
-    {
-        if (obj != null)
-            obj.SetActive(true);
-    }
-
-    private void disableObject(GameObject obj)
-    {
-        if(obj != null)
-            obj.SetActive(false);
     }
 
     private void refreshTimer()
@@ -338,7 +317,7 @@ public class FlowController : MonoBehaviour
 
     public void startPlaying()
     {
-        disableObject(currentMenu);
+         UtilitiesScript.Instance.disableObject(currentMenu);
         //EventManager.StopListening("tap", tapUiReceived);
         DebugText.text = "Place your hand in right angle pose for 2 seconds ";
         //Preapare Calibration Scene
@@ -366,12 +345,12 @@ public class FlowController : MonoBehaviour
     {
         trainingMode = false;
         ObjectCollectionManager.Instance.ClearScene();
-        enableObject(currentMenu);
+         UtilitiesScript.Instance.enableObject(currentMenu);
         if (resultsScreen == null) //Create Results menu
             resultsScreen = Instantiate(resultsPrefab, currentMenu.transform.position, currentMenu.transform.rotation);
         else
-            enableObject(resultsScreen);
-        disableObject(currentMenu);
+             UtilitiesScript.Instance.enableObject(resultsScreen);
+         UtilitiesScript.Instance.disableObject(currentMenu);
         currentMenu = resultsScreen;
         TextMesh suc =  currentMenu.transform.Find("Successes").gameObject.GetComponent<TextMesh>();
         TextMesh failures = currentMenu.transform.Find("Failures").gameObject.GetComponent<TextMesh>();
@@ -451,10 +430,10 @@ public class FlowController : MonoBehaviour
 
         if (box.Contains(new Vector2(pos.x, pos.z)))
         {
-            handsTrackingController.enableOutlineToManipulated(Color.white);
+            UtilitiesScript.Instance.EnableOutline(handsTrackingController.getManipulatedObject() ,Color.white);
         }
         else
-            handsTrackingController.enableOutlineToManipulated(Color.red);
+            UtilitiesScript.Instance.EnableOutline(handsTrackingController.getManipulatedObject() ,Color.red);
     }
 
     public void userSaidYes()

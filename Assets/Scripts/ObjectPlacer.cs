@@ -37,8 +37,6 @@ public class ObjectPlacer : MonoBehaviour
         List<PlacementQuery> queries = new List<PlacementQuery>();
         queries.AddRange(AddTree());
         queries.AddRange(AddBox());
-        Quaternion rotation = Quaternion.LookRotation(Vector3.zero, Vector3.up);
-        //ObjectCollectionManager.Instance.CreateBox(Vector3.zero, rotation);
         GetLocationsFromSolver(queries);
     }
 

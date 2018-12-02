@@ -9,15 +9,17 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
     public GameObject TreePrefab;
     public GameObject FruitPrefab;
     public GameObject BoxPrefab;
-    public GameObject CalibrationPointPrefab;
+    public GameObject GatePrefab;
     public Vector3 TreeSize;
     public Vector3 FruitSize;
     public Vector3 BoxSize;
+    public Vector3 GateSize;
     public Vector3 CalibrationPointSize;
-    public float FruitScale;
+    // Private Variables
     public FlowController flowController;
     private GameObject createdTree;
     private GameObject createdBox;
+    private GameObject createdGate;
     private float ScaleFactor;
     private List<GameObject> ActiveHolograms = new List<GameObject>();
     private bool boxCreated, treeCreated;
@@ -168,10 +170,11 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             handRef.z = magHR * (-cosf);
         }
         handRef.y = initPos.y - 0.5f;
-        Vector3 newPos = handRef + Camera.main.transform.position;
-
         createdBox.SetActive(true);
-        //createdBox.transform.position = newPos;
+        /*
+        Vector3 newPos = handRef + Camera.main.transform.position;
+        createdBox.transform.position = newPos;
+        */
     }
 
     public void disappearBox()
@@ -183,7 +186,12 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
 
     public GameObject getCreatedBox()
     {
-        createdBox.SetActive(true);
+        //createdBox.SetActive(true);
         return createdBox;
+    }
+
+    public GameObject getCreatedGate()
+    {
+        return createdGate;
     }
 }
