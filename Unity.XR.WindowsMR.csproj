@@ -5,9 +5,9 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{F9CD62E0-1F5F-0FF1-FAAD-8F0564D3012D}</ProjectGuid>
+    <ProjectGuid>{5E11E1B3-0410-B7BD-6D16-1A513F34657C}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AssemblyName>Assembly-CSharp</AssemblyName>
+    <AssemblyName>Unity.XR.WindowsMR</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{E097FAD1-6243-4DAD-9C02-E9B9EFC3FFC1};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
@@ -233,17 +233,47 @@
     <Reference Include="UnityEngine.UI">
       <HintPath>C:/Program Files/Unity-Next/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEditor.UI">
+      <HintPath>C:/Program Files/Unity-Next/Editor/Data/UnityExtensions/Unity/GUISystem/Editor/UnityEditor.UI.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.Timeline">
       <HintPath>C:/Program Files/Unity-Next/Editor/Data/UnityExtensions/Unity/Timeline/RuntimeEditor/UnityEngine.Timeline.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.Timeline">
+      <HintPath>C:/Program Files/Unity-Next/Editor/Data/UnityExtensions/Unity/Timeline/Editor/UnityEditor.Timeline.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.Networking">
       <HintPath>C:/Program Files/Unity-Next/Editor/Data/UnityExtensions/Unity/Networking/UnityEngine.Networking.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEditor.Networking">
+      <HintPath>C:/Program Files/Unity-Next/Editor/Data/UnityExtensions/Unity/Networking/Editor/UnityEditor.Networking.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.GoogleAudioSpatializer">
+      <HintPath>C:/Program Files/Unity-Next/Editor/Data/UnityExtensions/Unity/UnityGoogleAudioSpatializer/Editor/UnityEditor.GoogleAudioSpatializer.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.GoogleAudioSpatializer">
       <HintPath>C:/Program Files/Unity-Next/Editor/Data/UnityExtensions/Unity/UnityGoogleAudioSpatializer/RuntimeEditor/UnityEngine.GoogleAudioSpatializer.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEditor.SpatialTracking">
+      <HintPath>C:/Program Files/Unity-Next/Editor/Data/UnityExtensions/Unity/UnitySpatialTracking/Editor/UnityEditor.SpatialTracking.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.SpatialTracking">
       <HintPath>C:/Program Files/Unity-Next/Editor/Data/UnityExtensions/Unity/UnitySpatialTracking/RuntimeEditor/UnityEngine.SpatialTracking.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.VR">
+      <HintPath>C:/Program Files/Unity-Next/Editor/Data/UnityExtensions/Unity/UnityVR/Editor/UnityEditor.VR.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.Graphs">
+      <HintPath>C:/Program Files/Unity-Next/Editor/Data/Managed/UnityEditor.Graphs.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.WSA.Extensions">
+      <HintPath>C:/Program Files/Unity-Next/Editor/Data/PlaybackEngines/MetroSupport/UnityEditor.WSA.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.WindowsStandalone.Extensions">
+      <HintPath>C:/Program Files/Unity-Next/Editor/Data/PlaybackEngines/windowsstandalonesupport/UnityEditor.WindowsStandalone.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="SyntaxTree.VisualStudio.Unity.Bridge">
+      <HintPath>C:/Program Files (x86)/Microsoft Visual Studio Tools for Unity/15.0/Editor/SyntaxTree.VisualStudio.Unity.Bridge.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib">
       <HintPath>C:\Program Files\Unity-Next\Editor\Data\MonoBleedingEdge\lib\mono\4.7.1-api\mscorlib.dll</HintPath>
@@ -601,105 +631,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="Unity.TextMeshPro.Editor.csproj">
-      <Project>{3A848AB7-9891-EDDA-D555-BF184C2F81F4}</Project>
-      <Name>Unity.TextMeshPro.Editor</Name>
-    </ProjectReference>
-    <ProjectReference Include="Unity.PackageManagerUI.Editor.csproj">
-      <Project>{6877705C-FBD9-0C4F-5AFB-6FB431E5D39D}</Project>
-      <Name>Unity.PackageManagerUI.Editor</Name>
-    </ProjectReference>
-    <ProjectReference Include="Unity.XR.WindowsMR.Editor.csproj">
-      <Project>{D7E0F621-D98D-F122-678E-C02D028E5512}</Project>
-      <Name>Unity.XR.WindowsMR.Editor</Name>
-    </ProjectReference>
-    <ProjectReference Include="Unity.TextMeshPro.csproj">
-      <Project>{07A21C90-D344-AE1A-8456-9910C203B41A}</Project>
-      <Name>Unity.TextMeshPro</Name>
-    </ProjectReference>
-    <ProjectReference Include="Unity.XR.WindowsMR.csproj">
-      <Project>{5E11E1B3-0410-B7BD-6D16-1A513F34657C}</Project>
-      <Name>Unity.XR.WindowsMR</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Assets\Common\Scripts\CalibrationSpace.cs" />
-    <Compile Include="Assets\Common\Scripts\CameraCache.cs" />
-    <Compile Include="Assets\Common\Scripts\ClipPlane.cs" />
-    <Compile Include="Assets\Common\Scripts\CrossPlatform\MetroHandleRef.cs" />
-    <Compile Include="Assets\Common\Scripts\CrossPlatform\Reflection\ReflectionExtensions.cs" />
-    <Compile Include="Assets\Common\Scripts\CrossPlatform\Reflection\TypeUtils.cs" />
-    <Compile Include="Assets\Common\Scripts\CrossPlatform\SystemException.cs" />
-    <Compile Include="Assets\Common\Scripts\Extensions\ActionExtensions.cs" />
-    <Compile Include="Assets\Common\Scripts\Extensions\BoundsExtensions.cs" />
-    <Compile Include="Assets\Common\Scripts\Extensions\CameraExtensions.cs" />
-    <Compile Include="Assets\Common\Scripts\Extensions\Color32Extensions.cs" />
-    <Compile Include="Assets\Common\Scripts\Extensions\ComponentExtensions.cs" />
-    <Compile Include="Assets\Common\Scripts\Extensions\EnumerableExtensions.cs" />
-    <Compile Include="Assets\Common\Scripts\Extensions\EventSystemExtensions.cs" />
-    <Compile Include="Assets\Common\Scripts\Extensions\Extensions.cs" />
-    <Compile Include="Assets\Common\Scripts\Extensions\GameObjectExtensions.cs" />
-    <Compile Include="Assets\Common\Scripts\Extensions\LayerExtensions.cs" />
-    <Compile Include="Assets\Common\Scripts\Extensions\MathfExtensions.cs" />
-    <Compile Include="Assets\Common\Scripts\Extensions\TransformExtensions.cs" />
-    <Compile Include="Assets\Common\Scripts\Extensions\VectorExtensions.cs" />
-    <Compile Include="Assets\Common\Scripts\HoverLight.cs" />
-    <Compile Include="Assets\Common\Scripts\Int3.cs" />
-    <Compile Include="Assets\Common\Scripts\InterpolatedValues\InterpolatedColor.cs" />
-    <Compile Include="Assets\Common\Scripts\InterpolatedValues\InterpolatedFloat.cs" />
-    <Compile Include="Assets\Common\Scripts\InterpolatedValues\InterpolatedQuaternion.cs" />
-    <Compile Include="Assets\Common\Scripts\InterpolatedValues\InterpolatedValue.cs" />
-    <Compile Include="Assets\Common\Scripts\InterpolatedValues\InterpolatedVector2.cs" />
-    <Compile Include="Assets\Common\Scripts\InterpolatedValues\InterpolatedVector3.cs" />
-    <Compile Include="Assets\Common\Scripts\InterpolatedValues\QuaternionInterpolated.cs" />
-    <Compile Include="Assets\Common\Scripts\InterpolatedValues\Vector3Interpolated.cs" />
-    <Compile Include="Assets\Common\Scripts\InterpolationUtilities.cs" />
-    <Compile Include="Assets\Common\Scripts\Interpolator.cs" />
-    <Compile Include="Assets\Common\Scripts\MathUtils.cs" />
-    <Compile Include="Assets\Common\Scripts\RaycastResultComparer.cs" />
-    <Compile Include="Assets\Common\Scripts\SingleInstance.cs" />
-    <Compile Include="Assets\Common\Scripts\Singleton.cs" />
-    <Compile Include="Assets\Common\Scripts\StartAwareBehaviour.cs" />
-    <Compile Include="Assets\Common\Scripts\StartAwareSingleton.cs" />
-    <Compile Include="Assets\Common\Scripts\WorldAnchorManager.cs" />
-    <Compile Include="Assets\QuickOutline\Scripts\Outline.cs" />
-    <Compile Include="Assets\Scripts\AppleScript.cs" />
-    <Compile Include="Assets\Scripts\CalibrationController.cs" />
-    <Compile Include="Assets\Scripts\ClickerController.cs" />
-    <Compile Include="Assets\Scripts\DataScript.cs" />
-    <Compile Include="Assets\Scripts\DirectionIndicator.cs" />
-    <Compile Include="Assets\Scripts\EventManager.cs" />
-    <Compile Include="Assets\Scripts\FlowController.cs" />
-    <Compile Include="Assets\Scripts\GateScript.cs" />
-    <Compile Include="Assets\Scripts\GazeCursor.cs" />
-    <Compile Include="Assets\Scripts\HandsTrackingController.cs" />
-    <Compile Include="Assets\Scripts\MenuScript.cs" />
-    <Compile Include="Assets\Scripts\ObjectCollectionManager.cs" />
-    <Compile Include="Assets\Scripts\ObjectPlacer.cs" />
-    <Compile Include="Assets\Scripts\PlacementQuery.cs" />
-    <Compile Include="Assets\Scripts\PlacementResult.cs" />
-    <Compile Include="Assets\Scripts\SaveLoad.cs" />
-    <Compile Include="Assets\Scripts\SpatialUnderstandingState.cs" />
-    <Compile Include="Assets\Scripts\TagAlongForDisplay.cs" />
-    <Compile Include="Assets\Scripts\UtilitiesScript.cs" />
-    <Compile Include="Assets\Scripts\WindEffect.cs" />
-    <Compile Include="Assets\SpatialMapping\Scripts\DataEventArgs.cs" />
-    <Compile Include="Assets\SpatialMapping\Scripts\ObjectSurfaceObserver.cs" />
-    <Compile Include="Assets\SpatialMapping\Scripts\PropertyChangedEventArgsEx.cs" />
-    <Compile Include="Assets\SpatialMapping\Scripts\SpatialMappingManager.cs" />
-    <Compile Include="Assets\SpatialMapping\Scripts\SpatialMappingObserver.cs" />
-    <Compile Include="Assets\SpatialMapping\Scripts\SpatialMappingSource.cs" />
-    <Compile Include="Assets\SpatialMapping\Scripts\SpatialProcessing\PlaneFinding.cs" />
-    <Compile Include="Assets\SpatialMapping\Scripts\SpatialProcessing\RemoveSurfaceVertices.cs" />
-    <Compile Include="Assets\SpatialMapping\Scripts\SpatialProcessing\SurfaceMeshesToPlanes.cs" />
-    <Compile Include="Assets\SpatialMapping\Scripts\SpatialProcessing\SurfacePlane.cs" />
-    <Compile Include="Assets\SpatialUnderstanding\Scripts\SpatialUnderstanding.cs" />
-    <Compile Include="Assets\SpatialUnderstanding\Scripts\SpatialUnderstandingCustomMesh.cs" />
-    <Compile Include="Assets\SpatialUnderstanding\Scripts\SpatialUnderstandingDll.cs" />
-    <Compile Include="Assets\SpatialUnderstanding\Scripts\SpatialUnderstandingDllObjectPlacement.cs" />
-    <Compile Include="Assets\SpatialUnderstanding\Scripts\SpatialUnderstandingDllShapes.cs" />
-    <Compile Include="Assets\SpatialUnderstanding\Scripts\SpatialUnderstandingDllTopology.cs" />
-    <Compile Include="Assets\SpatialUnderstanding\Scripts\SpatialUnderstandingSourceMesh.cs" />
+    <Compile Include="Packages\com.unity.xr.windowsmr.metro\Runtime\AudioSpatializer.cs" />
+    <Compile Include="Packages\com.unity.xr.windowsmr.metro\Runtime\HoloLensInput.cs" />
+    <Compile Include="Packages\com.unity.xr.windowsmr.metro\Runtime\HoloLensInputModule.cs" />
+    <Compile Include="Packages\com.unity.xr.windowsmr.metro\Runtime\HoloLensInputModule.deprecated.cs" />
+    <Compile Include="Packages\com.unity.xr.windowsmr.metro\Runtime\SpatialMappingBase.cs" />
+    <Compile Include="Packages\com.unity.xr.windowsmr.metro\Runtime\SpatialMappingCollider.cs" />
+    <Compile Include="Packages\com.unity.xr.windowsmr.metro\Runtime\SpatialMappingContext.cs" />
+    <Compile Include="Packages\com.unity.xr.windowsmr.metro\Runtime\SpatialMappingRenderer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Common\Shaders\Obsolete\BlinnPhongConfigurable.cginc" />

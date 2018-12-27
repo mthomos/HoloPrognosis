@@ -67,14 +67,11 @@
     <Reference Include="Unity.PackageManagerUI.Editor">
       <HintPath>C:/Users/mario/Documents/Baraboo/Library/ScriptAssemblies/Unity.PackageManagerUI.Editor.dll</HintPath>
     </Reference>
-    <Reference Include="Unity.CollabProxy.Editor">
-      <HintPath>C:/Users/mario/Documents/Baraboo/Library/ScriptAssemblies/Unity.CollabProxy.Editor.dll</HintPath>
+    <Reference Include="Unity.XR.WindowsMR.Editor">
+      <HintPath>C:/Users/mario/Documents/Baraboo/Library/ScriptAssemblies/Unity.XR.WindowsMR.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
       <HintPath>C:/Users/mario/Documents/Baraboo/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.XR.WindowsMR.Editor">
-      <HintPath>C:/Users/mario/Documents/Baraboo/Library/ScriptAssemblies/Unity.XR.WindowsMR.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.XR.WindowsMR">
       <HintPath>C:/Users/mario/Documents/Baraboo/Library/ScriptAssemblies/Unity.XR.WindowsMR.dll</HintPath>
