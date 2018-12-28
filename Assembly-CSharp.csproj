@@ -60,19 +60,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Common\Scripts\CalibrationSpace.cs" />
     <Compile Include="Assets\Common\Scripts\CameraCache.cs" />
     <Compile Include="Assets\Common\Scripts\ClipPlane.cs" />
     <Compile Include="Assets\Common\Scripts\CrossPlatform\MetroHandleRef.cs" />
     <Compile Include="Assets\Common\Scripts\CrossPlatform\Reflection\ReflectionExtensions.cs" />
     <Compile Include="Assets\Common\Scripts\CrossPlatform\Reflection\TypeUtils.cs" />
     <Compile Include="Assets\Common\Scripts\CrossPlatform\SystemException.cs" />
-    <Compile Include="Assets\Common\Scripts\Extensions\ActionExtensions.cs" />
     <Compile Include="Assets\Common\Scripts\Extensions\BoundsExtensions.cs" />
     <Compile Include="Assets\Common\Scripts\Extensions\CameraExtensions.cs" />
-    <Compile Include="Assets\Common\Scripts\Extensions\Color32Extensions.cs" />
     <Compile Include="Assets\Common\Scripts\Extensions\ComponentExtensions.cs" />
-    <Compile Include="Assets\Common\Scripts\Extensions\EnumerableExtensions.cs" />
     <Compile Include="Assets\Common\Scripts\Extensions\EventSystemExtensions.cs" />
     <Compile Include="Assets\Common\Scripts\Extensions\Extensions.cs" />
     <Compile Include="Assets\Common\Scripts\Extensions\GameObjectExtensions.cs" />
@@ -80,24 +76,13 @@
     <Compile Include="Assets\Common\Scripts\Extensions\MathfExtensions.cs" />
     <Compile Include="Assets\Common\Scripts\Extensions\TransformExtensions.cs" />
     <Compile Include="Assets\Common\Scripts\Extensions\VectorExtensions.cs" />
-    <Compile Include="Assets\Common\Scripts\HoverLight.cs" />
     <Compile Include="Assets\Common\Scripts\Int3.cs" />
-    <Compile Include="Assets\Common\Scripts\InterpolatedValues\InterpolatedColor.cs" />
-    <Compile Include="Assets\Common\Scripts\InterpolatedValues\InterpolatedFloat.cs" />
-    <Compile Include="Assets\Common\Scripts\InterpolatedValues\InterpolatedQuaternion.cs" />
-    <Compile Include="Assets\Common\Scripts\InterpolatedValues\InterpolatedValue.cs" />
-    <Compile Include="Assets\Common\Scripts\InterpolatedValues\InterpolatedVector2.cs" />
-    <Compile Include="Assets\Common\Scripts\InterpolatedValues\InterpolatedVector3.cs" />
-    <Compile Include="Assets\Common\Scripts\InterpolatedValues\QuaternionInterpolated.cs" />
-    <Compile Include="Assets\Common\Scripts\InterpolatedValues\Vector3Interpolated.cs" />
     <Compile Include="Assets\Common\Scripts\InterpolationUtilities.cs" />
     <Compile Include="Assets\Common\Scripts\Interpolator.cs" />
     <Compile Include="Assets\Common\Scripts\MathUtils.cs" />
     <Compile Include="Assets\Common\Scripts\RaycastResultComparer.cs" />
     <Compile Include="Assets\Common\Scripts\SingleInstance.cs" />
     <Compile Include="Assets\Common\Scripts\Singleton.cs" />
-    <Compile Include="Assets\Common\Scripts\StartAwareBehaviour.cs" />
-    <Compile Include="Assets\Common\Scripts\StartAwareSingleton.cs" />
     <Compile Include="Assets\Common\Scripts\WorldAnchorManager.cs" />
     <Compile Include="Assets\QuickOutline\Scripts\Outline.cs" />
     <Compile Include="Assets\Scripts\AppleScript.cs" />
@@ -137,61 +122,29 @@
     <Compile Include="Assets\SpatialUnderstanding\Scripts\SpatialUnderstandingDllShapes.cs" />
     <Compile Include="Assets\SpatialUnderstanding\Scripts\SpatialUnderstandingDllTopology.cs" />
     <Compile Include="Assets\SpatialUnderstanding\Scripts\SpatialUnderstandingSourceMesh.cs" />
-    <None Include="Assets\Common\Shaders\Obsolete\FastConfigurable\FastConfigurable.shader" />
-    <None Include="Assets\QuickOutline\Resources\Shaders\OutlineFill.shader" />
-    <None Include="Assets\SpatialMapping\Shaders\Occlusion.shader" />
-    <None Include="Assets\Common\Shaders\Obsolete\BlinnPhongConfigurableTransparent.shader" />
-    <None Include="Assets\UI\Shaders\Alpha-Diffuse.shader" />
-    <None Include="Assets\Common\Shaders\Obsolete\FastConfigurable\HoloToolkitCommon.cginc" />
-    <None Include="Assets\Fruit Pack\Shaders\ToonLit.shader" />
-    <None Include="Assets\Common\Shaders\Obsolete\VertexLitConfigurable.cginc" />
-    <None Include="Assets\Common\Shaders\Obsolete\FastConfigurable\FastConfigurable.cginc" />
-    <None Include="Assets\Common\Shaders\Obsolete\VertexLitConfigurableTransparent.shader" />
-    <None Include="Assets\Common\Shaders\Obsolete\UnlitConfigurable.cginc" />
-    <None Include="Assets\UI\Shaders\HUXButtonHighlightShader.shader" />
     <None Include="Assets\SpatialUnderstanding\Materials\SpatialUnderstandingSurface.shader" />
     <None Include="Assets\SpatialMapping\Shaders\SpatialMappingTap.shader" />
-    <None Include="Assets\Common\Shaders\Obsolete\FastConfigurable\FastConfigurable2Sided.shader" />
-    <None Include="Assets\Common\Shaders\Standard.shader" />
-    <None Include="Assets\UI\Shaders\StereoImage.shader" />
-    <None Include="Assets\Common\Shaders\Obsolete\UnlitConfigurableTransparent.shader" />
-    <None Include="Assets\Common\Shaders\Obsolete\LambertianConfigurableTransparent.shader" />
-    <None Include="Assets\Common\Shaders\Obsolete\BlinnPhongConfigurable.shader" />
-    <None Include="Assets\UI\Shaders\LuminousUnity.shader" />
-    <None Include="Assets\Common\Shaders\Obsolete\FastConfigurable\macro.cginc" />
-    <None Include="Assets\Common\Shaders\Obsolete\VertexLitConfigurable.shader" />
-    <None Include="Assets\Common\Shaders\Obsolete\StandardFast.shader" />
+    <None Include="Assets\QuickOutline\Resources\Shaders\OutlineFill.shader" />
+    <None Include="Assets\QuickOutline\Readme.txt" />
     <None Include="Assets\Fruit Pack\Shaders\ToonLitTransparent.shader" />
-    <None Include="Assets\QuickOutline\Resources\Shaders\OutlineMask.shader" />
-    <None Include="Assets\SpatialUnderstanding\Materials\SpatialMappingSurface.shader" />
-    <None Include="Assets\Common\Shaders\WindowOcclusion.shader" />
-    <None Include="Assets\Common\Shaders\Obsolete\BlinnPhongConfigurable.cginc" />
-    <None Include="Assets\Common\Shaders\Obsolete\LambertianConfigurable.shader" />
-    <None Include="Assets\Common\Shaders\Obsolete\LambertianConfigurable.cginc" />
-    <None Include="Assets\Common\Shaders\Obsolete\UnlitConfigurable.shader" />
-    <None Include="Assets\UI\Shaders\HUXButtonShader.shader" />
+    <None Include="Assets\Fruit Pack\Shaders\ToonLit.shader" />
     <None Include="Assets\SpatialMapping\Shaders\Wireframe.shader" />
-    <None Include="Assets\UI\Shaders\3DTextShader.shader" />
-    <None Include="Assets\Common\Shaders\Obsolete\HoloToolkitCommon.cginc" />
-    <None Include="Assets\UI\Shaders\InvisibleShader.shader" />
-    <None Include="Assets\UI\Shaders\Occlusion.shader" />
-    <None Include="Assets\UI\Shaders\Normal-Diffuse.shader" />
-    <None Include="Assets\UI\Shaders\MovieMask.shader" />
-    <None Include="Assets\Common\Shaders\Obsolete\macro.cginc" />
-    <None Include="Assets\Common\Shaders\Obsolete\UnlitNoDepthTest.shader" />
-    <None Include="Assets\UI\Shaders\DebugNormals.shader" />
-    <None Include="Assets\UI\Shaders\unlit_vert_color.shader" />
-    <Reference Include="Unity.TextMeshPro.Editor">
-      <HintPath>C:/Users/mario/Documents/Baraboo/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
-    </Reference>
+    <None Include="Assets\SpatialMapping\Shaders\Occlusion.shader" />
+    <None Include="Assets\SpatialUnderstanding\Materials\SpatialMappingSurface.shader" />
+    <None Include="Assets\UX\Shaders\Normal-Diffuse.shader" />
+    <None Include="Assets\UX\Shaders\InvisibleShader.shader" />
+    <None Include="Assets\UX\Shaders\DebugNormals.shader" />
+    <None Include="Assets\QuickOutline\Resources\Shaders\OutlineMask.shader" />
+    <None Include="Assets\UX\Shaders\Alpha-Diffuse.shader" />
+    <None Include="Assets\UX\Shaders\Occlusion.shader" />
+    <None Include="Assets\UX\Shaders\MovieMask.shader" />
+    <None Include="Assets\UX\Shaders\LuminousUnity.shader" />
+    <None Include="Assets\UX\Shaders\3DTextShader.shader" />
     <Reference Include="Unity.PackageManagerUI.Editor">
       <HintPath>C:/Users/mario/Documents/Baraboo/Library/ScriptAssemblies/Unity.PackageManagerUI.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.XR.WindowsMR.Editor">
       <HintPath>C:/Users/mario/Documents/Baraboo/Library/ScriptAssemblies/Unity.XR.WindowsMR.Editor.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.TextMeshPro">
-      <HintPath>C:/Users/mario/Documents/Baraboo/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="Unity.XR.WindowsMR">
       <HintPath>C:/Users/mario/Documents/Baraboo/Library/ScriptAssemblies/Unity.XR.WindowsMR.dll</HintPath>
