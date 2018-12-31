@@ -55,13 +55,11 @@ public class GazeCursor : MonoBehaviour
     public void setTrainingMode()
     {
         trainingMode = true;
-        //FocusedObject = null;
     }
 
     public void setGenericUse()
     {
         trainingMode = false;
-        //FocusedObject = null;
     }
 
     public GameObject getFocusedObject()

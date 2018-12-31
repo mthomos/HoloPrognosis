@@ -1,5 +1,4 @@
-﻿using HoloToolkit.Unity;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -21,48 +20,39 @@ public class FlowController : MonoBehaviour
     // Settings
     private List<int> settings;
     private bool audioFeedbackEnabled = false;
-    private bool graphicalFeedbackEnabled = false;
     private bool clickerEnabled = false;
     // Training
     private bool trainingMode = false;
     private CalibrationController rightController, leftController;
     //Create timer variables
     private float timer;
-    private bool timerEnabled = false;
-    //
-    private bool handAboveBoxInProgress;
-    private float manipulationTimer;
+    public float timerForGate;
     // Menu
     private GameObject menuScreen;
     private GameObject settingsScreen;
     private GameObject playScreen;
     private GameObject resultsScreen;
     private GameObject currentMenu;
-    private int inMenu = -1;
-    //
+    private int inMenu = -1; // Menu index
     private bool rightHandEnabled = true;
     private bool leftHandEnabled = true;
     private bool treeIsShort = true;
     //
-    public float timerForRightPose = 2.0f;
+    public float timerForRightPose = 3.0f;
     public float timerForHighPose = 3.0f;
-    public float gameTimeMinutes;
-    public float waitHandTime;
-    //
-    public Vector3 smallSizeTree;
-    public Vector3 bigSizeTree;
-    //
-    private GameObject gate;
+    // Gate variables
+    private GateScript gateScript;
+    private bool objectInGateDetected;
+    private bool freeToRelease;
 
     private int success, fail;
     private bool rightHandPlaying = false;
 
     private void Start ()
     {
-        EventManager.StartListening("box_collision", boxObjectCollision);
-        EventManager.StartListening("floor_collision", floorObjectCollision);
+        EventManager.StartListening("box_collision", successfulTry);
+        EventManager.StartListening("floor_collision", failedTry);
         //Load Settings
-        /*
         settings = saveLoadScript.LoadSettings();
         for (int i=0; i< settings.Count; i++)
         {
@@ -71,30 +61,30 @@ public class FlowController : MonoBehaviour
                 if (settings[i] > 0)
                     audioFeedbackEnabled = true;
             }
-            else if (i == 1)
-            {
-                if (settings[i] > 0)
-                    graphicalFeedbackEnabled = true;
-            }
             else if (i == 2)
             {
                 if (settings[i] > 0)
                     clickerEnabled = true;
             }
         }
-        */
+        /*
         audioFeedbackEnabled = false;
-        graphicalFeedbackEnabled = true;
         clickerEnabled = true;
+        */
     }
 
-    private void boxObjectCollision()
+    private void successfulTry()
     {
-        success++;
-        PrepareNextManipulation();
+        if (freeToRelease)
+        {
+            success++;
+            PrepareNextManipulation();
+        }
+        else
+            failedTry();
     }
 
-    private void floorObjectCollision()
+    private void failedTry()
     {
         fail++;
         PrepareNextManipulation();
@@ -130,14 +120,32 @@ public class FlowController : MonoBehaviour
 
     private void Update ()
     {
-        if (timerEnabled && trainingMode)
+
+        if (trainingMode)
         {
-            refreshTimer();
             // Calculate distance of manipulated object and gate
-            if (gate == null)
-                gate = ObjectCollectionManager.Instance.getCreatedGate();
-
-
+            if (gateScript == null)
+                gateScript = ObjectCollectionManager.Instance.getCreatedGate().GetComponent<GateScript>();
+            if (gateScript.objectInsideTree(handsTrackingController.getManipulatedObject()))
+            {
+                if (!objectInGateDetected)
+                {
+                    freeToRelease = false;
+                    objectInGateDetected = true;
+                    //Reset Timer
+                    timer = 0.0f;
+                    if (timerForGate == 0)
+                        timerForGate = 3.0f;
+                }
+                else
+                {   //Refresh Timer
+                    timer += Time.deltaTime;
+                    if (timer > timerForGate)
+                    {
+                        freeToRelease = true;
+                    }
+                }
+            }
         }
 	}
 
@@ -148,6 +156,7 @@ public class FlowController : MonoBehaviour
             finishGame();
             return;
         }
+        
         GameObject tappedObj = gazeCursor.getFocusedObject();
         if (tappedObj.CompareTag("UI"))
         {
@@ -257,20 +266,10 @@ public class FlowController : MonoBehaviour
 
     private void returnToStartMenu()
     {
-         UtilitiesScript.Instance.disableObject(currentMenu);
+        UtilitiesScript.Instance.disableObject(currentMenu);
         currentMenu = menuScreen;
-         UtilitiesScript.Instance.enableObject(currentMenu);
+        UtilitiesScript.Instance.enableObject(currentMenu);
         inMenu = 0;
-    }
-
-    private void refreshTimer()
-    {
-        timer += Time.deltaTime;
-        if (timer > gameTimeMinutes * 60)
-        {
-            timer = 0f;
-            finishGame();
-        }
     }
 
     public void calibrationMaxPose()
@@ -278,21 +277,6 @@ public class FlowController : MonoBehaviour
         // Tell user to raise the hand for 2s
         //textToSpeechManager.SpeakSsml("Now Raise your hand as high as you can for two seconds");
         DebugText.text = "Raise your hand as high as you can. When ready open your palm";
-    }
-
-    public void TreeDone()
-    {
-         DebugText.text = " Tree Done";
-    }
-    private void enableTimer()
-    {
-        timerEnabled = true;
-        timer = 0.0f;
-    }
-
-    private void disableTimer()
-    {
-        timerEnabled = false;
     }
 
     //Public methods
@@ -307,8 +291,8 @@ public class FlowController : MonoBehaviour
         menuScreen.transform.position = pos;
         Vector3 directionToTarget = Camera.main.transform.position - pos;
         directionToTarget.y = 0.0f;
-        //if (directionToTarget.sqrMagnitude > 0.005f)
-        transform.rotation = Quaternion.LookRotation(-directionToTarget);
+        if (directionToTarget.sqrMagnitude > 0.005f)
+            transform.rotation = Quaternion.LookRotation(-directionToTarget);
         //menuScreen.AddComponent<MenuScript>();
         inMenu = 0;
         currentMenu = menuScreen;
@@ -317,10 +301,8 @@ public class FlowController : MonoBehaviour
 
     public void startPlaying()
     {
-         UtilitiesScript.Instance.disableObject(currentMenu);
-        //EventManager.StopListening("tap", tapUiReceived);
+        UtilitiesScript.Instance.disableObject(currentMenu);
         DebugText.text = "Place your hand in right angle pose for 2 seconds ";
-        //Preapare Calibration Scene
         //Set generic use for gaze
         gazeCursor.setGenericUse();
         //Start hand calibration
@@ -335,9 +317,9 @@ public class FlowController : MonoBehaviour
         // Enable manipulation with hands
         handsTrackingController.enableHandManipulation();
         // Enable data collection
-        //handsTrackingController.enableDataCollection();
+            //handsTrackingController.enableDataCollection();
         // Enable Timer
-        // enableTimer();
+            // enableTimer();
         trainingMode = true;
     }
 
@@ -345,12 +327,12 @@ public class FlowController : MonoBehaviour
     {
         trainingMode = false;
         ObjectCollectionManager.Instance.ClearScene();
-         UtilitiesScript.Instance.enableObject(currentMenu);
+        UtilitiesScript.Instance.enableObject(currentMenu);
         if (resultsScreen == null) //Create Results menu
             resultsScreen = Instantiate(resultsPrefab, currentMenu.transform.position, currentMenu.transform.rotation);
         else
              UtilitiesScript.Instance.enableObject(resultsScreen);
-         UtilitiesScript.Instance.disableObject(currentMenu);
+        UtilitiesScript.Instance.disableObject(currentMenu);
         currentMenu = resultsScreen;
         TextMesh suc =  currentMenu.transform.Find("Successes").gameObject.GetComponent<TextMesh>();
         TextMesh failures = currentMenu.transform.Find("Failures").gameObject.GetComponent<TextMesh>();
@@ -429,9 +411,7 @@ public class FlowController : MonoBehaviour
         Rect box = new Rect(createdBox.transform.position.x, createdBox.transform.position.z, createdBox.GetComponent<Renderer>().bounds.size.x / 2, createdBox.GetComponent<Renderer>().bounds.size.z / 2);
 
         if (box.Contains(new Vector2(pos.x, pos.z)))
-        {
             UtilitiesScript.Instance.EnableOutline(handsTrackingController.getManipulatedObject() ,Color.white);
-        }
         else
             UtilitiesScript.Instance.EnableOutline(handsTrackingController.getManipulatedObject() ,Color.red);
     }

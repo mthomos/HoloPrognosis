@@ -5,8 +5,8 @@ using UnityEngine;
 public enum ObjectType
 {
     Tree,
-    Fruit,
-    Box
+    Box,
+    Gate
 }
 
 public struct PlacementQuery

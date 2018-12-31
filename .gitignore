@@ -3,3 +3,4 @@ Library*
 *.meta
 *.cache
 Temp*
+Logs*

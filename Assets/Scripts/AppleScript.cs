@@ -23,16 +23,16 @@ public class AppleScript : MonoBehaviour
     {
         //Get collision object
         GameObject colObject = collision.gameObject;
-        if (colObject.name == "Box")
+        if (colObject.CompareTag("Dummy"))
         {
             if(!triggered)
             {
                 triggered = true;
                 EventManager.TriggerEvent("box_collision");
+                gameObject.transform.parent = colObject.transform;
+                if (gameObject.GetComponent<Outline>() != null)
+                    gameObject.GetComponent<Outline>().enabled = false;
             }
-            gameObject.transform.parent = colObject.transform;
-            if(gameObject.GetComponent<Outline>()!=null)
-                gameObject.GetComponent<Outline>().enabled = false;
         }
         else
         {
@@ -41,11 +41,11 @@ public class AppleScript : MonoBehaviour
             {
                 triggered = true;
                 EventManager.TriggerEvent("floor_collision");
+                gameObject.transform.parent = colObject.transform;
+                if (gameObject.GetComponent<Outline>() != null)
+                    gameObject.GetComponent<Outline>().enabled = false;
             }
-            if(gameObject.GetComponent<Outline>()!=null)
-                gameObject.GetComponent<Outline>().enabled = false;
         }
-        //ObjectCollectionManager.Instance.disappearBox();
     }
 
     public void disableWind()

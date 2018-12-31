@@ -36,7 +36,8 @@ public class ObjectPlacer : MonoBehaviour
 
         List<PlacementQuery> queries = new List<PlacementQuery>();
         queries.AddRange(AddTree());
-        queries.AddRange(AddBox());
+        //queries.AddRange(AddBox());
+        queries.AddRange(AddGate());
         GetLocationsFromSolver(queries);
     }
 
@@ -49,8 +50,10 @@ public class ObjectPlacer : MonoBehaviour
 
     public void CreateTree()
     {
+        if (!SpatialUnderstanding.Instance.AllowSpatialUnderstanding)
+            return;
+
         SpatialUnderstandingDllObjectPlacement.Solver_Init();
-        HideGridEnableOcclulsion();
 
         List<PlacementQuery> queries = new List<PlacementQuery>();
         queries.AddRange(AddTree());
@@ -62,18 +65,18 @@ public class ObjectPlacer : MonoBehaviour
         return CreateLocationQueriesForSolver(1, ObjectCollectionManager.Instance.TreeSize, ObjectType.Tree);
     }
 
-    public List<PlacementQuery> AddFruit()
-    {
-        return CreateLocationQueriesForSolver(1, ObjectCollectionManager.Instance.FruitSize, ObjectType.Fruit);
-    }
-
     public List<PlacementQuery> AddBox()
     {
         return CreateLocationQueriesForSolver(1, ObjectCollectionManager.Instance.BoxSize, ObjectType.Box);
     }
 
+    public List<PlacementQuery> AddGate()
+    {
+        return CreateLocationQueriesForSolver(1, ObjectCollectionManager.Instance.GateSize, ObjectType.Gate);
+    }
 
-     private void ProcessPlacementResults()
+
+    private void ProcessPlacementResults()
     {
         if (results.Count > 0)
         {
@@ -87,6 +90,9 @@ public class ObjectPlacer : MonoBehaviour
                     break;
                 case ObjectType.Box:
                     ObjectCollectionManager.Instance.CreateBox(toPlace.Position, rotation);
+                    break;
+                case ObjectType.Gate:
+                    ObjectCollectionManager.Instance.CreateGate(toPlace.Position, rotation);
                     break;
             }
         }
@@ -149,15 +155,6 @@ public class ObjectPlacer : MonoBehaviour
                 placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_NearCenter());
                 placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_OnFloor(halfDims);
             }
-            else if (objType == ObjectType.Fruit)
-            {
-                placementRules = new List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule>
-                {
-                SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule.Create_AwayFromOtherObjects(halfDims.x)
-                };
-                placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_NearWall());
-                placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_InMidAir(halfDims);
-            }
             else if (objType == ObjectType.Box)
             {
                 placementRules = new List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule>
@@ -165,6 +162,15 @@ public class ObjectPlacer : MonoBehaviour
                 SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule.Create_AwayFromOtherObjects(boxTreeDistance)
                 };
                 placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_NearWall());
+                placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_OnFloor(halfDims);
+            }
+            else if (objType == ObjectType.Gate)
+            {
+                placementRules = new List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule>
+                {
+                SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule.Create_AwayFromWalls(.5f, .5f)
+                };
+                placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_AwayFromOtherObjects());
                 placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_OnFloor(halfDims);
             }
 

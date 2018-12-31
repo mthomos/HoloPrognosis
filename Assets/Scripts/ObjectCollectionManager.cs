@@ -60,6 +60,25 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         }
     }
 
+    public void CreateGate(Vector3 positionCenter, Quaternion rotation)
+    {
+        // Stay center in the square but move down to the ground
+        var position = positionCenter + new Vector3(0, GateSize.y * .25f, 0);
+        GameObject newObject = Instantiate(GatePrefab, position, rotation);
+        newObject.name = "Gate";
+        if (newObject != null)
+        {
+            newObject.transform.parent = gameObject.transform;
+            newObject.tag = "Dummy";
+            newObject.transform.localScale = RescaleToSameScaleFactor(GatePrefab);
+            ActiveHolograms.Add(newObject);
+            createdGate = newObject;
+            boxCreated = true;
+            if (treeCreated && boxCreated)
+                flowController.PrepareNextManipulation();
+        }
+    }
+
     private Vector3 RescaleToSameScaleFactor(GameObject objectToScale)
     {
         if (ScaleFactor == 0f) CalculateScaleFactor();
@@ -155,6 +174,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
 
     public void appearBox(int counter, Vector3 initPos)
     {
+        /*
         Vector3 handRef = initPos - Camera.main.transform.position;
         float magHR = Mathf.Sqrt(Mathf.Pow(handRef.x, 2) + Mathf.Pow(handRef.z, 2));
         float cosf = handRef.x / magHR;
@@ -171,10 +191,10 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         }
         handRef.y = initPos.y - 0.5f;
         createdBox.SetActive(true);
-        /*
         Vector3 newPos = handRef + Camera.main.transform.position;
         createdBox.transform.position = newPos;
         */
+        createdBox.SetActive(true);
     }
 
     public void disappearBox()
@@ -186,7 +206,6 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
 
     public GameObject getCreatedBox()
     {
-        //createdBox.SetActive(true);
         return createdBox;
     }
 

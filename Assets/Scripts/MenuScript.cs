@@ -25,7 +25,7 @@ public class MenuScript : MonoBehaviour
         {
             interpolator.PositionPerSecond = PositionUpdateSpeed;
             interpolator.SetTargetPosition(tagalongTargetPosition);
-            Vector3 directionToTarget = Camera.main.transform.position - transform.position;
+            Vector3 directionToTarget = mainCamera.transform.position - transform.position;
             directionToTarget.y = 0.0f;
 
             if (directionToTarget.sqrMagnitude > 0.005f)

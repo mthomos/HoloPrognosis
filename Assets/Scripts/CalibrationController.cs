@@ -24,17 +24,13 @@
     {
         if (rightPoseInProgess)
         {
-            //if (headHandDist > Right_Pose_headHandDistance)
-                Right_Pose_headHandDistance = headHandDist;
-            //if (handHeight > Right_Pose_handHeight)
-                Right_Pose_handHeight = handHeight;
+            Right_Pose_headHandDistance = headHandDist;
+            Right_Pose_handHeight = handHeight;
         }
         else
         {
-            //if (headHandDist > Highest_Pose_headHandDistance)
-                Highest_Pose_headHandDistance = headHandDist;
-            //if (handHeight > Highest_pose_handHeight)
-                Highest_pose_handHeight = handHeight;
+            Highest_Pose_headHandDistance = headHandDist;
+            Highest_pose_handHeight = handHeight;
         }
     }
 
