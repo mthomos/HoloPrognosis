@@ -49,7 +49,7 @@ PlayerSettings:
   m_StereoRenderingPath: 0
   m_ActiveColorSpace: 0
   m_MTRendering: 1
-  m_StackTraceTypes: 010000000100000001000000010000000200000001000000
+  m_StackTraceTypes: 010000000200000001000000010000000200000001000000
   iosShowActivityIndicatorOnLoading: -1
   androidShowActivityIndicatorOnLoading: -1
   iosAppInBackgroundBehavior: 0
@@ -546,7 +546,7 @@ PlayerSettings:
     WindowsStoreApps:
       AllJoyn: False
       Appointments: False
-      BackgroundMediaPlayback: False
+      BackgroundMediaPlayback: True
       BlockedChatMessages: False
       Bluetooth: True
       Chat: False
