@@ -89,8 +89,10 @@
     <Compile Include="Assets\Scripts\CalibrationController.cs" />
     <Compile Include="Assets\Scripts\ClickerController.cs" />
     <Compile Include="Assets\Scripts\DataScript.cs" />
+    <Compile Include="Assets\Scripts\DebugScript.cs" />
     <Compile Include="Assets\Scripts\DirectionIndicator.cs" />
     <Compile Include="Assets\Scripts\EventManager.cs" />
+    <Compile Include="Assets\Scripts\FileManager.cs" />
     <Compile Include="Assets\Scripts\FlowController.cs" />
     <Compile Include="Assets\Scripts\GateScript.cs" />
     <Compile Include="Assets\Scripts\GazeCursor.cs" />
@@ -100,7 +102,6 @@
     <Compile Include="Assets\Scripts\ObjectPlacer.cs" />
     <Compile Include="Assets\Scripts\PlacementQuery.cs" />
     <Compile Include="Assets\Scripts\PlacementResult.cs" />
-    <Compile Include="Assets\Scripts\SaveLoad.cs" />
     <Compile Include="Assets\Scripts\SpatialUnderstandingState.cs" />
     <Compile Include="Assets\Scripts\TagAlongForDisplay.cs" />
     <Compile Include="Assets\Scripts\UtilitiesScript.cs" />
