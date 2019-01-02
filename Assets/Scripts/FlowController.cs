@@ -10,7 +10,7 @@ public class FlowController : MonoBehaviour
     public GameObject settingsPrefab;
     public GameObject playPrefab;
     public GameObject resultsPrefab;
-    public SaveLoad saveLoadScript;
+    public FileManager fileManager;
     public ObjectPlacer placer;
     public GazeCursor gazeCursor;
     public TextMesh DebugText;
@@ -53,7 +53,7 @@ public class FlowController : MonoBehaviour
         EventManager.StartListening("box_collision", successfulTry);
         EventManager.StartListening("floor_collision", failedTry);
         //Load Settings
-        settings = saveLoadScript.LoadSettings();
+        settings = fileManager.LoadSettings();
         for (int i=0; i< settings.Count; i++)
         {
             if(i==0)

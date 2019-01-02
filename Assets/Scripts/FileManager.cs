@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -115,5 +114,29 @@ public class FileManager : MonoBehaviour
             Debug.Log("Error reading  file->" + fileName + "___" + e);
         }
 #endif
+    }
+
+    public List<int> LoadSettings()
+    {
+        List<int> ret = new List<int>();
+        string result;
+        if (File.Exists(Path.Combine(appPath, settingsName)))
+        {
+            result = readFile(settingsName);
+            foreach(string line in result.Split('\n'))
+            {
+                ret.Add((int)char.GetNumericValue(line.ToCharArray()[0]));
+            }
+        }
+        else
+        {
+            //Write Default Settings
+            addString(settingsName, "1 \n1 \n0 \n0 ");
+            ret.Add(1);
+            ret.Add(1);
+            ret.Add(0);
+            ret.Add(0);
+        }
+        return ret;
     }
 }
