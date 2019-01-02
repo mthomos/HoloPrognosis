@@ -18,6 +18,7 @@ public class TextToSpeech : MonoBehaviour
     private AudioSource audioSource;
     public AudioSource AudioSource { get { return audioSource; } set { audioSource = value; } }
 
+    public static TextToSpeech Instance { get; private set; }
 #if !UNITY_EDITOR && UNITY_WSA
     private SpeechSynthesizer synthesizer;
     private VoiceInformation voiceInfo;
@@ -194,6 +195,7 @@ public class TextToSpeech : MonoBehaviour
 #if !UNITY_EDITOR && UNITY_WSA
             synthesizer = new SpeechSynthesizer();
 #endif
+            Instance = this;
         }
         catch (Exception ex)
         {

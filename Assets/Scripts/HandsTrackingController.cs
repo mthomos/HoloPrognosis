@@ -14,15 +14,15 @@ public struct HandStruct
         this.hand = hand;
         this.id = id;
         this.rightHand = rightHand;
-        this.interactionDetected = true;
+        interactionDetected = true;
     }
 
     public HandStruct(bool status)
     {
-        this.hand = null;
-        this.id = (uint) 1;
-        this.rightHand = status;
-        this.interactionDetected = status;
+        hand = null;
+        id = 1;
+        rightHand = status;
+        interactionDetected = status;
     }
 }
 

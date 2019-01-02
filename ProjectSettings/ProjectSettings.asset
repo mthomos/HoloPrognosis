@@ -134,7 +134,7 @@ PlayerSettings:
       maximumSupportedHeadTracking: 1
     hololens:
       depthFormat: 1
-      depthBufferSharingEnabled: 0
+      depthBufferSharingEnabled: 1
     oculus:
       sharedDepthBuffer: 0
       dashSupport: 0
@@ -574,7 +574,7 @@ PlayerSettings:
       RemovableStorage: True
       SharedUserCertificates: False
       SpatialPerception: True
-      SystemManagement: True
+      SystemManagement: False
       UserAccountInformation: False
       UserDataTasks: False
       UserNotificationListener: False

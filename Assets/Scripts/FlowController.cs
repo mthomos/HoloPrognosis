@@ -15,7 +15,6 @@ public class FlowController : MonoBehaviour
     public GazeCursor gazeCursor;
     public TextMesh DebugText;
     public HandsTrackingController handsTrackingController;
-    //public TextToSpeech textToSpeechManager;
     public float menuDistance;
     // Settings
     private List<int> settings;
@@ -67,10 +66,6 @@ public class FlowController : MonoBehaviour
                     clickerEnabled = true;
             }
         }
-        /*
-        audioFeedbackEnabled = false;
-        clickerEnabled = true;
-        */
     }
 
     private void successfulTry()
@@ -244,7 +239,7 @@ public class FlowController : MonoBehaviour
 
     private void moveToPlayScreen()
     {
-         UtilitiesScript.Instance.disableObject(currentMenu);
+        UtilitiesScript.Instance.disableObject(currentMenu);
         if (playScreen == null) //Create Play menu
             playScreen = Instantiate(playPrefab, currentMenu.transform.position, currentMenu.transform.rotation);
         else
@@ -274,9 +269,8 @@ public class FlowController : MonoBehaviour
 
     public void calibrationMaxPose()
     {
-        // Tell user to raise the hand for 2s
-        //textToSpeechManager.SpeakSsml("Now Raise your hand as high as you can for two seconds");
         DebugText.text = "Raise your hand as high as you can. When ready open your palm";
+        TextToSpeech.Instance.StartSpeaking(DebugText.text);
     }
 
     //Public methods
@@ -292,8 +286,8 @@ public class FlowController : MonoBehaviour
         Vector3 directionToTarget = Camera.main.transform.position - pos;
         directionToTarget.y = 0.0f;
         if (directionToTarget.sqrMagnitude > 0.005f)
-            transform.rotation = Quaternion.LookRotation(-directionToTarget);
-        //menuScreen.AddComponent<MenuScript>();
+            menuScreen.transform.rotation = Quaternion.LookRotation(-directionToTarget);
+
         inMenu = 0;
         currentMenu = menuScreen;
         placer.HideGridEnableOcclulsion();
@@ -303,6 +297,7 @@ public class FlowController : MonoBehaviour
     {
         UtilitiesScript.Instance.disableObject(currentMenu);
         DebugText.text = "Place your hand in right angle pose for 2 seconds ";
+        TextToSpeech.Instance.StartSpeaking(DebugText.text);
         //Set generic use for gaze
         gazeCursor.setGenericUse();
         //Start hand calibration
@@ -311,13 +306,14 @@ public class FlowController : MonoBehaviour
 
     public void calibrationFinished()
     {
+        TextToSpeech.Instance.StartSpeaking("Now the tree will be appeared");
         placer.CreateScene();
         //Set training use for gaze
         gazeCursor.setTrainingMode();
         // Enable manipulation with hands
         handsTrackingController.enableHandManipulation();
         // Enable data collection
-            //handsTrackingController.enableDataCollection();
+        handsTrackingController.enableDataCollection();
         // Enable Timer
             // enableTimer();
         trainingMode = true;
@@ -325,6 +321,7 @@ public class FlowController : MonoBehaviour
 
     public void finishGame()
     {
+        TextToSpeech.Instance.StartSpeaking("Training finished");
         trainingMode = false;
         ObjectCollectionManager.Instance.ClearScene();
         UtilitiesScript.Instance.enableObject(currentMenu);
@@ -411,24 +408,9 @@ public class FlowController : MonoBehaviour
         Rect box = new Rect(createdBox.transform.position.x, createdBox.transform.position.z, createdBox.GetComponent<Renderer>().bounds.size.x / 2, createdBox.GetComponent<Renderer>().bounds.size.z / 2);
 
         if (box.Contains(new Vector2(pos.x, pos.z)))
-            UtilitiesScript.Instance.EnableOutline(handsTrackingController.getManipulatedObject() ,Color.white);
+            UtilitiesScript.Instance.EnableOutline(handsTrackingController.getManipulatedObject(), Color.white);
         else
-            UtilitiesScript.Instance.EnableOutline(handsTrackingController.getManipulatedObject() ,Color.red);
-    }
-
-    public void userSaidYes()
-    {
-        throw new NotImplementedException();
-    }
-
-    public void userSaidNo()
-    {
-        throw new NotImplementedException();
-    }
-
-    public void userRequestedFinish()
-    {
-        throw new NotImplementedException();
+            UtilitiesScript.Instance.EnableOutline(handsTrackingController.getManipulatedObject(), Color.red);
     }
 
     public void printText(String text)

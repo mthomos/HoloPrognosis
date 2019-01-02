@@ -1,10 +1,8 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.XR.WSA.Input;
 
 public class ClickerController : MonoBehaviour
 {
-    private int clicker;
     private float lastClickTime = .0f;
     private bool clickTriggered;
     private bool doubleClickTriggered;
