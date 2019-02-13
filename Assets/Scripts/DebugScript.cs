@@ -34,7 +34,7 @@ public class DebugScript : MonoBehaviour
     {
         if (Time.time - timer > 2 && !trigerred1)
         {
-            fileManager.addString("settings.txt", "1 \n0 \n0 \n1 ");
+            fileManager.addRequest("settings.txt", "1 \n0 \n0 \n1 ");
             trigerred1 = true;
         }
 

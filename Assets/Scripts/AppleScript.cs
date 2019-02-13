@@ -23,28 +23,18 @@ public class AppleScript : MonoBehaviour
     {
         //Get collision object
         GameObject colObject = collision.gameObject;
-        if (colObject.CompareTag("Dummy"))
+        //Signal the event
+        if (colObject.CompareTag("Dummy") && !triggered)
+            EventManager.TriggerEvent("box_collision");
+        else if (!colObject.CompareTag("Dummy") && !triggered)
+           EventManager.TriggerEvent("floor_collision");
+
+        if(!triggered)
         {
-            if(!triggered)
-            {
-                triggered = true;
-                EventManager.TriggerEvent("box_collision");
-                gameObject.transform.parent = colObject.transform;
-                if (gameObject.GetComponent<Outline>() != null)
-                    gameObject.GetComponent<Outline>().enabled = false;
-            }
-        }
-        else
-        {
-            gameObject.transform.parent = null;
-            if(!triggered)
-            {
-                triggered = true;
-                EventManager.TriggerEvent("floor_collision");
-                gameObject.transform.parent = colObject.transform;
-                if (gameObject.GetComponent<Outline>() != null)
-                    gameObject.GetComponent<Outline>().enabled = false;
-            }
+            triggered = true;
+            gameObject.transform.parent = colObject.transform;
+            if (gameObject.GetComponent<Outline>() != null)
+                gameObject.GetComponent<Outline>().enabled = false;
         }
     }
 

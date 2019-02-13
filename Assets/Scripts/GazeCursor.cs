@@ -32,9 +32,7 @@ public class GazeCursor : MonoBehaviour
             if (trainingMode) // Use for gameplay
                 refreshFocusedObjectTrainingMode();
             else // for !training
-            {
                 refreshFocusedObjectGenericMode();
-            }
         }
         else
             cursorMeshRenderer.enabled = false;
@@ -66,5 +64,4 @@ public class GazeCursor : MonoBehaviour
     {
         return FocusedObject;
     }
-
 }

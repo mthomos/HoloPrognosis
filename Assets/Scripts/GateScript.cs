@@ -5,38 +5,40 @@ public class GateScript : MonoBehaviour
     //For editor
     public Color objectColor;
     //For scripting use
+    private bool checkForObject;
     public bool objectInGate = false;
     public GameObject approachingObject = null;
 
-    private bool checkForObject;
-
-    // Start is called before the first frame update
     void Start()
     {
-        GetComponent<Renderer>().material.color = objectColor;
+
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if (checkForObject && approachingObject != null)
-        {
-            objectInGate = objectInsideTree(approachingObject);
-        }
+
     }
 
-    public bool objectInsideTree(GameObject obj)
+    public bool objectInsideGate(GameObject obj)
     {
-        Vector3 gatePos = this.transform.position;
         Vector3 objPos = obj.transform.position;
-        Vector3 gateSize = this.GetComponent<Renderer>().bounds.size;
-        float radius = (gateSize.y + gateSize.z) / 2;
-        float gateObjdistance2D = new Vector2(gatePos.y - objPos.y, gatePos.z - objPos.z).magnitude;
-        //Check if is inside gate circle
-        if (Mathf.Abs(gatePos.x - objPos.x) < gateSize.x && gateObjdistance2D <= radius)
-            return true;
+        Vector3 gateSize = GetComponent<Renderer>().bounds.size;
+        Rect boxXZ = new Rect(transform.position.x, transform.position.z, gateSize.x / 2, gateSize.z / 2);
+        Rect boxXY = new Rect(transform.position.x, transform.position.y, gateSize.x / 2, gateSize.y / 2);
 
-        return false;
+       if (boxXZ.Contains(new Vector2(objPos.x, objPos.z)) && boxXY.Contains(new Vector2(objPos.x, objPos.y)) )
+       {
+            UtilitiesScript.Instance.EnableOutline(obj, Color.white);
+            UtilitiesScript.Instance.EnableOutline(gameObject, Color.white);
+            return true;
+       }
+        else
+        {
+            UtilitiesScript.Instance.EnableOutline(obj, Color.red);
+            UtilitiesScript.Instance.DisableOutline(gameObject);
+            return false;
+        }
+    
     }
 
     public void setCheckStatus(bool check)

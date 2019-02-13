@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using HoloToolkit.Unity;
 using UnityEngine;
 
@@ -14,7 +13,6 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
     public Vector3 FruitSize;
     public Vector3 BoxSize;
     public Vector3 GateSize;
-    public Vector3 CalibrationPointSize;
     // Private Variables
     public FlowController flowController;
     private GameObject createdTree;
@@ -23,6 +21,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
     private float ScaleFactor;
     private List<GameObject> ActiveHolograms = new List<GameObject>();
     private bool boxCreated, treeCreated;
+    private float angle = 90;
 
     public void CreateTree(Vector3 positionCenter, Quaternion rotation)
     {
@@ -149,20 +148,17 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
     
     public GameObject getLowestFruit(float threshold)
     {
-        List<GameObject> list  = new List<GameObject>();
+        GameObject lowestObject = null;
+        float dist = 10000;
         if (createdTree == null)
             return null;
         for (int i = 0; i < createdTree.transform.childCount; i++)
         {
-            if ( createdTree.transform.GetChild(i).gameObject.transform.position.y > threshold)
-                list.Add(createdTree.transform.GetChild(i).gameObject);
+            if (createdTree.transform.GetChild(i).gameObject.transform.position.y > threshold &&
+                    createdTree.transform.GetChild(i).gameObject.transform.position.y <= dist)
+                lowestObject = createdTree.transform.GetChild(i).gameObject;
         }
-
-        List <GameObject> a = list.OrderBy(item => item.transform.position.y).ToList();
-        if (a[0] != null)
-            return a[0];
-        else
-            return null;
+        return lowestObject;
     }
 
     public void ClearScene()
@@ -172,29 +168,29 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         ActiveHolograms.Clear();
     }
 
-    public void appearBox(int counter, Vector3 initPos)
+    public void appearGate(CalibrationController controller)
     {
-        /*
-        Vector3 handRef = initPos - Camera.main.transform.position;
-        float magHR = Mathf.Sqrt(Mathf.Pow(handRef.x, 2) + Mathf.Pow(handRef.z, 2));
-        float cosf = handRef.x / magHR;
-        float sinf = handRef.z / magHR;
-        if (counter%2==0)
+
+        float height = controller.getRightPoseHandHeight();
+        float distance = controller.getRightPoseHeadHandDistance();
+        Vector3 position;
+        position.y = height;
+        if( controller.isRightHand() )
         {
-            handRef.x = magHR * (-sinf);
-            handRef.z = magHR * (cosf);
+            position.x = Camera.main.transform.position.x + Mathf.Cos(angle)*distance;
+            position.z = Camera.main.transform.position.z + Mathf.Sin(angle)*distance;
         }
         else
         {
-            handRef.x = magHR * sinf;
-            handRef.z = magHR * (-cosf);
+            position.x = Camera.main.transform.position.x + Mathf.Cos(-1*angle)*distance;
+            position.z = Camera.main.transform.position.z + Mathf.Sin(-1*angle)*distance;
         }
-        handRef.y = initPos.y - 0.5f;
-        createdBox.SetActive(true);
-        Vector3 newPos = handRef + Camera.main.transform.position;
-        createdBox.transform.position = newPos;
-        */
-        createdBox.SetActive(true);
+
+        createdGate.SetActive(true);
+        Vector3 difPos = position - createdGate.transform.position;
+        createdGate.transform.position = position;
+        createdGate.transform.rotation.Set(0, 90, 0, 1);
+        //For child objects ??????
     }
 
     public void disappearBox()
@@ -202,6 +198,13 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         for (int a = 0; a < createdBox.transform.childCount; a++)
             createdBox.transform.GetChild(a).gameObject.SetActive(false);
         createdBox.SetActive(false);
+    }
+
+    public void disappearGate()
+    {
+        for (int a = 0; a < createdGate.transform.childCount; a++)
+            createdGate.transform.GetChild(a).gameObject.SetActive(false);
+        createdGate.SetActive(false);
     }
 
     public GameObject getCreatedBox()

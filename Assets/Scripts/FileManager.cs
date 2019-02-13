@@ -25,7 +25,6 @@ public struct FileStruct
 public class FileManager : MonoBehaviour
 {
     private static string settingsName = "settings.txt";
-
     private static string appPath;
     private static string output;
     private static Queue<FileStruct> writeBuffer = new Queue<FileStruct>();
@@ -85,7 +84,7 @@ public class FileManager : MonoBehaviour
 #endif
     }
 
-    public void addString(string file, string content)
+    public void addRequest(string file, string content)
     {
         writeBuffer.Enqueue(new FileStruct(file, content));
     }
@@ -133,7 +132,7 @@ public class FileManager : MonoBehaviour
         else
         {
             //Write Default Settings
-            addString(settingsName, "1 \n1 \n0 \n0 ");
+            addRequest(settingsName, "1 \n1 \n0 \n0 ");
             ret.Add(1);
             ret.Add(1);
             ret.Add(0);

@@ -34,6 +34,8 @@ public class HandsTrackingController : MonoBehaviour
     public TextMesh DebugText; // Text for debugging (for now)
     public GameObject TrackingObject; // GameObject representing the hand in holographic space
     public FlowController flowController;
+    public UiController uiController;
+    public UtilitiesScript utilities;
     //Colors
     public Color DefaultColor = Color.green;
     public Color TapColor = Color.white;
@@ -44,6 +46,7 @@ public class HandsTrackingController : MonoBehaviour
     public Color HoldFinished = Color.white;
     //Private Variables
     //Booleans
+    private bool ManipulationEnabled = false;
     private bool ColorOutlineChanged = false;
     private bool DataCollectionMode = false;
     private bool HandCalibrationMode = false;
@@ -67,6 +70,7 @@ public class HandsTrackingController : MonoBehaviour
     private float startTime;
     private bool RightPoseInProgress;
     private bool HighPoseInProgress;
+    Vector3 initUserPos;
 
     void Awake()
     {
@@ -89,7 +93,7 @@ public class HandsTrackingController : MonoBehaviour
 
     void Update()
     {
-        if(TrainingMode)
+        if(ManipulationEnabled)
             CheckForHands();
     }
 
@@ -111,9 +115,7 @@ public class HandsTrackingController : MonoBehaviour
     {
         FocusedObject = cursor.getFocusedObject();
         if (FocusedObject != null && trackingHand.interactionDetected == true)
-        {
             ManipulationForOneHand();
-        }
     }
 
     private void ManipulationForOneHand()
@@ -123,11 +125,11 @@ public class HandsTrackingController : MonoBehaviour
         if (FocusedObject.GetComponent<Renderer>() == null)
             return;
 
-        Bounds focusedObjectBounds = FocusedObject.GetComponent<Renderer>().bounds; //The graphical bounds of the focused objects
+        Bounds focusedObjectBounds = FocusedObject.GetComponent<Renderer>().bounds;
         focusedObjectBounds.Expand(.10f);
         if (focusedObjectBounds.Contains(handPos))
         {
-            if (!ObjectManipulationInProgress)
+            if (!ObjectManipulationInProgress) // Execute only before manipulation
             {
                 UtilitiesScript.Instance.ChangeObjectColor(trackingHand.hand, TouchedColor);
                 ObjectTouched = true;
@@ -164,6 +166,7 @@ public class HandsTrackingController : MonoBehaviour
             ManipulatedObject.transform.position = trackingHand.hand.transform.position;
             //Store initial position of hand and head
             Vector3 initHandPos = ManipulatedObject.transform.position;
+            initUserPos = Camera.main.transform.position;
             //Disable Wind of object
             if(ManipulatedObject.GetComponent<AppleScript>() != null)
                 ManipulatedObject.GetComponent<AppleScript>().disableWind();
@@ -177,24 +180,17 @@ public class HandsTrackingController : MonoBehaviour
     private void GestureRecognizer_ManipulationUpdated(ManipulationUpdatedEventArgs args)
     {
         if (trackingHand.interactionDetected == true && ObjectManipulationInProgress)
-        {
-            /*
-            if ((getDistanceObjects(trackingHand.hand.transform , Camera.main.transform) < flowController.getHeadDistanceUpperLimit(trackingHand.hand) + offset) && // Check head-hand distance
-                (getDistanceObjects(trackingHand.hand.transform, Camera.main.transform) < flowController.getHeadDisatnceLowerLimit(trackingHand.hand) - 3*offset)) //&&
-            
-            (Camera.main.transform.position.x - initUserPos.x) > bodyOffset &&  // Check head/body position
-            (Camera.main.transform.position.x - initUserPos.x) < bodyOffset &&
-            (Camera.main.transform.position.z - initUserPos.z) > bodyOffset &&
-            (Camera.main.transform.position.z - initUserPos.z) < bodyOffset))
-            */
-
+        {    
+            if( utilities.getDistanceObjects(trackingHand.hand.transform , Camera.main.transform) < flowController.getHeadDistanceUpperLimit(trackingHand.hand) + offset && // Check head-hand distance
+                utilities.getDistanceObjects(trackingHand.hand.transform, Camera.main.transform) < flowController.getHeadDisatnceLowerLimit(trackingHand.hand) -offset &&  // min max
+                Vector3.Magnitude(Camera.main.transform.position - initUserPos) <bodyOffset && TrainingMode)
+            {
+                flowController.userViolationDetected();
+            }
             //Move hand
             if(ManipulatedObject != null)
                 ManipulatedObject.transform.position = trackingHand.hand.transform.position;
-            if (TrainingMode)
-                flowController.checkIfAboveBox(ManipulatedObject.transform.position);
         }
-            
         EventManager.TriggerEvent("manipulation_updated");
     }
 
@@ -213,7 +209,6 @@ public class HandsTrackingController : MonoBehaviour
     private void manipulationEnded()
     {
         if (ObjectManipulationInProgress)
-        //if (trackingHand != null && ObjectManipulationInProgress) WIP until 2018.4
         {
             manipulationCounter++;
             UtilitiesScript.Instance.DisableOutline(ManipulatedObject);
@@ -223,7 +218,6 @@ public class HandsTrackingController : MonoBehaviour
             ManipulatedObject = null;
             TouchedObject = null;
 
-            //Data
             if (DataCollectionMode)
                 dataScript.manipulationEnded();
         }
@@ -256,7 +250,7 @@ public class HandsTrackingController : MonoBehaviour
                 calibrationController = new CalibrationController(rightHand);
                 beginCalibrationRightPose();
             }
-            if (DataCollectionMode)
+            if (DataCollectionMode) //Gather values for every hand movement
             {
                 float height = Mathf.Abs(pos.y - Camera.main.transform.position.y);
                 dataScript.addValue(pos, height);
@@ -289,7 +283,7 @@ public class HandsTrackingController : MonoBehaviour
                     if (Time.time - startTime > timerForRightPose) //Start max pose calibration
                     {
                         calibrationController.finishRightPose();
-                        flowController.calibrationMaxPose();
+                        uiController.calibrationMaxPose();
                         RightPoseInProgress = false;
                         HighPoseInProgress = true;
                     }
@@ -356,9 +350,15 @@ public class HandsTrackingController : MonoBehaviour
                 else
                 {
                     if (calibrationController.isRightHand())
+                    {
                         DebugText.text = "Right Hand calibrated successfully. Now let's calibrate the left one";
+                        TextToSpeech.Instance.StartSpeaking(DebugText.text);
+                    }
                     else
+                    {
                         DebugText.text = "Left Hand calibrated successfully. Now let's calibrate the right one";
+                        TextToSpeech.Instance.StartSpeaking(DebugText.text);
+                    }
                     calibrationController = null;
                     HighPoseInProgress = false;
                 }
@@ -377,6 +377,7 @@ public class HandsTrackingController : MonoBehaviour
     public void enableHandManipulation()
     {
         HandCalibrationMode = false;
+        ManipulationEnabled = true;
         TrainingMode = true;
     }
 

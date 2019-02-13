@@ -13,7 +13,7 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
     public float MinWallAreaForComplete = 0.0f; // for walls only
     //Debug displays
     public TextMesh DebugDisplay;
-    public FlowController flowController;
+    public UiController controller;
     public string SpaceQueryDescription;
     //Private Variables
     private bool _triggered;
@@ -117,7 +117,7 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
         {
             _triggered = true;
             EventManager.StopListening("tap", TapListener);
-            flowController.createUI();
+            controller.createUI();
         }
     }
 }
