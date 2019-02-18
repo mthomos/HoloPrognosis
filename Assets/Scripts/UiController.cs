@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class UiController : MonoBehaviour
@@ -63,26 +60,10 @@ public class UiController : MonoBehaviour
     {
         if (trainingMode)
         {
-            //Reset UI
-            TextToSpeech.Instance.StartSpeaking("Training finished");
-            ObjectCollectionManager.Instance.ClearScene();
-            UtilitiesScript.Instance.enableObject(currentMenu);
-            if (resultsScreen == null) //Create Results menu
-                resultsScreen = Instantiate(resultsPrefab, currentMenu.transform.position, currentMenu.transform.rotation);
-            else
-                UtilitiesScript.Instance.enableObject(resultsScreen);
-            UtilitiesScript.Instance.disableObject(currentMenu);
-            currentMenu = resultsScreen;
-            TextMesh suc = currentMenu.transform.Find("Successes").gameObject.GetComponent<TextMesh>();
-            TextMesh failures = currentMenu.transform.Find("Failures").gameObject.GetComponent<TextMesh>();
-            suc.text = "Succeses : " + flowController.success;
-            failures.text = "Failures: " + flowController.fail;
-            inMenu = 3;
-
-            flowController.finishGame();
+            //flowController.finishGame();
             return;
         }
-
+        //For UI navigation
         GameObject tappedObj = gazeCursor.getFocusedObject();
         if (tappedObj.CompareTag("UI"))
         {
@@ -165,6 +146,15 @@ public class UiController : MonoBehaviour
                     returnToStartMenu();
                 }
             }
+
+            else if (inMenu == 3) // Results Menu
+            {
+                if (tappedObj.name == "BackButton")
+                {
+                    returnToStartMenu();
+                }
+            }
+
             else if (inMenu == 4) // About Menu
             {
                 if (tappedObj.name == "BackButton")
@@ -184,6 +174,33 @@ public class UiController : MonoBehaviour
             UtilitiesScript.Instance.enableObject(aboutScreen);
         currentMenu = aboutScreen;
         inMenu = 4;
+    }
+
+    public void moveToResultsScreen()
+    {
+        //Reset UI
+        ObjectCollectionManager.Instance.ClearScene();
+        UtilitiesScript.Instance.enableObject(currentMenu);
+        if (resultsScreen == null) //Create Results menu
+            resultsScreen = Instantiate(resultsPrefab, currentMenu.transform.position, currentMenu.transform.rotation);
+        else
+            UtilitiesScript.Instance.enableObject(resultsScreen);
+
+        UtilitiesScript.Instance.disableObject(currentMenu);
+        currentMenu = resultsScreen;
+        TextMesh success = currentMenu.transform.Find("Successes").gameObject.GetComponent<TextMesh>();
+        TextMesh failures = currentMenu.transform.Find("Failures").gameObject.GetComponent<TextMesh>();
+        success.text = "Succeses : " + flowController.success;
+        failures.text = "Failures: " + flowController.fail;
+
+        Vector3 pos = Camera.main.transform.position + Camera.main.transform.forward * menuDistance;
+        currentMenu.transform.position = pos;
+        //Fix menu direction
+        Vector3 directionToTarget = Camera.main.transform.position - pos;
+        directionToTarget.y = 0.0f;
+        if (directionToTarget.sqrMagnitude > 0.005f)
+            currentMenu.transform.rotation = Quaternion.LookRotation(-directionToTarget);
+        inMenu = 3;
     }
 
     private void moveToPlayScreen()

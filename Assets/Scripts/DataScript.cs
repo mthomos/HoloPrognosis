@@ -13,10 +13,7 @@ class DataScript : MonoBehaviour
     private List<bool> manipulationResults = new List<bool>(); // save results of each manipulation
     private List<float> interactionTouchedList = new List<float>(); // save the "moments" which user touched the objects
     //
-    private Queue<Vector3> posBuffer = new Queue<Vector3>();
-    private Queue<float> timeBuffer = new Queue<float>();
     private Vector3 privPos = Vector3.zero;
-    private Vector3 currentPos;
     private float privSpeed, privTime, cacheTime;
 
     void Start()
@@ -26,31 +23,8 @@ class DataScript : MonoBehaviour
 
     private void Update()
     {
-        // Process buffers
-        if (posBuffer.Count > 0)
-        {
-            if (privPos != Vector3.zero)
-            {
-                currentPos = posBuffer.Dequeue();
-                float t_time = timeBuffer.Dequeue();
-                float t_speed = Vector3.Magnitude(currentPos - privPos) / t_time;
-                float t_accel = (t_speed - privSpeed) / t_time;
-                speed.Add(t_time, t_speed);
-                acceleration.Add(t_time, t_accel);
-                privSpeed = t_speed;
-                privPos = currentPos;
-            }
-            else
-            {
-                privPos = posBuffer.Dequeue();
-                timeBuffer.Dequeue();
-            }
-        }
-        else
-        {
             if (requsetFinalize)
                 finalizeSession();
-        }
     }
 
     private void saveSession()
@@ -132,12 +106,21 @@ class DataScript : MonoBehaviour
         interactionTouchedList.Add(Time.time);
     }
 
-    public void addValue(Vector3 value, float height)
+    public void addValue(Vector3 position, float height)
     {
         cacheTime = Time.time;
-        posBuffer.Enqueue(value);
-        timeBuffer.Enqueue(cacheTime - privTime);
+        if (cacheTime == privTime)
+            return;
+
+        float dt = cacheTime - privTime;
+        float t_speed = Vector3.Magnitude(position - privPos) / dt;
+        float t_accel = (t_speed - privSpeed) / dt;
+        speed.Add(cacheTime, t_speed);
+        acceleration.Add(cacheTime, t_accel);
         handHeight.Add(cacheTime, height);
+        //Save values
+        privSpeed = t_speed;
+        privPos = position;
         privTime = cacheTime;
     }
 
@@ -149,5 +132,10 @@ class DataScript : MonoBehaviour
     public void manipulationEnded()
     {
         dataList.Add(Time.time);
+    }
+
+    public void addManipulationResult(bool result)
+    {
+        manipulationResults.Add(result);
     }
 }

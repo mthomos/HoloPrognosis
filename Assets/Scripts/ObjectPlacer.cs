@@ -41,10 +41,10 @@ public class ObjectPlacer : MonoBehaviour
         GetLocationsFromSolver(queries);
     }
 
-    public void CreateBox()
+    public void CreateGate()
     {
         List<PlacementQuery> queries = new List<PlacementQuery>();
-        queries.AddRange(AddBox());
+        queries.AddRange(AddGate());
         GetLocationsFromSolver(queries);
     }
 
@@ -65,11 +65,6 @@ public class ObjectPlacer : MonoBehaviour
         return CreateLocationQueriesForSolver(1, ObjectCollectionManager.Instance.TreeSize, ObjectType.Tree);
     }
 
-    public List<PlacementQuery> AddBox()
-    {
-        return CreateLocationQueriesForSolver(1, ObjectCollectionManager.Instance.BoxSize, ObjectType.Box);
-    }
-
     public List<PlacementQuery> AddGate()
     {
         return CreateLocationQueriesForSolver(1, ObjectCollectionManager.Instance.GateSize, ObjectType.Gate);
@@ -87,9 +82,6 @@ public class ObjectPlacer : MonoBehaviour
             {
                 case ObjectType.Tree:
                     ObjectCollectionManager.Instance.CreateTree(toPlace.Position, rotation);
-                    break;
-                case ObjectType.Box:
-                    ObjectCollectionManager.Instance.CreateBox(toPlace.Position, rotation);
                     break;
                 case ObjectType.Gate:
                     ObjectCollectionManager.Instance.CreateGate(toPlace.Position, rotation);
@@ -134,7 +126,6 @@ public class ObjectPlacer : MonoBehaviour
 
             return new PlacementResult(placementResult.Clone() as SpatialUnderstandingDllObjectPlacement.ObjectPlacementResult, boxFullDims, objType);
         }
-
         return null;
     }
 
@@ -182,8 +173,6 @@ public class ObjectPlacer : MonoBehaviour
                     placementConstraints
                 ));
         }
-
         return placementQueries;
     }
-
 }

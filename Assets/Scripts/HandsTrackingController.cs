@@ -31,7 +31,6 @@ public class HandsTrackingController : MonoBehaviour
     //Public Variables - For Editor
     //GameObjects
     public GazeCursor cursor; // Cusrsor used for defining FocusedObject
-    public TextMesh DebugText; // Text for debugging (for now)
     public GameObject TrackingObject; // GameObject representing the hand in holographic space
     public FlowController flowController;
     public UiController uiController;
@@ -320,9 +319,15 @@ public class HandsTrackingController : MonoBehaviour
                 else
                 {
                     if (calibrationController.isRightHand())
-                        DebugText.text = "Right Hand calibrated successfully. Now let's calibrate the left one";
+                    {
+                        uiController.printText("Right Hand calibrated successfully. Now let's calibrate the left one");
+                        TextToSpeech.Instance.StartSpeaking("Right Hand calibrated successfully. Now let's calibrate the left one");
+                    }
                     else
-                        DebugText.text = "Left Hand calibrated successfully. Now let's calibrate the right one";
+                    {
+                        uiController.printText("Left Hand calibrated successfully. Now let's calibrate the right one");
+                        TextToSpeech.Instance.StartSpeaking("Left Hand calibrated successfully. Now let's calibrate the right one");
+                    }
                     calibrationController = null;
                     HighPoseInProgress = false;
                 }
@@ -351,13 +356,13 @@ public class HandsTrackingController : MonoBehaviour
                 {
                     if (calibrationController.isRightHand())
                     {
-                        DebugText.text = "Right Hand calibrated successfully. Now let's calibrate the left one";
-                        TextToSpeech.Instance.StartSpeaking(DebugText.text);
+                        uiController.printText("Right Hand calibrated successfully. Now let's calibrate the left one");
+                        TextToSpeech.Instance.StartSpeaking("Right Hand calibrated successfully. Now let's calibrate the left one");
                     }
                     else
                     {
-                        DebugText.text = "Left Hand calibrated successfully. Now let's calibrate the right one";
-                        TextToSpeech.Instance.StartSpeaking(DebugText.text);
+                        uiController.printText("Left Hand calibrated successfully. Now let's calibrate the right one");
+                        TextToSpeech.Instance.StartSpeaking("Left Hand calibrated successfully. Now let's calibrate the right one");
                     }
                     calibrationController = null;
                     HighPoseInProgress = false;

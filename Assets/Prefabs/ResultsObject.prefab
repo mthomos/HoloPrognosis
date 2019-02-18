@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 102692226424708086}
   m_Layer: 0
   m_Name: Failures
-  m_TagString: Untagged
+  m_TagString: UI
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -228,7 +228,7 @@ GameObject:
   - component: {fileID: 102578228007460528}
   m_Layer: 0
   m_Name: Successes
-  m_TagString: Untagged
+  m_TagString: UI
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

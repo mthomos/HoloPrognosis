@@ -7,7 +7,7 @@ public class GateScript : MonoBehaviour
     //For scripting use
     private bool checkForObject;
     public bool objectInGate = false;
-    public GameObject approachingObject = null;
+    public bool gateOpened = false;
 
     void Start()
     {
@@ -21,6 +21,9 @@ public class GateScript : MonoBehaviour
 
     public bool objectInsideGate(GameObject obj)
     {
+        if (!gateOpened)
+            return false;
+
         Vector3 objPos = obj.transform.position;
         Vector3 gateSize = GetComponent<Renderer>().bounds.size;
         Rect boxXZ = new Rect(transform.position.x, transform.position.z, gateSize.x / 2, gateSize.z / 2);
@@ -44,10 +47,5 @@ public class GateScript : MonoBehaviour
     public void setCheckStatus(bool check)
     {
         checkForObject = check;
-    }
-
-    public void setApproachingObject(GameObject obj)
-    {
-        approachingObject = obj;
     }
 }

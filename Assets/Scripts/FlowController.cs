@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class FlowController : MonoBehaviour
 {
@@ -8,11 +6,12 @@ public class FlowController : MonoBehaviour
     public GazeCursor gazeCursor;
     public UiController uiController;
     public ObjectPlacer placer;
+    private DataScript dataScript;
 
     // Training
-    private bool trainingMode = false;
+    private bool trainingMode, rightHandPlaying, manipulationInProgress;
     private CalibrationController rightController, leftController, currentControlller;
-    private bool rightHandPlaying = false;
+    private GameObject manipulatedObject;
     public int success, fail, violation;
 
     //Create timer variables
@@ -28,21 +27,25 @@ public class FlowController : MonoBehaviour
 
     private void Start ()
     {
-        EventManager.StartListening("manipulation_started", manipulationStarted);
-        EventManager.StartListening("box_collision", successfulTry);
-        EventManager.StartListening("floor_collision", failedTry);
+        dataScript = GameObject.Find("Data").GetComponent<DataScript>();
     }
 
     private void manipulationStarted()
     {
+        if (!trainingMode)
+            return;
         //Appear Gate
         ObjectCollectionManager.Instance.appearGate(currentControlller);
+        //Get manipulatedObject
+        manipulatedObject = handsTrackingController.getManipulatedObject();
+        manipulationInProgress = true;
     }
 
     private void successfulTry()
     {
         if (freeToRelease)
         {
+            dataScript.addManipulationResult(true);
             success++;
             PrepareNextManipulation();
         }
@@ -52,6 +55,7 @@ public class FlowController : MonoBehaviour
 
     private void failedTry()
     {
+        dataScript.addManipulationResult(false);
         fail++;
         PrepareNextManipulation();
     }
@@ -62,6 +66,14 @@ public class FlowController : MonoBehaviour
         //Disable Gate
         ObjectCollectionManager.Instance.disappearGate();
         violation = 0;
+        manipulationInProgress = false;
+        //Destroy object
+        if (manipulatedObject != null)
+        {
+            ObjectCollectionManager.Instance.destoryActiveHologram(manipulatedObject.name);
+            Destroy(manipulatedObject);
+            manipulatedObject = null;
+        }
         //Swap hands
         rightHandPlaying = !rightHandPlaying;
         if (rightHandPlaying)
@@ -94,12 +106,13 @@ public class FlowController : MonoBehaviour
 
     private void Update ()
     {
-        if (trainingMode)
+        if (trainingMode && manipulationInProgress)
         {
             // Calculate distance of manipulated object and gate
             if (gateScript == null)
                 gateScript = ObjectCollectionManager.Instance.getCreatedGate().GetComponent<GateScript>();
-            if (gateScript.objectInsideGate(handsTrackingController.getManipulatedObject()))
+
+            if (gateScript.objectInsideGate(manipulatedObject))
             {
                 if (!objectInGateDetected)
                 {
@@ -132,6 +145,7 @@ public class FlowController : MonoBehaviour
 
     public void calibrationFinished()
     {
+        uiController.printText("");
         TextToSpeech.Instance.StartSpeaking("Now the tree will be appeared");
         placer.CreateScene();
         //Set training use for gaze
@@ -142,10 +156,17 @@ public class FlowController : MonoBehaviour
         handsTrackingController.enableDataCollection();
         // Enable Timer enableTimer();
         trainingMode = true;
+        //Enable Events
+        EventManager.StartListening("manipulation_started", manipulationStarted);
+        EventManager.StartListening("box_collision", successfulTry);
+        EventManager.StartListening("floor_collision", failedTry);
     }
 
     public void finishGame()
     {
+        TextToSpeech.Instance.StartSpeaking("Training finished");
+        //Prepare UI
+        uiController.moveToResultsScreen();
         //Reset
         trainingMode = false;
         gazeCursor.setGenericUse();
@@ -154,6 +175,11 @@ public class FlowController : MonoBehaviour
         fail = 0;
         rightController = null;
         leftController = null;
+
+        //Disable Events
+        EventManager.StopListening("manipulation_started", manipulationStarted);
+        EventManager.StopListening("box_collision", successfulTry);
+        EventManager.StopListening("floor_collision", failedTry);
     }
 
     public bool addCalibrationController(CalibrationController controller)

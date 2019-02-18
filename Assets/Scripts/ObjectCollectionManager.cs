@@ -6,17 +6,15 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
 {
     //Public Variables - For Editor
     public GameObject TreePrefab;
-    public GameObject FruitPrefab;
-    public GameObject BoxPrefab;
+    //public GameObject BoxPrefab;
     public GameObject GatePrefab;
     public Vector3 TreeSize;
-    public Vector3 FruitSize;
-    public Vector3 BoxSize;
+    //public Vector3 BoxSize;
     public Vector3 GateSize;
     // Private Variables
     public FlowController flowController;
     private GameObject createdTree;
-    private GameObject createdBox;
+    //private GameObject createdBox;
     private GameObject createdGate;
     private float ScaleFactor;
     private List<GameObject> ActiveHolograms = new List<GameObject>();
@@ -37,9 +35,10 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             ActiveHolograms.Add(newObject);
             createdTree = newObject;
             SetProps();
+            treeCreated = true;
         }
     }
-
+    /*
     public void CreateBox(Vector3 positionCenter, Quaternion rotation)
     {
         // Stay center in the square but move down to the ground
@@ -58,7 +57,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
                 flowController.PrepareNextManipulation();
         }
     }
-
+    */
     public void CreateGate(Vector3 positionCenter, Quaternion rotation)
     {
         // Stay center in the square but move down to the ground
@@ -73,6 +72,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             ActiveHolograms.Add(newObject);
             createdGate = newObject;
             boxCreated = true;
+            createdGate.AddComponent<GateScript>().gateOpened = false;
             if (treeCreated && boxCreated)
                 flowController.PrepareNextManipulation();
         }
@@ -138,6 +138,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         for (int i = 0; i < createdTree.transform.childCount; i++)
         {
             child = createdTree.transform.GetChild(i).gameObject;
+            child.name = "apple_" + i;
             child.AddComponent<AppleScript>();
             ActiveHolograms.Add(child);
         }
@@ -190,9 +191,10 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         Vector3 difPos = position - createdGate.transform.position;
         createdGate.transform.position = position;
         createdGate.transform.rotation.Set(0, 90, 0, 1);
+        createdGate.GetComponent<GateScript>().gateOpened = true;
         //For child objects ??????
     }
-
+    /*
     public void disappearBox()
     {
         for (int a = 0; a < createdBox.transform.childCount; a++)
@@ -200,20 +202,36 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         createdBox.SetActive(false);
     }
 
+    public GameObject getCreatedBox()
+    {
+        return createdBox;
+    }
+    */
     public void disappearGate()
     {
+        if (createdGate == null)
+            return;
+
+        createdGate.GetComponent<GateScript>().gateOpened = false;
         for (int a = 0; a < createdGate.transform.childCount; a++)
             createdGate.transform.GetChild(a).gameObject.SetActive(false);
         createdGate.SetActive(false);
     }
 
-    public GameObject getCreatedBox()
-    {
-        return createdBox;
-    }
-
     public GameObject getCreatedGate()
     {
         return createdGate;
+    }
+
+    public void destoryActiveHologram(string name)
+    {
+        foreach (GameObject hologram in ActiveHolograms)
+        {
+            if(hologram.name == name)
+            {
+                ActiveHolograms.Remove(hologram);
+                break;
+            }
+        }
     }
 }
