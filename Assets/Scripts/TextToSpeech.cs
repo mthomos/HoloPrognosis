@@ -21,7 +21,6 @@ public class TextToSpeech : MonoBehaviour
     public static TextToSpeech Instance { get; private set; }
 #if !UNITY_EDITOR && UNITY_WSA
     private SpeechSynthesizer synthesizer;
-    private VoiceInformation voiceInfo;
     private bool speechTextInQueue = false;
 #endif
 

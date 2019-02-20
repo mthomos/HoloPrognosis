@@ -577,7 +577,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TreePrefab: {fileID: 1198309765264102, guid: d8486cdd8ad6ec54cb40d0818cc7e2a5, type: 3}
   GatePrefab: {fileID: 100000, guid: abdcb10807a3c8a42a82f95b440f8c26, type: 3}
-  TreeSize: {x: 0.8, y: 1.5, z: 0.8}
+  TreeSize: {x: 0.8, y: 2, z: 0.8}
   GateSize: {x: 0.5, y: 0.5, z: 0.5}
   flowController: {fileID: 790716446}
 --- !u!114 &790716444
@@ -827,9 +827,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfadc27178601dd4ca1793492f9e2539, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ImportMeshPeriod: 1
+  ImportMeshPeriod: 2
   meshMaterial: {fileID: 2100000, guid: 6cec46d5b336e2a4b9b2e1d3e8e3754c, type: 2}
-  MaxFrameTime: 5
+  MaxFrameTime: 10
   CreateMeshColliders: 1
 --- !u!114 &864562864
 MonoBehaviour:
@@ -886,8 +886,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2a98b181acba5549af3d852c7664623, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TrianglesPerCubicMeter: 500
-  TimeBetweenUpdates: 2
+  TrianglesPerCubicMeter: 600
+  TimeBetweenUpdates: 1
   observerVolumeType: 0
   extents: {x: 10, y: 10, z: 10}
   origin: {x: 0, y: 0, z: 0}
@@ -1155,7 +1155,7 @@ Transform:
   m_GameObject: {fileID: 1550465570}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -0.05, z: 0}
-  m_LocalScale: {x: 0.005, y: 0.005, z: 1}
+  m_LocalScale: {x: 0.0045, y: 0.0045, z: 1}
   m_Children: []
   m_Father: {fileID: 1488041721}
   m_RootOrder: 1

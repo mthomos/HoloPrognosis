@@ -275,10 +275,9 @@ public class HandsTrackingController : MonoBehaviour
             if (HandCalibrationMode && calibrationController != null)
             {
                 float dist =(Camera.main.transform.position - pos).magnitude; 
-                float height = pos.y;
                 if(RightPoseInProgress)
                 {
-                    calibrationController.addValue(dist, height);
+                    calibrationController.addValue(dist, pos.y);
                     if (Time.time - startTime > timerForRightPose) //Start max pose calibration
                     {
                         calibrationController.finishRightPose();
@@ -287,17 +286,11 @@ public class HandsTrackingController : MonoBehaviour
                         HighPoseInProgress = true;
                     }
                 }
-        
                 if (HighPoseInProgress)
-                {
-                    calibrationController.addValue(dist, height);
-                }
+                    calibrationController.addValue(dist, pos.y);
             }
             if (DataCollectionMode)
-            {
-                float height = pos.y;
-                dataScript.addValue(pos, height);
-            }
+                dataScript.addValue(pos, pos.y);
         }
     }   
 

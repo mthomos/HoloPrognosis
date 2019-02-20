@@ -5,7 +5,6 @@ using UnityEngine.Events;
 
 public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
 {
-    //public TextToSpeech textToSpeechManager;
     //Public Variables - For Editor
     public float MinAreaForStats = 2.0f; // both floor and wall surfaces
     public float MinAreaForComplete = 4.0f; // for floor
@@ -16,8 +15,7 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
     public UiController controller;
     public string SpaceQueryDescription;
     //Private Variables
-    private bool _triggered;
-    private bool scanReady = false;
+    private bool _triggered, scanReady, feedback_triggered;
     private UnityAction TapListener;
 
     private bool DoesScanMeetMinBarForCompletion
@@ -58,8 +56,12 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
                 switch (SpatialUnderstanding.Instance.ScanState)
                 {
                     case SpatialUnderstanding.ScanStates.Scanning:
-                        if (DoesScanMeetMinBarForCompletion)
+                        if (DoesScanMeetMinBarForCompletion && !feedback_triggered)
+                        {
+                            feedback_triggered = true;
+                            TextToSpeech.Instance.StartSpeaking("Space scanned, air tap to finalize your playspace");
                             return "Space scanned, air tap to finalize your playspace";
+                        }
                         return "Walk around and scan in your playspace";
                     case SpatialUnderstanding.ScanStates.Finishing:
                         return "Finalizing scan";
@@ -97,12 +99,13 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
     {
         TapListener = new UnityAction(Tap_Triggered);
         EventManager.StartListening("tap", TapListener);
+        TextToSpeech.Instance.StartSpeaking("Walk around and scan in your playspace");
     }
 
     private void Tap_Triggered()
     {
         if (scanReady &&
-            (SpatialUnderstanding.Instance.ScanState == SpatialUnderstanding.ScanStates.Scanning) &&
+           (SpatialUnderstanding.Instance.ScanState == SpatialUnderstanding.ScanStates.Scanning) &&
              !SpatialUnderstanding.Instance.ScanStatsReportStillWorking)
             SpatialUnderstanding.Instance.RequestFinishScan();
     }
