@@ -47,7 +47,8 @@ public class GazeCursor : MonoBehaviour
     {
         if (hitInfo.collider.gameObject.CompareTag("User") || 
             hitInfo.collider.gameObject.CompareTag("UI") ||
-            hitInfo.collider.gameObject.CompareTag("Calibration"))
+            hitInfo.collider.gameObject.CompareTag("Calibration") ||
+            hitInfo.collider.gameObject.CompareTag("Dummy"))
             FocusedObject = hitInfo.collider.gameObject;
     }
     public void setTrainingMode()

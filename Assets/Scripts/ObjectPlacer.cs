@@ -5,8 +5,6 @@ using System;
 
 public class ObjectPlacer : MonoBehaviour
 {
-    public SpatialUnderstandingCustomMesh SpatialUnderstandingMesh;
-    public Material OccludedMaterial;
     public float boxTreeDistance;
     // Private variables
     private Queue<PlacementResult> results = new Queue<PlacementResult>();
@@ -21,12 +19,6 @@ public class ObjectPlacer : MonoBehaviour
         ProcessPlacementResults();
     }
 
-    public void HideGridEnableOcclulsion()
-    {
-        SpatialUnderstandingMesh.MeshMaterial = OccludedMaterial;
-    }
-
-
     public void CreateScene()
     {
          if (!SpatialUnderstanding.Instance.AllowSpatialUnderstanding)
@@ -36,7 +28,6 @@ public class ObjectPlacer : MonoBehaviour
 
         List<PlacementQuery> queries = new List<PlacementQuery>();
         queries.AddRange(AddTree());
-        //queries.AddRange(AddBox());
         queries.AddRange(AddGate());
         GetLocationsFromSolver(queries);
     }
@@ -159,10 +150,9 @@ public class ObjectPlacer : MonoBehaviour
             {
                 placementRules = new List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule>
                 {
-                SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule.Create_AwayFromWalls(.5f, .5f)
+                SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule.Create_AwayFromOtherObjects(.5f)
                 };
-                placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_AwayFromOtherObjects());
-                placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_OnFloor(halfDims);
+                placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_NearWall());
             }
 
             placementQueries.Add(

@@ -94,8 +94,10 @@ public class FileManager : MonoBehaviour
         output=null;
 
         if (!File.Exists(Path.Combine(appPath, fileName)))
+        {
+            Debug.Log("File " + fileName + " -> NOT FOUND");
             return "Not_found";
-
+        }
         Task task = ReadFile(fileName);
         task.Wait();
         return output;
@@ -126,7 +128,10 @@ public class FileManager : MonoBehaviour
             result = readFile(settingsName);
             foreach(string line in result.Split('\n'))
             {
-                ret.Add((int)char.GetNumericValue(line.ToCharArray()[0]));
+                if (line.ToCharArray().Length == 0)
+                    ret.Add(1);
+                else
+                    ret.Add((int)char.GetNumericValue(line.ToCharArray()[0]));
             }
         }
         else

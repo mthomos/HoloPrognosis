@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.XR.WSA.Input;
 
 public struct HandStruct
@@ -30,6 +29,7 @@ public class HandsTrackingController : MonoBehaviour
 {
     //Public Variables - For Editor
     //GameObjects
+    public DataScript dataScript;
     public GazeCursor cursor; // Cusrsor used for defining FocusedObject
     public GameObject TrackingObject; // GameObject representing the hand in holographic space
     public FlowController flowController;
@@ -59,7 +59,6 @@ public class HandsTrackingController : MonoBehaviour
     private GameObject ManipulatedObject;// GameObject which is being Manipulated by the user
     private GameObject FocusedObject; // GameObject which the user gazes at
     private GestureRecognizer gestureRecognizer;
-    private DataScript dataScript;
     private CalibrationController calibrationController;
     //Training
     private int manipulationCounter;
@@ -68,7 +67,6 @@ public class HandsTrackingController : MonoBehaviour
     private float timerForRightPose;
     private float startTime;
     private bool RightPoseInProgress;
-    private bool HighPoseInProgress;
     Vector3 initUserPos;
 
     void Awake()
@@ -86,8 +84,6 @@ public class HandsTrackingController : MonoBehaviour
         gestureRecognizer.ManipulationUpdated += GestureRecognizer_ManipulationUpdated;
         gestureRecognizer.HoldStarted += GestureRecognizer_HoldStarted;
         gestureRecognizer.StartCapturingGestures();
-        //Enable Data Collection
-        dataScript = GameObject.Find("Data").GetComponent<DataScript>();
     }
 
     void Update()
@@ -136,7 +132,7 @@ public class HandsTrackingController : MonoBehaviour
                 //Refresh Outline
                 if (!ColorOutlineChanged)
                 {
-                    UtilitiesScript.Instance.EnableOutline(TouchedObject, null);
+                    UtilitiesScript.Instance.EnableOutline(TouchedObject, Color.magenta, true);
                     ColorOutlineChanged = true;
                 }
                 //Gather data
@@ -247,7 +243,10 @@ public class HandsTrackingController : MonoBehaviour
             if (HandCalibrationMode)
             {
                 calibrationController = new CalibrationController(rightHand);
-                beginCalibrationRightPose();
+                //Calibration Right Pose
+                timerForRightPose = flowController.timerForRightPose;
+                startTime = Time.time;
+                RightPoseInProgress = true;
             }
             if (DataCollectionMode) //Gather values for every hand movement
             {
@@ -255,13 +254,6 @@ public class HandsTrackingController : MonoBehaviour
                 dataScript.addValue(pos, height);
             }
         }
-    }
-
-    private void beginCalibrationRightPose()
-    {
-        timerForRightPose = flowController.timerForRightPose;
-        startTime = Time.time;
-        RightPoseInProgress = true;
     }
 
     private void InteractionManager_InteractionSourceUpdated(InteractionSourceUpdatedEventArgs args)
@@ -283,10 +275,9 @@ public class HandsTrackingController : MonoBehaviour
                         calibrationController.finishRightPose();
                         uiController.calibrationMaxPose();
                         RightPoseInProgress = false;
-                        HighPoseInProgress = true;
                     }
                 }
-                if (HighPoseInProgress)
+                else // high pose
                     calibrationController.addValue(dist, pos.y);
             }
             if (DataCollectionMode)
@@ -296,79 +287,72 @@ public class HandsTrackingController : MonoBehaviour
 
     private void InteractionManager_InteractionSourceLost(InteractionSourceLostEventArgs args)
     {
-        uint id = args.state.source.id;
         if (trackingHand.interactionDetected == true && args.state.source.kind == InteractionSourceKind.Hand)
         {
-            if (HandCalibrationMode && calibrationController != null)
-            {
-                bool finishCalibration = flowController.addCalibrationController(calibrationController);
-                if (finishCalibration)
-                {
-                    HandCalibrationMode = false;
-                    HighPoseInProgress = false;
-                    calibrationController = null;
-                    flowController.calibrationFinished();
-                }
-                else
-                {
-                    if (calibrationController.isRightHand())
-                    {
-                        uiController.printText("Right Hand calibrated successfully. Now let's calibrate the left one");
-                        TextToSpeech.Instance.StartSpeaking("Right Hand calibrated successfully. Now let's calibrate the left one");
-                    }
-                    else
-                    {
-                        uiController.printText("Left Hand calibrated successfully. Now let's calibrate the right one");
-                        TextToSpeech.Instance.StartSpeaking("Left Hand calibrated successfully. Now let's calibrate the right one");
-                    }
-                    calibrationController = null;
-                    HighPoseInProgress = false;
-                }
-            }
-            Destroy(trackingHand.hand);
-            trackingHand.interactionDetected = false;
+            interactionTerminated();
         }
     }
 
     private void InteractionManager_InteractionSourceReleased(InteractionSourceReleasedEventArgs args)
     {
-        uint id = args.state.source.id;
         if (trackingHand.interactionDetected == true && args.state.source.kind == InteractionSourceKind.Hand)
         {
-            if (HandCalibrationMode && calibrationController != null)
+            interactionTerminated();
+        }
+    }
+
+    private void interactionTerminated()
+    {
+        if (HandCalibrationMode && calibrationController != null)
+        {
+            bool finishCalibration = flowController.addCalibrationController(calibrationController);
+            if (finishCalibration)
             {
-                bool continueCalibration = flowController.addCalibrationController(calibrationController);
-                if (continueCalibration)
+                HandCalibrationMode = false;
+                calibrationController = null;
+                flowController.calibrationFinished();
+            }
+            else
+            {
+                if (calibrationController.isRightHand())
                 {
-                    HandCalibrationMode = false;
-                    HighPoseInProgress = false;
-                    calibrationController = null;
-                    flowController.calibrationFinished();
-                }
-                else
-                {
-                    if (calibrationController.isRightHand())
+                    if (!flowController.leftHandEnabled)
+                    {
+                        HandCalibrationMode = false;
+                        calibrationController = null;
+                        flowController.calibrationFinished();
+                    }
+                    else
                     {
                         uiController.printText("Right Hand calibrated successfully. Now let's calibrate the left one");
                         TextToSpeech.Instance.StartSpeaking("Right Hand calibrated successfully. Now let's calibrate the left one");
+                    }
+                }
+                else
+                {
+                    if (!flowController.rightHandEnabled)
+                    {
+                        HandCalibrationMode = false;
+                        calibrationController = null;
+                        flowController.calibrationFinished();
                     }
                     else
                     {
                         uiController.printText("Left Hand calibrated successfully. Now let's calibrate the right one");
                         TextToSpeech.Instance.StartSpeaking("Left Hand calibrated successfully. Now let's calibrate the right one");
                     }
-                    calibrationController = null;
-                    HighPoseInProgress = false;
                 }
+                calibrationController = null;
             }
-            Destroy(trackingHand.hand);
-            trackingHand.interactionDetected = false;
         }
+        Destroy(trackingHand.hand);
+        trackingHand.interactionDetected = false;
     }
 
     public void enableHandCalibration()
     {
         HandCalibrationMode = true;
+        ManipulationEnabled = false;
         TrainingMode = false;
     }
 

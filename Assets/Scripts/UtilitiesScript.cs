@@ -4,30 +4,31 @@ using UnityEngine;
 
 public class UtilitiesScript : Singleton<UtilitiesScript>
 {
-    public void EnableOutline(GameObject focusedObject, object color)
+    public void EnableOutline(GameObject focusedObject, object color, bool createIfNeeded)
     {
-        if (focusedObject != null)
+        if (focusedObject == null)
+            return;
+
+        if (color == null)
+            color = Color.red;
+
+        var outline = focusedObject.GetComponent<Outline>();
+        if (outline == null && createIfNeeded)
         {
-            var outline = focusedObject.GetComponent<Outline>();
-            if (color == null)
-                color = Color.red;
-            if (outline == null)
+            //Create Outline
+            outline = gameObject.AddComponent<Outline>();
+            if (outline != null)
             {
-                //Create Outline
-                outline = gameObject.AddComponent<Outline>();
-                if (outline != null)
-                {
-                    outline.OutlineMode = Outline.Mode.OutlineAll;
-                    outline.OutlineWidth = 5f;
-                    outline.OutlineColor = (Color) color;
-                    outline.enabled = true;
-                }
-            }
-            else
-            {
+                outline.OutlineMode = Outline.Mode.OutlineAll;
+                outline.OutlineWidth = 5f;
                 outline.OutlineColor = (Color) color;
                 outline.enabled = true;
             }
+        }
+        else if (outline != null)
+        {
+            outline.OutlineColor = (Color) color;
+            outline.enabled = true;
         }
     }
 

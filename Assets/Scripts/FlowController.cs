@@ -13,6 +13,7 @@ public class FlowController : MonoBehaviour
     private CalibrationController rightController, leftController, currentControlller;
     private GameObject manipulatedObject;
     public int success, fail, violation;
+    public bool rightHandEnabled = true, leftHandEnabled = true;
 
     //Create timer variables
     private float timer;
@@ -28,22 +29,24 @@ public class FlowController : MonoBehaviour
     private void Start ()
     {
         dataScript = GameObject.Find("Data").GetComponent<DataScript>();
+        EventManager.StartListening("world_created", manipulationStarted);
     }
 
     private void manipulationStarted()
     {
         if (!trainingMode)
             return;
-        //Appear Gate
+        //Appear Gate according to hand
         ObjectCollectionManager.Instance.appearGate(currentControlller);
         //Get manipulatedObject
         manipulatedObject = handsTrackingController.getManipulatedObject();
+        //Enable manipulation in flow controller
         manipulationInProgress = true;
     }
 
     private void successfulTry()
     {
-        if (freeToRelease)
+        if (freeToRelease && violation == 0)
         {
             dataScript.addManipulationResult(true);
             success++;
@@ -62,7 +65,8 @@ public class FlowController : MonoBehaviour
 
     public void PrepareNextManipulation()
     {
-        if (!trainingMode) return;
+        if (!trainingMode)
+            return;
         //Disable Gate
         ObjectCollectionManager.Instance.disappearGate();
         violation = 0;
@@ -74,24 +78,36 @@ public class FlowController : MonoBehaviour
             Destroy(manipulatedObject);
             manipulatedObject = null;
         }
-        //Swap hands
-        rightHandPlaying = !rightHandPlaying;
-        if (rightHandPlaying)
-            currentControlller = rightController;
-        else
-            currentControlller = leftController;
-
-        //Load (possible) next object for manipulation
-        GameObject nowPlayingObject = ObjectCollectionManager.Instance.getLowestFruit(currentControlller.getHighestPoseHandHeight());
-        if (nowPlayingObject == null)
+        GameObject nowPlayingObject = null;
+        //Swap hands 
+        if (rightHandEnabled && leftHandEnabled) // if both hands enabled
         {
-            //Switch to the other hand if for the current hand object doesn't exist
             rightHandPlaying = !rightHandPlaying;
             if (rightHandPlaying)
                 currentControlller = rightController;
             else
                 currentControlller = leftController;
-            nowPlayingObject = ObjectCollectionManager.Instance.getLowestFruit(currentControlller .getHighestPoseHandHeight());
+
+            //Load (possible) next object for manipulation
+            nowPlayingObject = ObjectCollectionManager.Instance.getLowestFruit(currentControlller.getHighestPoseHandHeight());
+            if (nowPlayingObject == null)
+            {
+                //Switch to the other hand if for the current hand object doesn't exist
+                rightHandPlaying = !rightHandPlaying;
+                if (rightHandPlaying)
+                    currentControlller = rightController;
+                else
+                    currentControlller = leftController;
+                nowPlayingObject = ObjectCollectionManager.Instance.getLowestFruit(currentControlller.getHighestPoseHandHeight());
+            }
+        }
+        else if (rightHandEnabled && !leftHandEnabled) // Only right hand enabled
+        {
+            nowPlayingObject = ObjectCollectionManager.Instance.getLowestFruit(rightController.getHighestPoseHandHeight());
+        }
+        else if (!rightHandEnabled && leftHandEnabled) // Only left hand enabled
+        {
+            nowPlayingObject = ObjectCollectionManager.Instance.getLowestFruit(leftController.getHighestPoseHandHeight());
         }
         // If no objects exist, finish
         if (nowPlayingObject == null)
@@ -99,7 +115,7 @@ public class FlowController : MonoBehaviour
         else
         {
             uiController.prepareUserManipulation(rightHandPlaying);
-            UtilitiesScript.Instance.EnableOutline(nowPlayingObject, null);
+            UtilitiesScript.Instance.EnableOutline(nowPlayingObject, null, false);
             nowPlayingObject.tag = "User";
         }
     }
@@ -137,6 +153,7 @@ public class FlowController : MonoBehaviour
 
     public void startPlaying()
     {
+        uiController.moveToPlayspace();
         //Set generic use for gaze
         gazeCursor.setGenericUse();
         //Start hand calibration
@@ -154,7 +171,8 @@ public class FlowController : MonoBehaviour
         handsTrackingController.enableHandManipulation();
         // Enable data collection
         handsTrackingController.enableDataCollection();
-        // Enable Timer enableTimer();
+        // Enable Timer 
+        // enableTimer();
         trainingMode = true;
         //Enable Events
         EventManager.StartListening("manipulation_started", manipulationStarted);

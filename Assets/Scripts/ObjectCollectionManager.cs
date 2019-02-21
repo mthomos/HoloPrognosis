@@ -6,15 +6,12 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
 {
     //Public Variables - For Editor
     public GameObject TreePrefab;
-    //public GameObject BoxPrefab;
     public GameObject GatePrefab;
     public Vector3 TreeSize;
-    //public Vector3 BoxSize;
     public Vector3 GateSize;
     // Private Variables
     public FlowController flowController;
     private GameObject createdTree;
-    //private GameObject createdBox;
     private GameObject createdGate;
     private float ScaleFactor;
     private List<GameObject> ActiveHolograms = new List<GameObject>();
@@ -36,31 +33,13 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             createdTree = newObject;
             SetProps();
             treeCreated = true;
-        }
-    }
-    /*
-    public void CreateBox(Vector3 positionCenter, Quaternion rotation)
-    {
-        // Stay center in the square but move down to the ground
-        var position = positionCenter + new Vector3(0, BoxSize.y * .25f, 0);
-        GameObject newObject = Instantiate(BoxPrefab, position, rotation);
-        newObject.name = "Box";
-        if (newObject != null)
-        {
-            newObject.transform.parent = gameObject.transform;
-            newObject.tag = "Dummy";
-            newObject.transform.localScale = RescaleToSameScaleFactor(BoxPrefab);
-            ActiveHolograms.Add(newObject);
-            createdBox = newObject;
-            boxCreated = true;
             if (treeCreated && boxCreated)
-                flowController.PrepareNextManipulation();
+                EventManager.TriggerEvent("world_created");
         }
     }
-    */
+
     public void CreateGate(Vector3 positionCenter, Quaternion rotation)
     {
-        // Stay center in the square but move down to the ground
         var position = positionCenter + new Vector3(0, GateSize.y * .25f, 0);
         GameObject newObject = Instantiate(GatePrefab, position, rotation);
         newObject.name = "Gate";
@@ -71,10 +50,10 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             newObject.transform.localScale = RescaleToSameScaleFactor(GatePrefab);
             ActiveHolograms.Add(newObject);
             createdGate = newObject;
-            boxCreated = true;
             createdGate.AddComponent<GateScript>().gateOpened = false;
+            boxCreated = true;
             if (treeCreated && boxCreated)
-                flowController.PrepareNextManipulation();
+                EventManager.TriggerEvent("world_created");
         }
     }
 
@@ -137,20 +116,21 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         GameObject child;
         for (int i = 0; i < createdTree.transform.childCount; i++)
         {
+            Debug.Log("APPLE NUMBER->" + i);
             child = createdTree.transform.GetChild(i).gameObject;
             child.name = "apple_" + i;
+            child.tag = "User";
             child.AddComponent<AppleScript>();
+            child.AddComponent<Outline>();
+            child.GetComponent<Outline>().enabled = false;
             ActiveHolograms.Add(child);
         }
-        treeCreated = true;
-        if (treeCreated && boxCreated)
-            flowController.PrepareNextManipulation();
     }
     
     public GameObject getLowestFruit(float threshold)
     {
         GameObject lowestObject = null;
-        float dist = 10000;
+        float dist = 100000;
         if (createdTree == null)
             return null;
         for (int i = 0; i < createdTree.transform.childCount; i++)
@@ -173,7 +153,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
     {
 
         float height = controller.getRightPoseHandHeight();
-        float distance = controller.getRightPoseHeadHandDistance();
+        float distance = 2.0f;//controller.getRightPoseHeadHandDistance();
         Vector3 position;
         position.y = height;
         if( controller.isRightHand() )
@@ -190,23 +170,9 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         createdGate.SetActive(true);
         Vector3 difPos = position - createdGate.transform.position;
         createdGate.transform.position = position;
-        createdGate.transform.rotation.Set(0, 90, 0, 1);
+        createdGate.transform.rotation.Set(0, 90, -90, 1);
         createdGate.GetComponent<GateScript>().gateOpened = true;
-        //For child objects ??????
     }
-    /*
-    public void disappearBox()
-    {
-        for (int a = 0; a < createdBox.transform.childCount; a++)
-            createdBox.transform.GetChild(a).gameObject.SetActive(false);
-        createdBox.SetActive(false);
-    }
-
-    public GameObject getCreatedBox()
-    {
-        return createdBox;
-    }
-    */
     public void disappearGate()
     {
         if (createdGate == null)

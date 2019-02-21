@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-class DataScript : MonoBehaviour
+public class DataScript : MonoBehaviour
 {
     private bool requsetFinalize = false;
     //Gather values for every hand movement
@@ -15,10 +15,15 @@ class DataScript : MonoBehaviour
     //
     private Vector3 privPos = Vector3.zero;
     private float privSpeed, privTime, cacheTime;
+    private float startTime;
+    private int startHour, startMinute, startSecond;
 
     void Start()
     {
-        
+        startTime = Time.time;
+        startHour = DateTime.Now.Hour;
+        startMinute = DateTime.Now.Minute;
+        startSecond = DateTime.Now.Second;
     }
 
     private void Update()

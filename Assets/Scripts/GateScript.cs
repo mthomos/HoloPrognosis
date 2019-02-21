@@ -3,15 +3,19 @@
 public class GateScript : MonoBehaviour
 {
     //For editor
-    public Color objectColor;
+    public Color gateColor;
     //For scripting use
-    private bool checkForObject;
-    public bool objectInGate = false;
-    public bool gateOpened = false;
+    private bool objectInGate;
+    public bool gateOpened;
 
     void Start()
     {
-
+        if (gateColor != null)
+        {
+            Renderer rend = GetComponent<Renderer>();
+            rend.material.shader = Shader.Find("_Color");
+            rend.material.SetColor("_Color", gateColor);
+        }
     }
 
     void Update()
@@ -21,7 +25,7 @@ public class GateScript : MonoBehaviour
 
     public bool objectInsideGate(GameObject obj)
     {
-        if (!gateOpened)
+        if (!gateOpened || obj == null)
             return false;
 
         Vector3 objPos = obj.transform.position;
@@ -31,21 +35,16 @@ public class GateScript : MonoBehaviour
 
        if (boxXZ.Contains(new Vector2(objPos.x, objPos.z)) && boxXY.Contains(new Vector2(objPos.x, objPos.y)) )
        {
-            UtilitiesScript.Instance.EnableOutline(obj, Color.white);
-            UtilitiesScript.Instance.EnableOutline(gameObject, Color.white);
+            UtilitiesScript.Instance.EnableOutline(obj, Color.white, false);
+            UtilitiesScript.Instance.EnableOutline(gameObject, Color.white, false);
             return true;
        }
         else
         {
-            UtilitiesScript.Instance.EnableOutline(obj, Color.red);
+            UtilitiesScript.Instance.EnableOutline(obj, Color.blue, false);
             UtilitiesScript.Instance.DisableOutline(gameObject);
             return false;
         }
     
-    }
-
-    public void setCheckStatus(bool check)
-    {
-        checkForObject = check;
     }
 }

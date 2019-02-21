@@ -9,7 +9,6 @@ public class UiController : MonoBehaviour
     public GameObject playPrefab;
     public GameObject resultsPrefab;
     public GameObject aboutPrefab;
-    public FileManager fileManager;
     public ObjectPlacer placer;
     public GazeCursor gazeCursor;
     public TextMesh DebugText;
@@ -21,8 +20,6 @@ public class UiController : MonoBehaviour
     private List<int> settings;
     private bool audioFeedbackEnabled = false;
     private bool clickerEnabled = false;
-    private bool rightHandEnabled = true;
-    private bool leftHandEnabled = true;
     private bool treeIsShort = true;
 
     // Menu
@@ -34,13 +31,10 @@ public class UiController : MonoBehaviour
     private GameObject currentMenu;
     private int inMenu = -1; // Menu index
 
-    // Training
-    private bool trainingMode = false;
-
     private void Start()
     {
         //Load Settings
-        settings = fileManager.LoadSettings();
+        settings = FileManager.Instance.LoadSettings();
         for (int i = 0; i < settings.Count; i++)
         {
             if (i == 0)
@@ -58,11 +52,6 @@ public class UiController : MonoBehaviour
 
     private void tapUiReceived()
     {
-        if (trainingMode)
-        {
-            //flowController.finishGame();
-            return;
-        }
         //For UI navigation
         GameObject tappedObj = gazeCursor.getFocusedObject();
         if (tappedObj.CompareTag("UI"))
@@ -118,16 +107,16 @@ public class UiController : MonoBehaviour
                 }
                 else if (tappedObj.name == "RightHandButton")
                 {
-                    rightHandEnabled = (!rightHandEnabled);
-                    if (rightHandEnabled)
+                    flowController.rightHandEnabled = (!flowController.rightHandEnabled);
+                    if (flowController.rightHandEnabled)
                         tappedObj.GetComponentInChildren<TextMesh>().text = "Right Hand:" + "\n" + "Yes";
                     else
                         tappedObj.GetComponentInChildren<TextMesh>().text = "Right Hand:" + "\n" + "No";
                 }
                 else if (tappedObj.name == "LeftHandButton")
                 {
-                    leftHandEnabled = (!leftHandEnabled);
-                    if (rightHandEnabled)
+                    flowController.leftHandEnabled = (!flowController.leftHandEnabled);
+                    if (flowController.rightHandEnabled)
                         tappedObj.GetComponentInChildren<TextMesh>().text = "Left Hand:" + "\n" + "Yes";
                     else
                         tappedObj.GetComponentInChildren<TextMesh>().text = "Left Hand:" + "\n" + "No";
@@ -239,7 +228,6 @@ public class UiController : MonoBehaviour
         gazeCursor.setGenericUse();
         EventManager.StartListening("tap", tapUiReceived);
         //Appear the menu in front of user
-        placer.HideGridEnableOcclulsion();
         menuScreen = Instantiate(menuPrefab);
         Vector3 pos = Camera.main.transform.position + Camera.main.transform.forward * menuDistance;
         menuScreen.transform.position = pos;
@@ -271,7 +259,12 @@ public class UiController : MonoBehaviour
             text = "Next manipulation is with the right hand.";
         else
             text = "Next manipulation is with the left hand.";
-        printText(text);
+        //printText(text);
         TextToSpeech.Instance.StartSpeaking(text);
+    }
+
+    public void moveToPlayspace()
+    {
+        inMenu = -1;
     }
 }

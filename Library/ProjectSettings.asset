@@ -49,7 +49,7 @@ PlayerSettings:
   m_StereoRenderingPath: 0
   m_ActiveColorSpace: 0
   m_MTRendering: 1
-  m_StackTraceTypes: 010000000200000001000000010000000200000001000000
+  m_StackTraceTypes: 020000000200000001000000010000000200000001000000
   iosShowActivityIndicatorOnLoading: -1
   androidShowActivityIndicatorOnLoading: -1
   iosAppInBackgroundBehavior: 0
@@ -523,7 +523,8 @@ PlayerSettings:
   allowUnsafeCode: 0
   additionalIl2CppArgs: 
   scriptingRuntimeVersion: 1
-  apiCompatibilityLevelPerPlatform: {}
+  apiCompatibilityLevelPerPlatform:
+    Metro: 3
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
   metroPackageName: HoloPrognosis
@@ -552,19 +553,19 @@ PlayerSettings:
     WindowsStoreApps:
       AllJoyn: False
       Appointments: False
-      BackgroundMediaPlayback: True
+      BackgroundMediaPlayback: False
       BlockedChatMessages: False
       Bluetooth: True
       Chat: False
       CodeGeneration: False
       Contacts: False
       EnterpriseAuthentication: False
-      HumanInterfaceDevice: False
+      HumanInterfaceDevice: True
       InputInjectionBrokered: False
       InternetClient: False
       InternetClientServer: False
       Location: False
-      LowLevelDevices: False
+      LowLevelDevices: True
       Microphone: True
       MusicLibrary: False
       Objects3D: True
@@ -576,13 +577,13 @@ PlayerSettings:
       PrivateNetworkClientServer: False
       Proximity: True
       RecordedCallsFolder: False
-      RemoteSystem: False
+      RemoteSystem: True
       RemovableStorage: True
       SharedUserCertificates: False
       SpatialPerception: True
-      SystemManagement: False
+      SystemManagement: True
       UserAccountInformation: False
-      UserDataTasks: False
+      UserDataTasks: True
       UserNotificationListener: False
       VideosLibrary: False
       VoipCall: False
