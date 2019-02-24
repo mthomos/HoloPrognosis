@@ -204,11 +204,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1011558337}
   - component: {fileID: 1011558339}
-  - component: {fileID: 1011558340}
-  - component: {fileID: 1011558341}
   - component: {fileID: 1011558338}
-  - component: {fileID: 1011558344}
-  - component: {fileID: 1011558343}
+  - component: {fileID: 1011558340}
   m_Layer: 0
   m_Name: Scripts
   m_TagString: Untagged
@@ -347,51 +344,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 1011558336}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: afca0d4c0aa38dc4083908c0567e1615, type: 3}
+  m_Script: {fileID: 11500000, guid: 8e5a8d4165420ae4daf6ad34900e7a06, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fileManager: {fileID: 1011558341}
-  textToSpeech: {fileID: 1011558343}
---- !u!114 &1011558341
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1011558336}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f6404681346e12841a0c2c6284e4e522, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &1011558343
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1011558336}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 384f571493cee2c4dbbd733608d895ad, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  audioSource: {fileID: 1011558338}
---- !u!114 &1011558344
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1011558336}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0553cf402a68620469b341df96ef105b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  DebugDisplay: {fileID: 0}
-  PersistentKeywords: 0
-  Keywords: []
+  obj1: {fileID: 0}
+  obj2: {fileID: 0}
+  utilities: {fileID: 1011558339}
+  res: 0
 --- !u!1 &1637458627
 GameObject:
   m_ObjectHideFlags: 0
@@ -455,7 +414,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1637458627}
   m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
-  m_LocalPosition: {x: 0, y: 3, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

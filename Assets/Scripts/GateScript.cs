@@ -2,11 +2,8 @@
 
 public class GateScript : MonoBehaviour
 {
-    //For editor
     public Color gateColor;
-    //For scripting use
-    private bool objectInGate;
-    public bool gateOpened;
+    public bool gateOpened = false;
 
     void Start()
     {

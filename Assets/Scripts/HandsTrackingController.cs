@@ -180,7 +180,7 @@ public class HandsTrackingController : MonoBehaviour
                 utilities.getDistanceObjects(trackingHand.hand.transform, Camera.main.transform) < flowController.getHeadDisatnceLowerLimit(trackingHand.hand) -offset &&  // min max
                 Vector3.Magnitude(Camera.main.transform.position - initUserPos) <bodyOffset && TrainingMode)
             {
-                flowController.userViolationDetected();
+                flowController.UserViolationDetected();
             }
             //Move hand
             if(ManipulatedObject != null)
@@ -238,7 +238,7 @@ public class HandsTrackingController : MonoBehaviour
             if (obj.state.sourcePose.TryGetPosition(out pos))
                 hand.transform.position = pos;
 
-            bool rightHand = UtilitiesScript.Instance.isRightObject(pos);
+            bool rightHand = UtilitiesScript.Instance.isRightFromHead(pos);
             trackingHand = new HandStruct(hand, obj.state.source.id, rightHand);   
             if (HandCalibrationMode)
             {
@@ -308,39 +308,30 @@ public class HandsTrackingController : MonoBehaviour
             bool finishCalibration = flowController.addCalibrationController(calibrationController);
             if (finishCalibration)
             {
+                Debug.Log("Both hands calibrated. Last hand was right:" + calibrationController.isRightHand());
                 HandCalibrationMode = false;
                 calibrationController = null;
                 flowController.calibrationFinished();
             }
             else
             {
-                if (calibrationController.isRightHand())
+                if (calibrationController.isRightHand() && flowController.leftHandEnabled)
                 {
-                    if (!flowController.leftHandEnabled)
-                    {
-                        HandCalibrationMode = false;
-                        calibrationController = null;
-                        flowController.calibrationFinished();
-                    }
-                    else
-                    {
-                        uiController.printText("Right Hand calibrated successfully. Now let's calibrate the left one");
-                        TextToSpeech.Instance.StartSpeaking("Right Hand calibrated successfully. Now let's calibrate the left one");
-                    }
+                    Debug.Log("Right hand calibrated, waith for left");
+                    uiController.printText("Right Hand calibrated successfully. Now let's calibrate the left one");
+                    TextToSpeech.Instance.StartSpeaking("Right Hand calibrated successfully. Now let's calibrate the left one");
+                }
+                else if (calibrationController.isRightHand() && flowController.rightHandEnabled)
+                {
+                    Debug.Log("Left hand calibrated, waith for right");
+                    uiController.printText("Left Hand calibrated successfully. Now let's calibrate the right one");
+                    TextToSpeech.Instance.StartSpeaking("Left Hand calibrated successfully. Now let's calibrate the right one");
                 }
                 else
                 {
-                    if (!flowController.rightHandEnabled)
-                    {
-                        HandCalibrationMode = false;
-                        calibrationController = null;
-                        flowController.calibrationFinished();
-                    }
-                    else
-                    {
-                        uiController.printText("Left Hand calibrated successfully. Now let's calibrate the right one");
-                        TextToSpeech.Instance.StartSpeaking("Left Hand calibrated successfully. Now let's calibrate the right one");
-                    }
+                    HandCalibrationMode = false;
+                    calibrationController = null;
+                    flowController.calibrationFinished();
                 }
                 calibrationController = null;
             }

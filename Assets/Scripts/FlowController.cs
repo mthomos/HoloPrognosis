@@ -6,121 +6,40 @@ public class FlowController : MonoBehaviour
     public GazeCursor gazeCursor;
     public UiController uiController;
     public ObjectPlacer placer;
-    private DataScript dataScript;
+    public DataScript dataScript;
 
     // Training
-    private bool trainingMode, rightHandPlaying, manipulationInProgress;
+    private bool trainingMode, rightHandPlaying;
     private CalibrationController rightController, leftController, currentControlller;
-    private GameObject manipulatedObject;
-    public int success, fail, violation;
-    public bool rightHandEnabled = true, leftHandEnabled = true;
+    public int success, fail;
+    public bool rightHandEnabled = true;
+    public bool leftHandEnabled = true;
 
     //Create timer variables
     private float timer;
-    public float timerForGate;
+    public float timerForGate = 0.5f;
     public float timerForRightPose = 3.0f;
-    public float timerForHighPose = 3.0f;
 
     // Gate variables
     private GateScript gateScript;
-    private bool objectInGateDetected;
-    private bool freeToRelease;
+
+    // Manipulation variables -- reset in every manipulation
+    private bool objectInGateDetected, manipulationInProgress, freeToRelease;
+    public int violation;
+    private GameObject manipulatedObject = null;
+    //
+    private int manipulations;
 
     private void Start ()
     {
-        dataScript = GameObject.Find("Data").GetComponent<DataScript>();
-        EventManager.StartListening("world_created", manipulationStarted);
+        //Enable Events
+        EventManager.StartListening("manipulation_started", manipulationStarted);
+        EventManager.StartListening("box_collision", successfulTry);
+        EventManager.StartListening("floor_collision", failedTry);
+        EventManager.StartListening("world_created", PrepareNextManipulation);
     }
 
-    private void manipulationStarted()
-    {
-        if (!trainingMode)
-            return;
-        //Appear Gate according to hand
-        ObjectCollectionManager.Instance.appearGate(currentControlller);
-        //Get manipulatedObject
-        manipulatedObject = handsTrackingController.getManipulatedObject();
-        //Enable manipulation in flow controller
-        manipulationInProgress = true;
-    }
-
-    private void successfulTry()
-    {
-        if (freeToRelease && violation == 0)
-        {
-            dataScript.addManipulationResult(true);
-            success++;
-            PrepareNextManipulation();
-        }
-        else
-            failedTry();
-    }
-
-    private void failedTry()
-    {
-        dataScript.addManipulationResult(false);
-        fail++;
-        PrepareNextManipulation();
-    }
-
-    public void PrepareNextManipulation()
-    {
-        if (!trainingMode)
-            return;
-        //Disable Gate
-        ObjectCollectionManager.Instance.disappearGate();
-        violation = 0;
-        manipulationInProgress = false;
-        //Destroy object
-        if (manipulatedObject != null)
-        {
-            ObjectCollectionManager.Instance.destoryActiveHologram(manipulatedObject.name);
-            Destroy(manipulatedObject);
-            manipulatedObject = null;
-        }
-        GameObject nowPlayingObject = null;
-        //Swap hands 
-        if (rightHandEnabled && leftHandEnabled) // if both hands enabled
-        {
-            rightHandPlaying = !rightHandPlaying;
-            if (rightHandPlaying)
-                currentControlller = rightController;
-            else
-                currentControlller = leftController;
-
-            //Load (possible) next object for manipulation
-            nowPlayingObject = ObjectCollectionManager.Instance.getLowestFruit(currentControlller.getHighestPoseHandHeight());
-            if (nowPlayingObject == null)
-            {
-                //Switch to the other hand if for the current hand object doesn't exist
-                rightHandPlaying = !rightHandPlaying;
-                if (rightHandPlaying)
-                    currentControlller = rightController;
-                else
-                    currentControlller = leftController;
-                nowPlayingObject = ObjectCollectionManager.Instance.getLowestFruit(currentControlller.getHighestPoseHandHeight());
-            }
-        }
-        else if (rightHandEnabled && !leftHandEnabled) // Only right hand enabled
-        {
-            nowPlayingObject = ObjectCollectionManager.Instance.getLowestFruit(rightController.getHighestPoseHandHeight());
-        }
-        else if (!rightHandEnabled && leftHandEnabled) // Only left hand enabled
-        {
-            nowPlayingObject = ObjectCollectionManager.Instance.getLowestFruit(leftController.getHighestPoseHandHeight());
-        }
-        // If no objects exist, finish
-        if (nowPlayingObject == null)
-            finishGame();
-        else
-        {
-            uiController.prepareUserManipulation(rightHandPlaying);
-            UtilitiesScript.Instance.EnableOutline(nowPlayingObject, null, false);
-            nowPlayingObject.tag = "User";
-        }
-    }
-
-    private void Update ()
+    private void Update()
     {
         if (trainingMode && manipulationInProgress)
         {
@@ -143,13 +62,120 @@ public class FlowController : MonoBehaviour
                 {   //Refresh Timer
                     timer += Time.deltaTime;
                     if (timer > timerForGate)
-                    {
                         freeToRelease = true;
-                    }
                 }
             }
         }
-	}
+    }
+
+    private void OnDestroy()
+    {
+        //Disable Events
+        EventManager.StopListening("manipulation_started", manipulationStarted);
+        EventManager.StopListening("box_collision", successfulTry);
+        EventManager.StopListening("floor_collision", failedTry);
+        EventManager.StopListening("world_created", PrepareNextManipulation);
+    }
+
+    // Event functions
+    private void manipulationStarted()
+    {
+        if (!trainingMode)
+            return;
+        //Appear Gate according to hand
+        ObjectCollectionManager.Instance.appearGate(currentControlller);
+        //Get manipulatedObject
+        manipulatedObject = handsTrackingController.getManipulatedObject();
+        //Enable manipulation in flow controller
+        manipulationInProgress = true;
+    }
+
+    private void successfulTry()
+    {
+        if (freeToRelease && violation < 50)
+        {
+            dataScript.addManipulationResult(true);
+            success++;
+            PrepareNextManipulation();
+        }
+        else
+            failedTry();
+    }
+
+    private void failedTry()
+    {
+        dataScript.addManipulationResult(false);
+        fail++;
+        PrepareNextManipulation();
+    }
+
+    public void PrepareNextManipulation()
+    {
+        // If training mode is disable exit
+        if (!trainingMode)
+            return;
+        manipulations++;
+        string debugString = "Manipulation_" + manipulations + "->";
+        //Disable Gate
+        ObjectCollectionManager.Instance.disappearGate();
+        //Reset variables
+        violation = 0;
+        manipulationInProgress = false;
+        objectInGateDetected = false;
+        //Destroy object
+        Debug.Log(debugString + "reset_varables");
+        if (manipulatedObject != null)
+        {
+            Debug.Log(debugString + "destroy_hologram");
+            ObjectCollectionManager.Instance.destoryActiveHologram(manipulatedObject.name);
+            Destroy(manipulatedObject);
+            manipulatedObject = null;
+        }
+        GameObject nowPlayingObject = null;
+        //Swap hands 
+        if (rightHandEnabled && leftHandEnabled) // if both hands enabled
+        {
+            rightHandPlaying = !rightHandPlaying;
+            if (rightHandPlaying)
+                currentControlller = rightController;
+            else
+                currentControlller = leftController;
+
+            //Load (possible) next object for manipulation
+            nowPlayingObject = ObjectCollectionManager.Instance.getLowestFruit(currentControlller.getHighestPoseHandHeight());
+            if (nowPlayingObject == null)
+            {
+                Debug.Log(debugString + "for the current hand, no nowPlayingObject, switch hand");
+                //Switch to the other hand if for the current hand object doesn't exist
+                rightHandPlaying = !rightHandPlaying;
+                if (rightHandPlaying)
+                    currentControlller = rightController;
+                else
+                    currentControlller = leftController;
+                nowPlayingObject = ObjectCollectionManager.Instance.getLowestFruit(currentControlller.getHighestPoseHandHeight());
+            }
+        }
+        else if (rightHandEnabled && !leftHandEnabled) // Only right hand enabled
+        {
+            Debug.Log(debugString + "for the right hand");
+            nowPlayingObject = ObjectCollectionManager.Instance.getLowestFruit(rightController.getHighestPoseHandHeight());
+        }
+        else if (!rightHandEnabled && leftHandEnabled) // Only left hand enabled
+        {
+            Debug.Log(debugString + "for the left hand");
+            nowPlayingObject = ObjectCollectionManager.Instance.getLowestFruit(leftController.getHighestPoseHandHeight());
+        }
+        // If no objects exist, finish
+        if (nowPlayingObject == null)
+            finishGame();
+        else
+        {
+            uiController.prepareUserManipulation(rightHandPlaying);
+            UtilitiesScript.Instance.EnableOutline(nowPlayingObject, null, false);
+            nowPlayingObject.tag = "User";
+            Debug.Log(debugString + "object_name->"+nowPlayingObject.name);
+        }
+    }
 
     public void startPlaying()
     {
@@ -174,14 +200,11 @@ public class FlowController : MonoBehaviour
         // Enable Timer 
         // enableTimer();
         trainingMode = true;
-        //Enable Events
-        EventManager.StartListening("manipulation_started", manipulationStarted);
-        EventManager.StartListening("box_collision", successfulTry);
-        EventManager.StartListening("floor_collision", failedTry);
     }
 
     public void finishGame()
     {
+        Debug.Log("training finished");
         TextToSpeech.Instance.StartSpeaking("Training finished");
         //Prepare UI
         uiController.moveToResultsScreen();
@@ -193,15 +216,11 @@ public class FlowController : MonoBehaviour
         fail = 0;
         rightController = null;
         leftController = null;
-
-        //Disable Events
-        EventManager.StopListening("manipulation_started", manipulationStarted);
-        EventManager.StopListening("box_collision", successfulTry);
-        EventManager.StopListening("floor_collision", failedTry);
     }
 
     public bool addCalibrationController(CalibrationController controller)
     {
+        //Store controllers
         if (controller.isRightHand())
             rightController = controller;
         else
@@ -242,7 +261,7 @@ public class FlowController : MonoBehaviour
             return currentController.getHighestPoseHeadHandDistance();
     }
 
-    public void userViolationDetected()
+    public void UserViolationDetected()
     {
         violation++;
     }

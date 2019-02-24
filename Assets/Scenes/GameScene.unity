@@ -576,14 +576,14 @@ MonoBehaviour:
   gazeCursor: {fileID: 938779208}
   uiController: {fileID: 790716450}
   placer: {fileID: 790716442}
+  dataScript: {fileID: 790716445}
   success: 0
   fail: 0
-  violation: 0
   rightHandEnabled: 1
-  leftHandEnabled: 1
-  timerForGate: 0
+  leftHandEnabled: 0
+  timerForGate: 1
   timerForRightPose: 2
-  timerForHighPose: 3
+  violation: 0
 --- !u!114 &790716447
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -843,7 +843,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2a98b181acba5549af3d852c7664623, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TrianglesPerCubicMeter: 600
+  TrianglesPerCubicMeter: 500
   TimeBetweenUpdates: 1
   observerVolumeType: 0
   extents: {x: 10, y: 10, z: 10}

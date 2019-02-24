@@ -50,7 +50,7 @@ public class UtilitiesScript : Singleton<UtilitiesScript>
         return Vector3.Magnitude(obj1.position - obj2.position);
     }
 
-    public bool isRightObject(Vector3 pos)
+    public bool isRightFromHead(Vector3 pos)
     {
         Vector3 heading = pos - Camera.main.transform.position;
         Vector3 perp = Vector3.Cross(Camera.main.transform.forward, heading);

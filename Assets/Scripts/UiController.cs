@@ -259,7 +259,6 @@ public class UiController : MonoBehaviour
             text = "Next manipulation is with the right hand.";
         else
             text = "Next manipulation is with the left hand.";
-        //printText(text);
         TextToSpeech.Instance.StartSpeaking(text);
     }
 

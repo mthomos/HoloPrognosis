@@ -50,7 +50,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             newObject.transform.localScale = RescaleToSameScaleFactor(GatePrefab);
             ActiveHolograms.Add(newObject);
             createdGate = newObject;
-            createdGate.AddComponent<GateScript>().gateOpened = false;
+            createdGate.AddComponent<GateScript>();
             boxCreated = true;
             if (treeCreated && boxCreated)
                 EventManager.TriggerEvent("world_created");
@@ -116,7 +116,6 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         GameObject child;
         for (int i = 0; i < createdTree.transform.childCount; i++)
         {
-            Debug.Log("APPLE NUMBER->" + i);
             child = createdTree.transform.GetChild(i).gameObject;
             child.name = "apple_" + i;
             child.tag = "User";
@@ -151,6 +150,8 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
 
     public void appearGate(CalibrationController controller)
     {
+        if (controller == null)
+            return;
 
         float height = controller.getRightPoseHandHeight();
         float distance = 2.0f;//controller.getRightPoseHeadHandDistance();
