@@ -52,8 +52,16 @@ public class UiController : MonoBehaviour
 
     private void tapUiReceived()
     {
+        if (inMenu == -1) // Play scene
+        {
+            moveToResultsScreen();
+            return;
+        }
         //For UI navigation
         GameObject tappedObj = gazeCursor.getFocusedObject();
+        if (tappedObj == null)
+            return;
+
         if (tappedObj.CompareTag("UI"))
         {
             if (inMenu == 0) //Start Menu
@@ -180,7 +188,7 @@ public class UiController : MonoBehaviour
         TextMesh success = currentMenu.transform.Find("Successes").gameObject.GetComponent<TextMesh>();
         TextMesh failures = currentMenu.transform.Find("Failures").gameObject.GetComponent<TextMesh>();
         success.text = "Succeses : " + flowController.success;
-        failures.text = "Failures: " + flowController.fail;
+        failures.text = "Failures: " + (flowController.fail-1);
 
         Vector3 pos = Camera.main.transform.position + Camera.main.transform.forward * menuDistance;
         currentMenu.transform.position = pos;
@@ -219,16 +227,26 @@ public class UiController : MonoBehaviour
         UtilitiesScript.Instance.disableObject(currentMenu);
         currentMenu = menuScreen;
         UtilitiesScript.Instance.enableObject(currentMenu);
+        if (inMenu == -1)
+        {
+            //Fix menu position
+            Vector3 pos = Camera.main.transform.position + Camera.main.transform.forward * menuDistance;
+            currentMenu.transform.position = pos;
+            //Fix menu direction
+            Vector3 directionToTarget = Camera.main.transform.position - pos;
+            directionToTarget.y = 0.0f;
+            if (directionToTarget.sqrMagnitude > 0.005f)
+                currentMenu.transform.rotation = Quaternion.LookRotation(-directionToTarget);
+        }
         inMenu = 0;
     }
 
     public void createUI()
     {
-        //First listen for taps
-        gazeCursor.setGenericUse();
         EventManager.StartListening("tap", tapUiReceived);
         //Appear the menu in front of user
         menuScreen = Instantiate(menuPrefab);
+        //Fix menu position
         Vector3 pos = Camera.main.transform.position + Camera.main.transform.forward * menuDistance;
         menuScreen.transform.position = pos;
         //Fix menu direction

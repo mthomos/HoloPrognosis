@@ -6,7 +6,6 @@ public class GazeCursor : MonoBehaviour
     public FlowController flowController;
     //Private Variables
     private GameObject FocusedObject = null; // The object which user is staring at
-    private bool trainingMode = false;
     //Cached variables
     private Renderer cursorMeshRenderer; // Using this to disable cursor
     private RaycastHit hitInfo;
@@ -29,36 +28,15 @@ public class GazeCursor : MonoBehaviour
             cursorMeshRenderer.enabled = true;
             gameObject.transform.position = hitInfo.point;
             gameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal);
-            if (trainingMode) // Use for gameplay
-                refreshFocusedObjectTrainingMode();
-            else // for !training
-                refreshFocusedObjectGenericMode();
+            if ( hitInfo.collider.gameObject.CompareTag("User") ||
+                 hitInfo.collider.gameObject.CompareTag("UI")) // ||
+            //hitInfo.collider.gameObject.CompareTag("Dummy"))
+                FocusedObject = hitInfo.collider.gameObject;
+            else
+                FocusedObject = null;
         }
         else
             cursorMeshRenderer.enabled = false;
-    }
-    private void refreshFocusedObjectTrainingMode()
-    {
-        if (hitInfo.collider.gameObject.CompareTag("User"))
-            FocusedObject = hitInfo.collider.gameObject;
-    }
-
-    private void refreshFocusedObjectGenericMode()
-    {
-        if (hitInfo.collider.gameObject.CompareTag("User") || 
-            hitInfo.collider.gameObject.CompareTag("UI") ||
-            hitInfo.collider.gameObject.CompareTag("Calibration") ||
-            hitInfo.collider.gameObject.CompareTag("Dummy"))
-            FocusedObject = hitInfo.collider.gameObject;
-    }
-    public void setTrainingMode()
-    {
-        trainingMode = true;
-    }
-
-    public void setGenericUse()
-    {
-        trainingMode = false;
     }
 
     public GameObject getFocusedObject()

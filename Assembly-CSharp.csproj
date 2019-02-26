@@ -90,6 +90,7 @@
     <Compile Include="Assets\Scripts\CalibrationController.cs" />
     <Compile Include="Assets\Scripts\ClickerController.cs" />
     <Compile Include="Assets\Scripts\DataScript.cs" />
+    <Compile Include="Assets\Scripts\DebugScript.cs" />
     <Compile Include="Assets\Scripts\EventManager.cs" />
     <Compile Include="Assets\Scripts\FileManager.cs" />
     <Compile Include="Assets\Scripts\FlowController.cs" />

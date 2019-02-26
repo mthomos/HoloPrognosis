@@ -532,7 +532,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TreePrefab: {fileID: 1198309765264102, guid: d8486cdd8ad6ec54cb40d0818cc7e2a5, type: 3}
-  GatePrefab: {fileID: 100000, guid: abdcb10807a3c8a42a82f95b440f8c26, type: 3}
+  GatePrefab: {fileID: 6770303324140087380, guid: 72ab5f51ee5c4674c92f536ddafe1ede,
+    type: 3}
   TreeSize: {x: 0.8, y: 2, z: 0.8}
   GateSize: {x: 0.5, y: 0.5, z: 0.5}
   flowController: {fileID: 790716446}
@@ -580,7 +581,7 @@ MonoBehaviour:
   success: 0
   fail: 0
   rightHandEnabled: 1
-  leftHandEnabled: 0
+  leftHandEnabled: 1
   timerForGate: 1
   timerForRightPose: 2
   violation: 0
@@ -786,7 +787,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ImportMeshPeriod: 2
   meshMaterial: {fileID: 2100000, guid: 6cec46d5b336e2a4b9b2e1d3e8e3754c, type: 2}
-  MaxFrameTime: 10
+  MaxFrameTime: 5
   CreateMeshColliders: 1
 --- !u!114 &864562864
 MonoBehaviour:
@@ -863,7 +864,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SpatialUnderstandingMesh: {fileID: 864562863}
   OccludedMaterial: {fileID: 2100000, guid: df172103f5fba4a4d8636aeca60cb0d7, type: 2}
-  MinAreaForStats: 2
+  MinAreaForStats: 4
   MinAreaForComplete: 4
   MinHorizAreaForComplete: 1
   MinWallAreaForComplete: 0.2
@@ -944,13 +945,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 938779204}
-  m_LocalRotation: {x: 0.5, y: 0.5, z: 0.5, w: 0.5}
+  m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
   m_LocalPosition: {x: 0.09481, y: 0, z: 0.0525}
   m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 90}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
 --- !u!114 &938779208
 MonoBehaviour:
   m_ObjectHideFlags: 0

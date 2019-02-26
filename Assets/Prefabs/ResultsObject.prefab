@@ -104,7 +104,7 @@ GameObject:
   - component: {fileID: 23214965198411874}
   m_Layer: 0
   m_Name: BackPlate
-  m_TagString: Untagged
+  m_TagString: UI
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -410,7 +410,7 @@ GameObject:
   - component: {fileID: 23640420427670532}
   m_Layer: 0
   m_Name: FrontPlate
-  m_TagString: Untagged
+  m_TagString: UI
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

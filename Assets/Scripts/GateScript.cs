@@ -2,17 +2,11 @@
 
 public class GateScript : MonoBehaviour
 {
-    public Color gateColor;
     public bool gateOpened = false;
 
     void Start()
     {
-        if (gateColor != null)
-        {
-            Renderer rend = GetComponent<Renderer>();
-            rend.material.shader = Shader.Find("_Color");
-            rend.material.SetColor("_Color", gateColor);
-        }
+    
     }
 
     void Update()
@@ -38,7 +32,7 @@ public class GateScript : MonoBehaviour
        }
         else
         {
-            UtilitiesScript.Instance.EnableOutline(obj, Color.blue, false);
+            UtilitiesScript.Instance.EnableOutline(obj, Color.magenta, false);
             UtilitiesScript.Instance.DisableOutline(gameObject);
             return false;
         }

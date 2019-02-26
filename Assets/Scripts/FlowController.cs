@@ -47,6 +47,9 @@ public class FlowController : MonoBehaviour
             if (gateScript == null)
                 gateScript = ObjectCollectionManager.Instance.getCreatedGate().GetComponent<GateScript>();
 
+            if (manipulatedObject == null)
+                return;
+
             if (gateScript.objectInsideGate(manipulatedObject))
             {
                 if (!objectInGateDetected)
@@ -83,9 +86,14 @@ public class FlowController : MonoBehaviour
         if (!trainingMode)
             return;
         //Appear Gate according to hand
+        Debug.Log("Gate appeared");
         ObjectCollectionManager.Instance.appearGate(currentControlller);
         //Get manipulatedObject
         manipulatedObject = handsTrackingController.getManipulatedObject();
+        //Delete parent
+        if (manipulatedObject != null)
+            manipulatedObject.transform.parent = null;
+        ObjectCollectionManager.Instance.disappearTree();
         //Enable manipulation in flow controller
         manipulationInProgress = true;
     }
@@ -94,7 +102,7 @@ public class FlowController : MonoBehaviour
     {
         if (freeToRelease && violation < 50)
         {
-            dataScript.addManipulationResult(true);
+            dataScript.addManipulationResult(true, currentControlller.isRightHand());
             success++;
             PrepareNextManipulation();
         }
@@ -104,7 +112,7 @@ public class FlowController : MonoBehaviour
 
     private void failedTry()
     {
-        dataScript.addManipulationResult(false);
+        dataScript.addManipulationResult(false, currentControlller.isRightHand());
         fail++;
         PrepareNextManipulation();
     }
@@ -114,6 +122,7 @@ public class FlowController : MonoBehaviour
         // If training mode is disable exit
         if (!trainingMode)
             return;
+        ObjectCollectionManager.Instance.appearTree();
         manipulations++;
         string debugString = "Manipulation_" + manipulations + "->";
         //Disable Gate
@@ -123,7 +132,6 @@ public class FlowController : MonoBehaviour
         manipulationInProgress = false;
         objectInGateDetected = false;
         //Destroy object
-        Debug.Log(debugString + "reset_varables");
         if (manipulatedObject != null)
         {
             Debug.Log(debugString + "destroy_hologram");
@@ -136,6 +144,7 @@ public class FlowController : MonoBehaviour
         if (rightHandEnabled && leftHandEnabled) // if both hands enabled
         {
             rightHandPlaying = !rightHandPlaying;
+            Debug.Log(debugString+" right hand:" + rightHandPlaying);
             if (rightHandPlaying)
                 currentControlller = rightController;
             else
@@ -179,11 +188,16 @@ public class FlowController : MonoBehaviour
 
     public void startPlaying()
     {
+        //Reset variables
+        success = 0;
+        fail= 0;
+        timer = 0;
+        //Prepare UI
         uiController.moveToPlayspace();
-        //Set generic use for gaze
-        gazeCursor.setGenericUse();
         //Start hand calibration
         handsTrackingController.enableHandCalibration();
+        rightController = null;
+        leftController = null;
     }
 
     public void calibrationFinished()
@@ -191,14 +205,10 @@ public class FlowController : MonoBehaviour
         uiController.printText("");
         TextToSpeech.Instance.StartSpeaking("Now the tree will be appeared");
         placer.CreateScene();
-        //Set training use for gaze
-        gazeCursor.setTrainingMode();
         // Enable manipulation with hands
         handsTrackingController.enableHandManipulation();
         // Enable data collection
         handsTrackingController.enableDataCollection();
-        // Enable Timer 
-        // enableTimer();
         trainingMode = true;
     }
 
@@ -206,16 +216,12 @@ public class FlowController : MonoBehaviour
     {
         Debug.Log("training finished");
         TextToSpeech.Instance.StartSpeaking("Training finished");
+        //Save data
+        //dataScript.finishSession();
         //Prepare UI
         uiController.moveToResultsScreen();
         //Reset
         trainingMode = false;
-        gazeCursor.setGenericUse();
-        trainingMode = false;
-        success = 0;
-        fail = 0;
-        rightController = null;
-        leftController = null;
     }
 
     public bool addCalibrationController(CalibrationController controller)

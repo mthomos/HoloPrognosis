@@ -61,7 +61,6 @@ public class HandsTrackingController : MonoBehaviour
     private GestureRecognizer gestureRecognizer;
     private CalibrationController calibrationController;
     //Training
-    private int manipulationCounter;
     public float offset;
     public float bodyOffset;
     private float timerForRightPose;
@@ -137,7 +136,7 @@ public class HandsTrackingController : MonoBehaviour
                 }
                 //Gather data
                 if (DataCollectionMode)
-                    dataScript.interactionTouched();
+                    dataScript.interactionTouched(trackingHand.rightHand);
             }
         }
         else
@@ -167,7 +166,7 @@ public class HandsTrackingController : MonoBehaviour
                 ManipulatedObject.GetComponent<AppleScript>().disableWind();
             //Gather data
             if (DataCollectionMode)
-                dataScript.manipulationStarted();
+                dataScript.manipulationStarted(trackingHand.hand);
         }
         EventManager.TriggerEvent("manipulation_started");
     }
@@ -205,7 +204,6 @@ public class HandsTrackingController : MonoBehaviour
     {
         if (ObjectManipulationInProgress)
         {
-            manipulationCounter++;
             UtilitiesScript.Instance.DisableOutline(ManipulatedObject);
             UtilitiesScript.Instance.EnableGravity(ManipulatedObject);
 
@@ -214,7 +212,7 @@ public class HandsTrackingController : MonoBehaviour
             TouchedObject = null;
 
             if (DataCollectionMode)
-                dataScript.manipulationEnded();
+                dataScript.manipulationEnded(trackingHand.hand);
         }
     }
     private void GestureRecognizer_Tapped(TappedEventArgs args)
@@ -251,7 +249,7 @@ public class HandsTrackingController : MonoBehaviour
             if (DataCollectionMode) //Gather values for every hand movement
             {
                 float height = Mathf.Abs(pos.y - Camera.main.transform.position.y);
-                dataScript.addValue(pos, height);
+                dataScript.addValue(pos, height, trackingHand.rightHand);
             }
         }
     }
@@ -281,7 +279,7 @@ public class HandsTrackingController : MonoBehaviour
                     calibrationController.addValue(dist, pos.y);
             }
             if (DataCollectionMode)
-                dataScript.addValue(pos, pos.y);
+                dataScript.addValue(pos, pos.y, trackingHand.rightHand);
         }
     }   
 
@@ -303,14 +301,13 @@ public class HandsTrackingController : MonoBehaviour
 
     private void interactionTerminated()
     {
-        if (HandCalibrationMode && calibrationController != null)
+        if (HandCalibrationMode && calibrationController != null && !RightPoseInProgress)
         {
             bool finishCalibration = flowController.addCalibrationController(calibrationController);
-            if (finishCalibration)
+            if (finishCalibration && flowController.leftHandEnabled && flowController.rightHandEnabled)
             {
                 Debug.Log("Both hands calibrated. Last hand was right:" + calibrationController.isRightHand());
-                HandCalibrationMode = false;
-                calibrationController = null;
+                //HandCalibrationMode = false;
                 flowController.calibrationFinished();
             }
             else
@@ -321,7 +318,7 @@ public class HandsTrackingController : MonoBehaviour
                     uiController.printText("Right Hand calibrated successfully. Now let's calibrate the left one");
                     TextToSpeech.Instance.StartSpeaking("Right Hand calibrated successfully. Now let's calibrate the left one");
                 }
-                else if (calibrationController.isRightHand() && flowController.rightHandEnabled)
+                else if (!calibrationController.isRightHand() && flowController.rightHandEnabled)
                 {
                     Debug.Log("Left hand calibrated, waith for right");
                     uiController.printText("Left Hand calibrated successfully. Now let's calibrate the right one");
@@ -330,11 +327,10 @@ public class HandsTrackingController : MonoBehaviour
                 else
                 {
                     HandCalibrationMode = false;
-                    calibrationController = null;
                     flowController.calibrationFinished();
                 }
-                calibrationController = null;
             }
+            calibrationController = null;
         }
         Destroy(trackingHand.hand);
         trackingHand.interactionDetected = false;

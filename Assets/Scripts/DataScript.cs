@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,17 +7,20 @@ public class DataScript : MonoBehaviour
 {
     private bool requsetFinalize = false;
     //Gather values for every hand movement
-    private Dictionary<float, float> speed = new Dictionary<float, float>();
-    private Dictionary<float, float> acceleration = new Dictionary<float, float>();
-    private Dictionary<float, float> handHeight = new Dictionary<float, float>();
-    private List<float> dataList = new List<float>();// save data pointer with this sequence manipuStart, manipulationEnded in data list
-    private List<bool> manipulationResults = new List<bool>(); // save results of each manipulation
-    private List<float> interactionTouchedList = new List<float>(); // save the "moments" which user touched the objects
-    //
+    private Dictionary<float, float> speed_right = new Dictionary<float, float>();
+    private Dictionary<float, float> speed_left = new Dictionary<float, float>();
+    private Dictionary<float, float> acceleration_right = new Dictionary<float, float>();
+    private Dictionary<float, float> acceleration_left = new Dictionary<float, float>();
+    private Dictionary<float, float> handHeight_right = new Dictionary<float, float>();
+    private Dictionary<float, float> handHeight_left = new Dictionary<float, float>();
+    private Dictionary<float, bool> dataList = new Dictionary<float, bool>();               // save data pointer with this sequence manipuStart, manipulationEnded in data list, also save hand
+    private Dictionary<int, bool> manipulationResults = new Dictionary<int, bool>();        // save results of each manipulation, also save hand
+    private Dictionary<int, bool> manipulationHand = new Dictionary<int, bool>();           // save  the hand manipulation sequence
+    private Dictionary<float, bool> interactionTouchedList = new Dictionary<float, bool>(); // save the "moments" which user touched the objects, also save hand
+
     private Vector3 privPos = Vector3.zero;
-    private float privSpeed, privTime, cacheTime;
-    private float startTime;
-    private int startHour, startMinute, startSecond;
+    private float privSpeed, privTime, cacheTime, startTime;
+    private int startHour, startMinute, startSecond, manipulations;
 
     void Start()
     {
@@ -34,70 +38,129 @@ public class DataScript : MonoBehaviour
 
     private void saveSession()
     {
-        string line="";
+        string appPath = FileManager.Instance.getAppPath();
+        string filePath, fileName;
+        string lines="";
+        byte[] bytes;
+
         string dateName = DateTime.Now.Day.ToString() + "_"
                         + DateTime.Now.Month.ToString() + "_"
                         + DateTime.Now.Year.ToString() + "_" 
                         + DateTime.Now.Hour.ToString() + ":" 
                         + DateTime.Now.Minute.ToString() ;
 
-        string speedFile = "speed_" + dateName;
-        string accelerationFile = "acceleration_" + dateName;
-        string handHeightFile = "handHeight_" + dateName;
-        string dataListFile = "dataList_" + dateName;
-        string manipulationResultsFile = "manipulationResults_" + dateName;
-        string interactionTouchedListsFile = "interactionTouchedLists_" + dateName;
-
-        foreach (KeyValuePair<float, float> s in speed)
+        foreach (KeyValuePair<float, float> s in speed_right)
         {
-            line = line + s.Key.ToString() + "_" + s.Value.ToString() + ",";
+            lines = lines + s.Key.ToString() + "_" + s.Value.ToString() + "\n";
         }
-        FileManager.Instance.addRequest(speedFile, line);
+        fileName = "speed_right_" + dateName + ".txt";
+        filePath = Path.Combine(appPath, fileName);
+        bytes = System.Text.Encoding.UTF8.GetBytes(lines);
+        File.WriteAllBytes(filePath, bytes);
 
-        line = "";
-        foreach (KeyValuePair<float, float> a in acceleration)
+        lines = "";
+        foreach (KeyValuePair<float, float> s in speed_left)
         {
-            line = line + a.Key.ToString() + "_" + a.Value.ToString() + ",";
+            lines = lines + s.Key.ToString() + "_" + s.Value.ToString() + "\n";
         }
-        FileManager.Instance.addRequest(accelerationFile, line);
+        fileName = "speed_left_" + dateName + ".txt";
+        filePath = Path.Combine(appPath, fileName);
+        bytes = System.Text.Encoding.UTF8.GetBytes(lines);
+        File.WriteAllBytes(filePath, bytes);
 
-        line = "";
-        foreach (KeyValuePair<float, float> h in handHeight)
+        lines = "";
+        foreach (KeyValuePair<float, float> a in acceleration_right)
         {
-            line = line + h.Key.ToString() + "_" + h.Value.ToString() + ",";
+            lines = lines + a.Key.ToString() + "_" + a.Value.ToString() + "\n";
         }
-        FileManager.Instance.addRequest(handHeightFile, line);
+        fileName = "acceleration_right_" + dateName + ".txt";
+        filePath = Path.Combine(appPath, fileName);
+        bytes = System.Text.Encoding.UTF8.GetBytes(lines);
+        File.WriteAllBytes(filePath, bytes);
 
-        line = "";
-        foreach (float d in dataList)
+        lines = "";
+        foreach (KeyValuePair<float, float> a in acceleration_left)
         {
-            line = line + d.ToString() + ",";
+            lines = lines + a.Key.ToString() + "_" + a.Value.ToString() + "\n";
         }
-        FileManager.Instance.addRequest(dataListFile, line);
+        fileName = "acceleration_left_" + dateName + ".txt";
+        filePath = Path.Combine(appPath, fileName);
+        bytes = System.Text.Encoding.UTF8.GetBytes(lines);
+        File.WriteAllBytes(filePath, bytes);
 
-        line = "";
-        foreach (bool m in manipulationResults)
+        lines = "";
+        foreach (KeyValuePair<float, float> h in handHeight_right)
         {
-            line = line + m.ToString() + ",";
+            lines = lines + h.Key.ToString() + "_" + h.Value.ToString() + "\n";
         }
-        FileManager.Instance.addRequest(manipulationResultsFile, line);
+        fileName = "handHeight_right_" + dateName + ".txt";
+        filePath = Path.Combine(appPath, fileName);
+        bytes = System.Text.Encoding.UTF8.GetBytes(lines);
+        File.WriteAllBytes(filePath, bytes);
 
-        line = "";
-        foreach (float i in interactionTouchedList)
+        lines = "";
+        foreach (KeyValuePair<float, float> h in handHeight_left)
         {
-            line = line + i.ToString() + ",";
+            lines = lines + h.Key.ToString() + "_" + h.Value.ToString() + "\n";
         }
-        FileManager.Instance.addRequest(interactionTouchedListsFile, line);
+        fileName = "handHeight_left_" + dateName + ".txt";
+        filePath = Path.Combine(appPath, fileName);
+        bytes = System.Text.Encoding.UTF8.GetBytes(lines);
+        File.WriteAllBytes(filePath, bytes);
+
+        lines = "";
+        foreach (KeyValuePair<float, bool> d in dataList)
+        {
+            lines = lines + d.Key.ToString() + "_" + d.Value.ToString() + "\n";
+        }
+        fileName = "dataList_" + dateName + ".txt";
+        filePath = Path.Combine(appPath, fileName);
+        bytes = System.Text.Encoding.UTF8.GetBytes(lines);
+        File.WriteAllBytes(filePath, bytes);
+
+        lines = "";
+        foreach (KeyValuePair<int, bool> m in manipulationResults)
+        {
+            lines = lines + m.Key.ToString() + "_" + m.Value.ToString() + "\n";
+        }
+        fileName = "manipulationResults_" + dateName + ".txt";
+        filePath = Path.Combine(appPath, fileName);
+        bytes = System.Text.Encoding.UTF8.GetBytes(lines);
+        File.WriteAllBytes(filePath, bytes);
+
+        lines = "";
+        foreach (KeyValuePair<int, bool> m in manipulationHand)
+        {
+            lines = lines + m.Key.ToString() + "_" + m.Value.ToString() + "\n";
+        }
+        fileName = "manipulationHand_" + dateName + ".txt";
+        filePath = Path.Combine(appPath, fileName);
+        bytes = System.Text.Encoding.UTF8.GetBytes(lines);
+        File.WriteAllBytes(filePath, bytes);
+
+        lines = "";
+        foreach (KeyValuePair<float, bool> i in interactionTouchedList)
+        {
+            lines = lines + i.Key.ToString() + "_" + i.Value.ToString() + "\n";
+        }
+        fileName = "interactionTouchedList_" + dateName + ".txt";
+        filePath = Path.Combine(appPath, fileName);
+        bytes = System.Text.Encoding.UTF8.GetBytes(lines);
+        File.WriteAllBytes(filePath, bytes);
     }
 
     private void finalizeSession()
     {
         saveSession();
-        speed.Clear();
-        acceleration.Clear();
-        handHeight.Clear();
+        speed_right.Clear();
+        acceleration_right.Clear();
+        handHeight_right.Clear();
+        speed_left.Clear();
+        acceleration_left.Clear();
+        handHeight_left.Clear();
         dataList.Clear();
         manipulationResults.Clear();
+        manipulationHand.Clear();
         interactionTouchedList.Clear();
     }
 
@@ -106,12 +169,12 @@ public class DataScript : MonoBehaviour
         requsetFinalize = true;
     }
 
-    public void interactionTouched()
+    public void interactionTouched(bool rightHand)
     {
-        interactionTouchedList.Add(Time.time);
+        interactionTouchedList.Add(Time.time, rightHand);
     }
 
-    public void addValue(Vector3 position, float height)
+    public void addValue(Vector3 position, float height, bool rightHand)
     {
         cacheTime = Time.time;
         if (cacheTime == privTime)
@@ -120,27 +183,38 @@ public class DataScript : MonoBehaviour
         float dt = cacheTime - privTime;
         float t_speed = Vector3.Magnitude(position - privPos) / dt;
         float t_accel = (t_speed - privSpeed) / dt;
-        speed.Add(cacheTime, t_speed);
-        acceleration.Add(cacheTime, t_accel);
-        handHeight.Add(cacheTime, height);
+        if (rightHand)
+        {
+            speed_right.Add(cacheTime, t_speed);
+            acceleration_right.Add(cacheTime, t_accel);
+            handHeight_right.Add(cacheTime, height);
+        }
+        else
+        {
+            speed_left.Add(cacheTime, t_speed);
+            acceleration_left.Add(cacheTime, t_accel);
+            handHeight_left.Add(cacheTime, height);
+        }
         //Save values
         privSpeed = t_speed;
         privPos = position;
         privTime = cacheTime;
     }
 
-    public void manipulationStarted()
+    public void manipulationStarted(bool rightHand)
     {
-        dataList.Add(Time.time);
+        dataList.Add(Time.time, rightHand);
     }
 
-    public void manipulationEnded()
+    public void manipulationEnded(bool rightHand)
     {
-        dataList.Add(Time.time);
+        dataList.Add(Time.time, rightHand);
     }
 
-    public void addManipulationResult(bool result)
+    public void addManipulationResult(bool result, bool rightHand)
     {
-        manipulationResults.Add(result);
+        manipulationResults.Add(manipulations, result);
+        manipulationHand.Add(manipulations, rightHand);
+        manipulations++;
     }
 }

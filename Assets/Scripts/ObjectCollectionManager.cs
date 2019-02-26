@@ -16,16 +16,15 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
     private float ScaleFactor;
     private List<GameObject> ActiveHolograms = new List<GameObject>();
     private bool boxCreated, treeCreated;
-    private float angle = 90;
 
     public void CreateTree(Vector3 positionCenter, Quaternion rotation)
     {
-        // Stay center in the square but move down to the ground
         Vector3 position = positionCenter - new Vector3(0, TreeSize.y * .5f, 0);
         GameObject newObject = Instantiate(TreePrefab, position, rotation);
         newObject.name = "Tree";
         if (newObject != null)
         {
+            Debug.Log("tree_created");
             newObject.transform.parent = gameObject.transform;
             newObject.tag = "Dummy";
             newObject.transform.localScale = RescaleToSameScaleFactor(TreePrefab);
@@ -41,10 +40,12 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
     public void CreateGate(Vector3 positionCenter, Quaternion rotation)
     {
         var position = positionCenter + new Vector3(0, GateSize.y * .25f, 0);
+        position.y = 1.3f;
         GameObject newObject = Instantiate(GatePrefab, position, rotation);
         newObject.name = "Gate";
         if (newObject != null)
         {
+            Debug.Log("gate_created");
             newObject.transform.parent = gameObject.transform;
             newObject.tag = "Dummy";
             newObject.transform.localScale = RescaleToSameScaleFactor(GatePrefab);
@@ -118,7 +119,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         {
             child = createdTree.transform.GetChild(i).gameObject;
             child.name = "apple_" + i;
-            child.tag = "User";
+            //child.tag = "User";
             child.AddComponent<AppleScript>();
             child.AddComponent<Outline>();
             child.GetComponent<Outline>().enabled = false;
@@ -151,27 +152,75 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
     public void appearGate(CalibrationController controller)
     {
         if (controller == null)
+        {
+            Debug.Log("Controller was null");
             return;
+        }
+
+        if (createdGate == null)
+        {
+            Debug.Log("Gate was null");
+            return;
+        }
 
         float height = controller.getRightPoseHandHeight();
-        float distance = 2.0f;//controller.getRightPoseHeadHandDistance();
+        float distance = 1.2f;//controller.getRightPoseHeadHandDistance();
         Vector3 position;
-        position.y = height;
+        position.y = 0.75f*height;
+        Vector3 forward = Camera.main.transform.forward;
+        Vector3 angles = Camera.main.transform.eulerAngles;
         if( controller.isRightHand() )
         {
-            position.x = Camera.main.transform.position.x + Mathf.Cos(angle)*distance;
-            position.z = Camera.main.transform.position.z + Mathf.Sin(angle)*distance;
+            if (angles.x >=0 && angles.z >=0) // Edit conditions
+            {
+                position.x = Camera.main.transform.position.x + Mathf.Sin(angles.y * Mathf.Rad2Deg) * distance;
+                position.z = Camera.main.transform.position.z - Mathf.Cos(angles.y * Mathf.Rad2Deg) * distance;
+            }
+            else if (angles.x >= 0 && angles.z < 0)
+            {
+                position.x = Camera.main.transform.position.x - Mathf.Sin(angles.y * Mathf.Rad2Deg) * distance;
+                position.z = Camera.main.transform.position.z + Mathf.Cos(angles.y * Mathf.Rad2Deg) * distance;
+            }
+            else if (angles.x < 0 && angles.z >= 0)
+            {
+                position.x = Camera.main.transform.position.x - Mathf.Sin(angles.y * Mathf.Rad2Deg) * distance;
+                position.z = Camera.main.transform.position.z + Mathf.Cos(angles.y * Mathf.Rad2Deg) * distance;
+            }
+            else
+            {
+                position.x = Camera.main.transform.position.x + Mathf.Sin(angles.y * Mathf.Rad2Deg) * distance;
+                position.z = Camera.main.transform.position.z - Mathf.Cos(angles.y * Mathf.Rad2Deg) * distance;
+            }
         }
         else
         {
-            position.x = Camera.main.transform.position.x + Mathf.Cos(-1*angle)*distance;
-            position.z = Camera.main.transform.position.z + Mathf.Sin(-1*angle)*distance;
+            if (angles.x >= 0 && angles.z >= 0)
+            {
+                position.x = Camera.main.transform.position.x - Mathf.Cos(angles.y * Mathf.Rad2Deg) * distance;
+                position.z = Camera.main.transform.position.z + Mathf.Sin(angles.y * Mathf.Rad2Deg) * distance;
+            }
+            else if (angles.x >= 0 && angles.z < 0)
+            {
+                position.x = Camera.main.transform.position.x + Mathf.Cos(angles.y * Mathf.Rad2Deg) * distance;
+                position.z = Camera.main.transform.position.z - Mathf.Sin(angles.y * Mathf.Rad2Deg) * distance;
+            }
+            else if (angles.x < 0 && angles.z >= 0)
+            {
+                position.x = Camera.main.transform.position.x + Mathf.Cos(angles.y * Mathf.Rad2Deg) * distance;
+                position.z = Camera.main.transform.position.z - Mathf.Sin(angles.y * Mathf.Rad2Deg) * distance;
+            }
+            else
+            {
+                position.x = Camera.main.transform.position.x - Mathf.Cos(angles.y * Mathf.Rad2Deg) * distance;
+                position.z = Camera.main.transform.position.z + Mathf.Sin(angles.y * Mathf.Rad2Deg) * distance;
+            }
         }
+        //position.x = Camera.main.transform.position.x + forward.x * distance;
+        //position.z = Camera.main.transform.position.z + forward.z * distance;
 
         createdGate.SetActive(true);
-        Vector3 difPos = position - createdGate.transform.position;
         createdGate.transform.position = position;
-        createdGate.transform.rotation.Set(0, 90, -90, 1);
+        createdGate.transform.Rotate(0, 90f, -90f);
         createdGate.GetComponent<GateScript>().gateOpened = true;
     }
     public void disappearGate()
@@ -180,9 +229,32 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             return;
 
         createdGate.GetComponent<GateScript>().gateOpened = false;
-        for (int a = 0; a < createdGate.transform.childCount; a++)
-            createdGate.transform.GetChild(a).gameObject.SetActive(false);
+        //for (int a = 0; a < createdGate.transform.childCount; a++)
+        //    createdGate.transform.GetChild(a).gameObject.SetActive(false);
         createdGate.SetActive(false);
+    }
+
+    public void disappearTree()
+    {
+        if (createdTree == null)
+            return;
+
+        for (int a = 0; a < createdTree.transform.childCount; a++)
+            createdTree.transform.GetChild(a).gameObject.SetActive(false);
+        createdTree.SetActive(false);
+    }
+
+    public void appearTree()
+    {
+        if (createdTree == null)
+            return;
+
+        createdTree.SetActive(true);
+        for (int a = 0; a < createdTree.transform.childCount; a++)
+        {
+            createdTree.transform.GetChild(a).gameObject.SetActive(true);
+            UtilitiesScript.Instance.DisableOutline(createdTree.transform.GetChild(a).gameObject);
+        }
     }
 
     public GameObject getCreatedGate()

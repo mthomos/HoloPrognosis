@@ -7,6 +7,7 @@ using UnityEngine;
 
 #if UNITY_WSA && !UNITY_EDITOR
 using Windows.Storage;
+using Windows.Foundation;
 using System.Threading.Tasks;
 #endif
 
@@ -59,7 +60,7 @@ public class FileManager : MonoBehaviour
     {
 #if UNITY_WSA && !UNITY_EDITOR
         StorageFolder folder = ApplicationData.Current.LocalFolder;
-        StorageFile file;
+        StorageFile file = null;
         if (File.Exists(Path.Combine(appPath, current.fileName)))
         {
             file = await folder.GetFileAsync(current.fileName);
@@ -72,8 +73,19 @@ public class FileManager : MonoBehaviour
         }
         try
         {
+            if (file == null)
+            {
+                Debug.Log("File is not null");
+                return;
+            }
             Debug.Log("Trying to write");
-            await FileIO.WriteTextAsync(file, current.content);
+            IAsyncAction action = FileIO.WriteTextAsync(file, current.content);
+            if (action.Status == AsyncStatus.Completed)
+                Debug.Log("success write");
+            else if (action.Status == AsyncStatus.Error)
+                Debug.Log("error in write");
+            else if (action.Status == AsyncStatus.Started)
+                Debug.Log("started write");
         }
         catch (Exception e)
         {
@@ -144,5 +156,34 @@ public class FileManager : MonoBehaviour
             ret.Add(0);
         }
         return ret;
+    }
+
+    public Stream OpenFileForWriteAsync (string fileName)
+    {
+        Stream stream = null ;
+#if UNITY_WSA && !UNITY_EDITOR
+        Task task = Task.Factory.StartNew(async () =>
+        {
+            StorageFolder folder = await StorageFolder.GetFolderFromPathAsync ( appPath ) ;
+            StorageFile file = await folder.CreateFileAsync(fileName ,CreationCollisionOption.ReplaceExisting ) ;
+            stream = await file.OpenStreamForWriteAsync() ;
+        } );
+        task.Wait();
+# else
+        stream = new FileStream (Path.Combine(appPath , fileName) , FileMode.Create , FileAccess.Write) ;
+# endif
+        return stream ;
+    }
+
+    /*
+     StorageFolder storageFolder = ApplicationData.Current.LocalFolder;
+     StorageFile storageFile = await storageFolder.GetFileAsync(filename);
+     var stream = System.IO.File.Open(storageFile.Path,FileMode.Open);
+     bool check = stream is FileStream;
+     */
+
+    public string getAppPath()
+    {
+        return appPath;
     }
 }

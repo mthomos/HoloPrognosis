@@ -1,23 +1,38 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.IO;
 using UnityEngine;
 
 public class DebugScript : MonoBehaviour
 {
-    public GameObject obj1, obj2;
     public UtilitiesScript utilities;
-    public bool res;
+    public FileManager fileManager;
+    private Stream debugStream;
+    private int triggered;
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Log("Hello World");
+        Debug.Log(Camera.main.transform.forward);
+        Debug.Log("_____");
+        Debug.Log(Camera.main.transform.eulerAngles);
+        //
+        if (fileManager == null)
+            fileManager = new FileManager();
+
+        debugStream = fileManager.OpenFileForWriteAsync("debug.txt");
     }
 
     // Update is called once per frame
     void Update()
     {
-        Vector2 vec_from = new Vector2(obj1.transform.position.x, obj1.transform.position.z);
-        Vector2 vec_to = new Vector2(obj2.transform.position.x, obj2.transform.position.z);
-        Debug.Log(Vector2.SignedAngle(vec_from, vec_to));
+       if (triggered <10)
+       {
+            /*
+            Debug.Log("write ___" + triggered);
+            string newPath = Path.Combine(fileManager.getAppPath(), "test.txt");
+            var bytes = System.Text.Encoding.UTF8.GetBytes("test" + triggered);
+            File.WriteAllBytes(newPath, bytes);
+            */
+            fileManager.addRequest("test.txt", "test" + triggered);
+            triggered++;
+       }
     }
 }
