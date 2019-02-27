@@ -14,6 +14,7 @@ public class FlowController : MonoBehaviour
     public int success, fail;
     public bool rightHandEnabled = true;
     public bool leftHandEnabled = true;
+    public float  maxHeightRightHand, maxHeightLeftHand;
 
     //Create timer variables
     private float timer;
@@ -44,28 +45,34 @@ public class FlowController : MonoBehaviour
         if (trainingMode && manipulationInProgress)
         {
             // Calculate distance of manipulated object and gate
-            if (gateScript == null)
+            if (gateScript == null && ObjectCollectionManager.Instance.getCreatedGate() != null)
                 gateScript = ObjectCollectionManager.Instance.getCreatedGate().GetComponent<GateScript>();
+
+            if (gateScript == null)
+                return;
 
             if (manipulatedObject == null)
                 return;
 
             if (gateScript.objectInsideGate(manipulatedObject))
             {
+                TextToSpeech.Instance.StartSpeaking("IN");
                 if (!objectInGateDetected)
                 {
                     freeToRelease = false;
                     objectInGateDetected = true;
                     //Reset Timer
                     timer = 0.0f;
-                    if (timerForGate == 0)
-                        timerForGate = 3.0f;
                 }
                 else
                 {   //Refresh Timer
                     timer += Time.deltaTime;
                     if (timer > timerForGate)
+                    {
                         freeToRelease = true;
+                        if (gateScript != null)
+                            gateScript.enableCollider();
+                    }
                 }
             }
         }
@@ -122,6 +129,7 @@ public class FlowController : MonoBehaviour
         // If training mode is disable exit
         if (!trainingMode)
             return;
+        ObjectCollectionManager.Instance.appearGate();
         ObjectCollectionManager.Instance.appearTree();
         manipulations++;
         string debugString = "Manipulation_" + manipulations + "->";
@@ -134,6 +142,11 @@ public class FlowController : MonoBehaviour
         //Destroy object
         if (manipulatedObject != null)
         {
+            if (rightHandPlaying)
+                maxHeightRightHand = manipulatedObject.transform.position.y;
+            else
+                maxHeightLeftHand = manipulatedObject.transform.position.y;
+
             Debug.Log(debugString + "destroy_hologram");
             ObjectCollectionManager.Instance.destoryActiveHologram(manipulatedObject.name);
             Destroy(manipulatedObject);
@@ -182,6 +195,7 @@ public class FlowController : MonoBehaviour
             uiController.prepareUserManipulation(rightHandPlaying);
             UtilitiesScript.Instance.EnableOutline(nowPlayingObject, null, false);
             nowPlayingObject.tag = "User";
+            nowPlayingObject.GetComponent<SphereCollider>().enabled = true;
             Debug.Log(debugString + "object_name->"+nowPlayingObject.name);
         }
     }
@@ -192,6 +206,8 @@ public class FlowController : MonoBehaviour
         success = 0;
         fail= 0;
         timer = 0;
+        maxHeightRightHand = 0;
+        maxHeightLeftHand = 0;
         //Prepare UI
         uiController.moveToPlayspace();
         //Start hand calibration
@@ -270,5 +286,15 @@ public class FlowController : MonoBehaviour
     public void UserViolationDetected()
     {
         violation++;
+    }
+
+    public CalibrationController GetRightCalibrationController()
+    {
+        return rightController;
+    }
+
+    public CalibrationController GetLeftCalibrationController()
+    {
+        return leftController;
     }
 }

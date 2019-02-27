@@ -54,7 +54,7 @@ public class UiController : MonoBehaviour
     {
         if (inMenu == -1) // Play scene
         {
-            moveToResultsScreen();
+            //moveToResultsScreen();
             return;
         }
         //For UI navigation
@@ -185,10 +185,33 @@ public class UiController : MonoBehaviour
 
         UtilitiesScript.Instance.disableObject(currentMenu);
         currentMenu = resultsScreen;
+
         TextMesh success = currentMenu.transform.Find("Successes").gameObject.GetComponent<TextMesh>();
         TextMesh failures = currentMenu.transform.Find("Failures").gameObject.GetComponent<TextMesh>();
+        TextMesh rightImpv = currentMenu.transform.Find("Right_Impv").gameObject.GetComponent<TextMesh>();
+        TextMesh left_Impv = currentMenu.transform.Find("Left_Impv").gameObject.GetComponent<TextMesh>();
+
         success.text = "Succeses : " + flowController.success;
-        failures.text = "Failures: " + (flowController.fail-1);
+        failures.text = "Failures: " + (flowController.fail);
+
+        float impv_per = ((flowController.maxHeightRightHand / flowController.GetRightCalibrationController().getHighestPoseHandHeight()) - 1) * 100f;
+
+        if (impv_per < 0 || flowController.maxHeightRightHand == 0)
+            impv_per = 0;
+
+        if (flowController.rightHandEnabled)
+            rightImpv.text = "Right Hand improved by " + impv_per + "%";
+        else
+            rightImpv.text = "";
+
+        impv_per = ((flowController.maxHeightLeftHand / flowController.GetLeftCalibrationController().getHighestPoseHandHeight()) - 1) * 100f;
+        if (impv_per < 0 || flowController.maxHeightLeftHand == 0)
+            impv_per = 0;
+
+        if (flowController.leftHandEnabled)
+            left_Impv.text = "Left Hand improved by " + impv_per + "%";
+        else
+            left_Impv.text = "";
 
         Vector3 pos = Camera.main.transform.position + Camera.main.transform.forward * menuDistance;
         currentMenu.transform.position = pos;

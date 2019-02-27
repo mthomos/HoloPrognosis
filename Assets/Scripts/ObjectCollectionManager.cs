@@ -52,6 +52,8 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             ActiveHolograms.Add(newObject);
             createdGate = newObject;
             createdGate.AddComponent<GateScript>();
+            createdGate.GetComponent<MeshCollider>().enabled = false;
+            createdGate.transform.Rotate(0, 0, -90f);
             boxCreated = true;
             if (treeCreated && boxCreated)
                 EventManager.TriggerEvent("world_created");
@@ -121,6 +123,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             child.name = "apple_" + i;
             //child.tag = "User";
             child.AddComponent<AppleScript>();
+            child.GetComponent<SphereCollider>().enabled = false;
             child.AddComponent<Outline>();
             child.GetComponent<Outline>().enabled = false;
             ActiveHolograms.Add(child);
@@ -219,9 +222,11 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         //position.z = Camera.main.transform.position.z + forward.z * distance;
 
         createdGate.SetActive(true);
-        createdGate.transform.position = position;
-        createdGate.transform.Rotate(0, 90f, -90f);
+        //createdGate.transform.position = position;
+        createdGate.transform.position = new Vector3(createdGate.transform.position.x,  0.7f * height, createdGate.transform.position.z);
+        UtilitiesScript.Instance.DisableOutline(createdGate);
         createdGate.GetComponent<GateScript>().gateOpened = true;
+        createdGate.GetComponent<MeshCollider>().enabled = false;
     }
     public void disappearGate()
     {
@@ -229,9 +234,17 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             return;
 
         createdGate.GetComponent<GateScript>().gateOpened = false;
-        //for (int a = 0; a < createdGate.transform.childCount; a++)
-        //    createdGate.transform.GetChild(a).gameObject.SetActive(false);
-        createdGate.SetActive(false);
+        UtilitiesScript.Instance.DisableOutline(createdGate);
+        //createdGate.SetActive(false);
+    }
+
+    public void appearGate()
+    {
+        if (createdGate == null)
+            return;
+
+        createdGate.SetActive(true);
+        UtilitiesScript.Instance.DisableOutline(createdGate);
     }
 
     public void disappearTree()

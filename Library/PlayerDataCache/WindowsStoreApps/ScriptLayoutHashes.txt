@@ -19,6 +19,7 @@ e1bbf0ab858085e38fae6b12ebbdcd35 UnityEngine.Timeline.dll:UnityEngine.Timeline.P
 201e3fde670b00545944bb3db215c80a UnityEngine.Timeline.dll:UnityEngine.Timeline.TimelineAsset
 ec3005d758f1be5e81c564a861ec54a0 Assembly-CSharp.dll:HoloToolkit.Unity.SpatialMapping.ObjectSurfaceObserver
 17c906a478a991cff14d95e0a9ec88ce Assembly-CSharp.dll:HoloToolkit.Unity.SpatialMapping.RemoveSurfaceVertices
+e38935396198fbc6c60eee67551adc54 Assembly-CSharp.dll:.DebugScript
 71bb6a6b6c8f052f948db64c7dd3ca4f Assembly-CSharp.dll:HoloToolkit.Unity.SpatialUnderstandingSourceMesh
 257e7444f1154e70b0bf261ddc8fd517 Assembly-CSharp.dll:HoloToolkit.Unity.SpatialUnderstandingCustomMesh
 71bb6a6b6c8f052f948db64c7dd3ca4f Assembly-CSharp.dll:.FileManager
@@ -87,7 +88,7 @@ fc108ce7d98c40ac0907e8ca7f500c76 UnityEngine.UI.dll:UnityEngine.UI.Text
 abf1930d8126d0b2e00e9449129a0190 UnityEngine.UI.dll:UnityEngine.EventSystems.TouchInputModule
 64e54c0cbb0177c5ea26f340efb9ff85 UnityEngine.UI.dll:UnityEngine.UI.VerticalLayoutGroup
 55f7de44f250e1c4448793c45332021d Assembly-CSharp.dll:.GazeCursor
-a047283f03ede5fd382ad7e7eaa25cfe Assembly-CSharp.dll:.GateScript
+abd5cb597156c96808cb2a8143653591 Assembly-CSharp.dll:.GateScript
 8046b142d068c2cc548e066f7bf2dabc Assembly-CSharp.dll:.WindEffect
 71bb6a6b6c8f052f948db64c7dd3ca4f UnityEngine.Timeline.dll:UnityEngine.Timeline.ActivationPlayableAsset
 06f0fef534ca4c1d6064fd77a26bf722 UnityEngine.Timeline.dll:UnityEngine.Timeline.ActivationTrack
@@ -125,7 +126,7 @@ b475398734b5e142867609c83b16046a Assembly-CSharp.dll:HoloToolkit.Unity.SpatialMa
 6a1740751fcbe3cc995dbcc04a956d01 Unity.XR.WindowsMR.dll:UnityEngine.EventSystems.HoloLensInputModule
 19bd23fcf6f220f58fd17516ca11b85f Assembly-CSharp.dll:.HandsTrackingController
 71bb6a6b6c8f052f948db64c7dd3ca4f Assembly-CSharp.dll:HoloToolkit.Unity.SpatialMapping.SpatialMappingSource
-ad2196f54915096d3d176300f3b7a33d Assembly-CSharp.dll:.FlowController
+758feddb0dd60257ef22a070dfaf38a7 Assembly-CSharp.dll:.FlowController
 71bb6a6b6c8f052f948db64c7dd3ca4f Assembly-CSharp.dll:.DataScript
 e6ae40841db498b6e673877ac45ad208 UnityEngine.Networking.dll:UnityEngine.Networking.NetworkAnimator
 71bb6a6b6c8f052f948db64c7dd3ca4f UnityEngine.Networking.dll:UnityEngine.Networking.NetworkBehaviour

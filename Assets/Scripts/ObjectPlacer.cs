@@ -150,9 +150,9 @@ public class ObjectPlacer : MonoBehaviour
             {
                 placementRules = new List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule>
                 {
-                SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule.Create_AwayFromOtherObjects(2f)
+                SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule.Create_AwayFromOtherObjects(1.5f)
                 };
-                placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_NearCenter());
+                placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_AwayFromWalls());
             }
 
             placementQueries.Add(

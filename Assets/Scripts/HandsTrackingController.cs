@@ -70,6 +70,7 @@ public class HandsTrackingController : MonoBehaviour
 
     void Awake()
     {
+        InteractionManager.InteractionSourcePressed += InteractionManager_InteractionSourcePressed;
         InteractionManager.InteractionSourceDetected += InteractionManager_InteractionSourceDetected;
         InteractionManager.InteractionSourceUpdated += InteractionManager_InteractionSourceUpdated;
         InteractionManager.InteractionSourceLost += InteractionManager_InteractionSourceLost;
@@ -151,8 +152,11 @@ public class HandsTrackingController : MonoBehaviour
     private void GestureRecognizer_ManipulationStarted(ManipulationStartedEventArgs args)
     {
         uint id = args.source.id;
+        //args.sourcePose.TryGetPosition
         if (trackingHand.interactionDetected = true && ObjectTouched)
         {
+            if (TouchedObject == null)
+                return;
             ObjectManipulationInProgress = true;
             ManipulatedObject = TouchedObject;
             //Viusal feedback
@@ -204,8 +208,11 @@ public class HandsTrackingController : MonoBehaviour
     {
         if (ObjectManipulationInProgress)
         {
-            UtilitiesScript.Instance.DisableOutline(ManipulatedObject);
-            UtilitiesScript.Instance.EnableGravity(ManipulatedObject);
+            if (ManipulatedObject != null)
+            {
+                UtilitiesScript.Instance.DisableOutline(ManipulatedObject);
+                UtilitiesScript.Instance.EnableGravity(ManipulatedObject);
+            }
 
             ObjectManipulationInProgress = false;
             ManipulatedObject = null;
@@ -227,17 +234,29 @@ public class HandsTrackingController : MonoBehaviour
             UtilitiesScript.Instance.ChangeColorOutline(TouchedObject, OutlineHoldColor);
     }
 
-    private void InteractionManager_InteractionSourceDetected(InteractionSourceDetectedEventArgs obj)
+    private void InteractionManager_InteractionSourcePressed(InteractionSourcePressedEventArgs args)
     {
-        if (obj.state.source.kind == InteractionSourceKind.Hand)
+        if (args.state.source.kind == InteractionSourceKind.Hand)
+        {
+            if (trackingHand.hand != null)
+            {
+                Destroy(trackingHand.hand);
+                trackingHand.interactionDetected = false;
+            }
+        }
+    }
+
+    private void InteractionManager_InteractionSourceDetected(InteractionSourceDetectedEventArgs args)
+    {
+        if (args.state.source.kind == InteractionSourceKind.Hand)
         {
             var hand = Instantiate(TrackingObject) as GameObject;
             Vector3 pos;
-            if (obj.state.sourcePose.TryGetPosition(out pos))
+            if (args.state.sourcePose.TryGetPosition(out pos))
                 hand.transform.position = pos;
 
             bool rightHand = UtilitiesScript.Instance.isRightFromHead(pos);
-            trackingHand = new HandStruct(hand, obj.state.source.id, rightHand);   
+            trackingHand = new HandStruct(hand, args.state.source.id, rightHand);   
             if (HandCalibrationMode)
             {
                 calibrationController = new CalibrationController(rightHand);

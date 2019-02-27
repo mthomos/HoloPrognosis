@@ -534,8 +534,8 @@ MonoBehaviour:
   TreePrefab: {fileID: 1198309765264102, guid: d8486cdd8ad6ec54cb40d0818cc7e2a5, type: 3}
   GatePrefab: {fileID: 6770303324140087380, guid: 72ab5f51ee5c4674c92f536ddafe1ede,
     type: 3}
-  TreeSize: {x: 0.8, y: 2, z: 0.8}
-  GateSize: {x: 0.5, y: 0.5, z: 0.5}
+  TreeSize: {x: 0.8, y: 2.1, z: 0.8}
+  GateSize: {x: 0.15, y: 0.15, z: 0.15}
   flowController: {fileID: 790716446}
 --- !u!114 &790716444
 MonoBehaviour:
@@ -582,6 +582,8 @@ MonoBehaviour:
   fail: 0
   rightHandEnabled: 1
   leftHandEnabled: 1
+  maxHeightRightHand: 0
+  maxHeightLeftHand: 0
   timerForGate: 1
   timerForRightPose: 2
   violation: 0

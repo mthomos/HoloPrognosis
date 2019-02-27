@@ -24,6 +24,7 @@ public class AppleScript : MonoBehaviour
         //Get collision object
         GameObject colObject = collision.gameObject;
         //Signal the event
+        Debug.Log("collision_"+colObject.name + " with " + gameObject.name);
         if (colObject.CompareTag("Dummy") && !triggered)
             EventManager.TriggerEvent("box_collision");
         else if (!colObject.CompareTag("Dummy") && !triggered)
