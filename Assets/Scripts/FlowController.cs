@@ -7,42 +7,34 @@ public class FlowController : MonoBehaviour
     public UiController uiController;
     public ObjectPlacer placer;
     public DataScript dataScript;
-
+    public TurtorialController turtorialController;
     // Training
-    private bool trainingMode, rightHandPlaying;
+    private bool trainingMode, turtorialMode, rightHandPlaying;
     private CalibrationController rightController, leftController, currentControlller;
     public int success, fail;
-    public bool rightHandEnabled = true;
-    public bool leftHandEnabled = true;
+    public bool rightHandEnabled, leftHandEnabled;
     public float  maxHeightRightHand, maxHeightLeftHand;
-
     //Create timer variables
     private float timer;
-    public float timerForGate = 0.5f;
+    public float timerForGate = 1.0f;
     public float timerForRightPose = 3.0f;
-
     // Gate variables
     private GateScript gateScript;
-
     // Manipulation variables -- reset in every manipulation
     private bool objectInGateDetected, manipulationInProgress, freeToRelease;
     public int violation;
     private GameObject manipulatedObject = null;
-    //
+    // Store manipulations
     private int manipulations;
 
     private void Start ()
     {
-        //Enable Events
-        EventManager.StartListening("manipulation_started", manipulationStarted);
-        EventManager.StartListening("box_collision", successfulTry);
-        EventManager.StartListening("floor_collision", failedTry);
-        EventManager.StartListening("world_created", PrepareNextManipulation);
+        
     }
 
     private void Update()
     {
-        if (trainingMode && manipulationInProgress)
+        if (trainingMode && manipulationInProgress && !turtorialMode)
         {
             // Calculate distance of manipulated object and gate
             if (gateScript == null && ObjectCollectionManager.Instance.getCreatedGate() != null)
@@ -56,7 +48,6 @@ public class FlowController : MonoBehaviour
 
             if (gateScript.objectInsideGate(manipulatedObject))
             {
-                TextToSpeech.Instance.StartSpeaking("IN");
                 if (!objectInGateDetected)
                 {
                     freeToRelease = false;
@@ -90,11 +81,13 @@ public class FlowController : MonoBehaviour
     // Event functions
     private void manipulationStarted()
     {
-        if (!trainingMode)
+        if (!trainingMode || turtorialMode)
             return;
+
         //Appear Gate according to hand
         Debug.Log("Gate appeared");
-        ObjectCollectionManager.Instance.appearGate(currentControlller);
+        ObjectCollectionManager.Instance.appearGate(currentControlller.getRightPoseHandHeight(), 
+                2.0f, currentControlller.isRightHand());
         //Get manipulatedObject
         manipulatedObject = handsTrackingController.getManipulatedObject();
         //Delete parent
@@ -107,6 +100,9 @@ public class FlowController : MonoBehaviour
 
     private void successfulTry()
     {
+        if (turtorialMode)
+            return;
+
         if (freeToRelease && violation < 50)
         {
             dataScript.addManipulationResult(true, currentControlller.isRightHand());
@@ -119,6 +115,9 @@ public class FlowController : MonoBehaviour
 
     private void failedTry()
     {
+        if (turtorialMode)
+            return;
+
         dataScript.addManipulationResult(false, currentControlller.isRightHand());
         fail++;
         PrepareNextManipulation();
@@ -127,8 +126,9 @@ public class FlowController : MonoBehaviour
     public void PrepareNextManipulation()
     {
         // If training mode is disable exit
-        if (!trainingMode)
+        if (!trainingMode || turtorialMode)
             return;
+
         ObjectCollectionManager.Instance.appearGate();
         ObjectCollectionManager.Instance.appearTree();
         manipulations++;
@@ -226,6 +226,11 @@ public class FlowController : MonoBehaviour
         // Enable data collection
         handsTrackingController.enableDataCollection();
         trainingMode = true;
+        //Enable Events
+        EventManager.StartListening("manipulation_started", manipulationStarted);
+        EventManager.StartListening("box_collision", successfulTry);
+        EventManager.StartListening("floor_collision", failedTry);
+        EventManager.StartListening("world_created", PrepareNextManipulation);
     }
 
     public void finishGame()
@@ -285,7 +290,8 @@ public class FlowController : MonoBehaviour
 
     public void UserViolationDetected()
     {
-        violation++;
+        if (!turtorialController.turtorialEnabled)
+            violation++;
     }
 
     public CalibrationController GetRightCalibrationController()
@@ -296,5 +302,25 @@ public class FlowController : MonoBehaviour
     public CalibrationController GetLeftCalibrationController()
     {
         return leftController;
+    }
+
+    public void EnableTurtorialMode()
+    {
+        turtorialMode = true;
+    }
+
+    public void DisableTurtorialMode()
+    {
+        turtorialMode = false;
+    }
+
+    public bool IsHandCalibrated(bool rightHand)
+    {
+        if (rightHand)
+        {
+            return rightController == null ? false : true;
+        }
+        else
+            return leftController == null ? false : true;
     }
 }

@@ -49,7 +49,6 @@ public class HandsTrackingController : MonoBehaviour
     private bool ColorOutlineChanged = false;
     private bool DataCollectionMode = false;
     private bool HandCalibrationMode = false;
-    private bool TrainingMode = false;
     private bool ObjectTouched = false;
     private bool ObjectManipulationInProgress = false;
     // trackingHands: In this dictionary, hands which generate intaractions and scanned by Hololens are stored
@@ -63,10 +62,9 @@ public class HandsTrackingController : MonoBehaviour
     //Training
     public float offset;
     public float bodyOffset;
-    private float timerForRightPose;
     private float startTime;
     private bool RightPoseInProgress;
-    Vector3 initUserPos;
+    Vector3 initUserPos = Vector3.zero;
 
     void Awake()
     {
@@ -75,15 +73,13 @@ public class HandsTrackingController : MonoBehaviour
         InteractionManager.InteractionSourceUpdated += InteractionManager_InteractionSourceUpdated;
         InteractionManager.InteractionSourceLost += InteractionManager_InteractionSourceLost;
         InteractionManager.InteractionSourceReleased += InteractionManager_InteractionSourceReleased;
+        /*
         gestureRecognizer = new GestureRecognizer();
-        gestureRecognizer.SetRecognizableGestures(GestureSettings.ManipulationTranslate | GestureSettings.Tap); //  GestureSettings.Hold |
+        gestureRecognizer.SetRecognizableGestures(GestureSettings.Tap);
         gestureRecognizer.Tapped += GestureRecognizer_Tapped;
-        gestureRecognizer.ManipulationStarted += GestureRecognizer_ManipulationStarted;
-        gestureRecognizer.ManipulationCompleted += GestureRecognizer_ManipulationCompleted;
-        gestureRecognizer.ManipulationCanceled += GestureRecognizer_ManipulationCanceled;
         gestureRecognizer.ManipulationUpdated += GestureRecognizer_ManipulationUpdated;
-        gestureRecognizer.HoldStarted += GestureRecognizer_HoldStarted;
         gestureRecognizer.StartCapturingGestures();
+        */
     }
 
     void Update()
@@ -94,16 +90,15 @@ public class HandsTrackingController : MonoBehaviour
 
     void OnDestroy()
     {
+        InteractionManager.InteractionSourcePressed -= InteractionManager_InteractionSourcePressed;
         InteractionManager.InteractionSourceDetected -= InteractionManager_InteractionSourceDetected;
         InteractionManager.InteractionSourceUpdated -= InteractionManager_InteractionSourceUpdated;
         InteractionManager.InteractionSourceLost -= InteractionManager_InteractionSourceLost;
+        InteractionManager.InteractionSourceReleased -= InteractionManager_InteractionSourceReleased;
+        /*
         gestureRecognizer.StopCapturingGestures();
         gestureRecognizer.Tapped -= GestureRecognizer_Tapped;
-        gestureRecognizer.ManipulationStarted -= GestureRecognizer_ManipulationStarted;
-        gestureRecognizer.ManipulationCompleted -= GestureRecognizer_ManipulationCompleted;
-        gestureRecognizer.ManipulationCanceled -= GestureRecognizer_ManipulationCanceled;
-        gestureRecognizer.ManipulationUpdated -= GestureRecognizer_ManipulationUpdated;
-        gestureRecognizer.HoldStarted -= GestureRecognizer_HoldStarted;
+        */
     }
 
     private void CheckForHands()
@@ -115,6 +110,9 @@ public class HandsTrackingController : MonoBehaviour
 
     private void ManipulationForOneHand()
     {
+        if (FocusedObject != null || trackingHand.hand != null)
+            return;
+
         Vector3 focusPos = FocusedObject.transform.position; //The player gazes at the item which will catch
         Vector3 handPos = trackingHand.hand.transform.position; //The position of user's hand in the Holospace
         if (FocusedObject.GetComponent<Renderer>() == null)
@@ -149,184 +147,135 @@ public class HandsTrackingController : MonoBehaviour
         }
     }
 
-    private void GestureRecognizer_ManipulationStarted(ManipulationStartedEventArgs args)
-    {
-        uint id = args.source.id;
-        //args.sourcePose.TryGetPosition
-        if (trackingHand.interactionDetected = true && ObjectTouched)
-        {
-            if (TouchedObject == null)
-                return;
-            ObjectManipulationInProgress = true;
-            ManipulatedObject = TouchedObject;
-            //Viusal feedback
-            UtilitiesScript.Instance.ChangeColorOutline(ManipulatedObject, OutlineManipulateColor);
-            ManipulatedObject.transform.position = trackingHand.hand.transform.position;
-            //Store initial position of hand and head
-            Vector3 initHandPos = ManipulatedObject.transform.position;
-            initUserPos = Camera.main.transform.position;
-            //Disable Wind of object
-            if(ManipulatedObject.GetComponent<AppleScript>() != null)
-                ManipulatedObject.GetComponent<AppleScript>().disableWind();
-            //Gather data
-            if (DataCollectionMode)
-                dataScript.manipulationStarted(trackingHand.hand);
-        }
-        EventManager.TriggerEvent("manipulation_started");
-    }
-
-    private void GestureRecognizer_ManipulationUpdated(ManipulationUpdatedEventArgs args)
-    {
-        if (trackingHand.interactionDetected == true && ObjectManipulationInProgress)
-        {    
-            if( utilities.getDistanceObjects(trackingHand.hand.transform , Camera.main.transform) < flowController.getHeadDistanceUpperLimit(trackingHand.hand) + offset && // Check head-hand distance
-                utilities.getDistanceObjects(trackingHand.hand.transform, Camera.main.transform) < flowController.getHeadDisatnceLowerLimit(trackingHand.hand) -offset &&  // min max
-                Vector3.Magnitude(Camera.main.transform.position - initUserPos) <bodyOffset && TrainingMode)
-            {
-                flowController.UserViolationDetected();
-            }
-            //Move hand
-            if(ManipulatedObject != null)
-                ManipulatedObject.transform.position = trackingHand.hand.transform.position;
-        }
-        EventManager.TriggerEvent("manipulation_updated");
-    }
-
-    private void GestureRecognizer_ManipulationCompleted(ManipulationCompletedEventArgs args)
-    {
-        manipulationEnded();
-        EventManager.TriggerEvent("manipulation_completed");
-    }
-
-    private void GestureRecognizer_ManipulationCanceled(ManipulationCanceledEventArgs args)
-    {
-        manipulationEnded();
-        EventManager.TriggerEvent("manipulation_canceled");
-    }
-
-    private void manipulationEnded()
-    {
-        if (ObjectManipulationInProgress)
-        {
-            if (ManipulatedObject != null)
-            {
-                UtilitiesScript.Instance.DisableOutline(ManipulatedObject);
-                UtilitiesScript.Instance.EnableGravity(ManipulatedObject);
-            }
-
-            ObjectManipulationInProgress = false;
-            ManipulatedObject = null;
-            TouchedObject = null;
-
-            if (DataCollectionMode)
-                dataScript.manipulationEnded(trackingHand.hand);
-        }
-    }
-    private void GestureRecognizer_Tapped(TappedEventArgs args)
-    {            
-        uint id = args.source.id;
-        EventManager.TriggerEvent("tap");
-    }
-
-    private void GestureRecognizer_HoldStarted(HoldStartedEventArgs args)
-    {
-        if (TouchedObject != null)
-            UtilitiesScript.Instance.ChangeColorOutline(TouchedObject, OutlineHoldColor);
-    }
-
-    private void InteractionManager_InteractionSourcePressed(InteractionSourcePressedEventArgs args)
-    {
-        if (args.state.source.kind == InteractionSourceKind.Hand)
-        {
-            if (trackingHand.hand != null)
-            {
-                Destroy(trackingHand.hand);
-                trackingHand.interactionDetected = false;
-            }
-        }
-    }
-
     private void InteractionManager_InteractionSourceDetected(InteractionSourceDetectedEventArgs args)
     {
         if (args.state.source.kind == InteractionSourceKind.Hand)
         {
+            //Get hand position and illustrate it
             var hand = Instantiate(TrackingObject) as GameObject;
-            Vector3 pos;
-            if (args.state.sourcePose.TryGetPosition(out pos))
+            if (args.state.sourcePose.TryGetPosition(out Vector3 pos))
                 hand.transform.position = pos;
 
-            bool rightHand = UtilitiesScript.Instance.isRightFromHead(pos);
-            trackingHand = new HandStruct(hand, args.state.source.id, rightHand);   
+            //Define if it's the right hand
+            bool isRightHand = UtilitiesScript.Instance.isRightFromHead(pos);
+            trackingHand = new HandStruct(hand, args.state.source.id, isRightHand);
+            // Control calibration
             if (HandCalibrationMode)
             {
-                calibrationController = new CalibrationController(rightHand);
-                //Calibration Right Pose
-                timerForRightPose = flowController.timerForRightPose;
-                startTime = Time.time;
-                RightPoseInProgress = true;
+                if (!flowController.IsHandCalibrated(isRightHand))
+                {
+                    calibrationController = new CalibrationController(isRightHand);
+                    startTime = Time.time;
+                    RightPoseInProgress = true;
+                }
+                else
+                {
+                    string handText = isRightHand ? "Right hand " : "Left hand ";
+                    uiController.printText(handText + "already calibrated");
+                    TextToSpeech.Instance.StartSpeaking(handText + "already calibrated");
+                }
             }
+            //Gather hand data
             if (DataCollectionMode) //Gather values for every hand movement
             {
                 float height = Mathf.Abs(pos.y - Camera.main.transform.position.y);
                 dataScript.addValue(pos, height, trackingHand.rightHand);
             }
+            // Control object manipulation
+            if (trackingHand.interactionDetected = true && ObjectTouched)
+            {
+                if (TouchedObject == null)
+                    return;
+
+                ObjectManipulationInProgress = true;
+                ManipulatedObject = TouchedObject;
+                //Viusal feedback
+                UtilitiesScript.Instance.ChangeColorOutline(ManipulatedObject, OutlineManipulateColor);
+                ManipulatedObject.transform.position = trackingHand.hand.transform.position;
+                //Store initial position of hand and head
+                initUserPos = Camera.main.transform.position;
+                /*
+                //Disable Wind of object
+                if(ManipulatedObject.GetComponent<AppleScript>() != null)
+                    ManipulatedObject.GetComponent<AppleScript>().disableWind();
+                */
+                //Gather data
+                if (DataCollectionMode)
+                    dataScript.manipulationStarted(trackingHand.hand);
+            }
         }
+        EventManager.TriggerEvent("manipulation_started");
     }
 
     private void InteractionManager_InteractionSourceUpdated(InteractionSourceUpdatedEventArgs args)
     {
-        uint id = args.state.source.id;
-        if (trackingHand.interactionDetected == true && args.state.source.kind == InteractionSourceKind.Hand)
+        //Debug.Log("-----" + args.state.source.kind + "----- GestureRecognizer_ManipulationUpdated");
+        if (args.state.source.kind == InteractionSourceKind.Hand) // Detect Hand
         {
-            Vector3 pos;
-            if (args.state.sourcePose.TryGetPosition(out pos))
+            //Update hand position
+            if (args.state.sourcePose.TryGetPosition(out Vector3 pos) && trackingHand.hand != null)
                 trackingHand.hand.transform.position = pos;
+
+            //Update calibration
             if (HandCalibrationMode && calibrationController != null)
             {
-                float dist =(Camera.main.transform.position - pos).magnitude; 
-                if(RightPoseInProgress)
+                float dist = (Camera.main.transform.position - pos).magnitude;
+                if (RightPoseInProgress)
                 {
                     calibrationController.addValue(dist, pos.y);
-                    if (Time.time - startTime > timerForRightPose) //Start max pose calibration
+                    if (Time.time - startTime > flowController.timerForRightPose) //Start max pose calibration
                     {
                         calibrationController.finishRightPose();
                         uiController.calibrationMaxPose();
                         RightPoseInProgress = false;
                     }
                 }
-                else // high pose
+                else // High pose calibration
                     calibrationController.addValue(dist, pos.y);
             }
             if (DataCollectionMode)
                 dataScript.addValue(pos, pos.y, trackingHand.rightHand);
-        }
-    }   
 
-    private void InteractionManager_InteractionSourceLost(InteractionSourceLostEventArgs args)
-    {
-        if (trackingHand.interactionDetected == true && args.state.source.kind == InteractionSourceKind.Hand)
-        {
-            interactionTerminated();
+            if (ObjectManipulationInProgress)
+            {
+                if (utilities.getDistanceObjects(trackingHand.hand.transform, Camera.main.transform) < flowController.getHeadDistanceUpperLimit(trackingHand.hand) + offset && // Check head-hand distance
+                    utilities.getDistanceObjects(trackingHand.hand.transform, Camera.main.transform) < flowController.getHeadDisatnceLowerLimit(trackingHand.hand) - offset &&  // min max
+                    Vector3.Magnitude(Camera.main.transform.position - initUserPos) < bodyOffset)
+                {
+                    flowController.UserViolationDetected();
+                }
+                //Move hand during manipulation
+                if (ManipulatedObject != null)
+                    ManipulatedObject.transform.position = trackingHand.hand.transform.position;
+            }
         }
+        EventManager.TriggerEvent("manipulation_updated");
     }
 
     private void InteractionManager_InteractionSourceReleased(InteractionSourceReleasedEventArgs args)
     {
-        if (trackingHand.interactionDetected == true && args.state.source.kind == InteractionSourceKind.Hand)
-        {
-            interactionTerminated();
-        }
+        if (args.state.source.kind == InteractionSourceKind.Hand)
+            manipulationEnded();
+
+        EventManager.TriggerEvent("manipulation_completed");
     }
 
-    private void interactionTerminated()
+    private void InteractionManager_InteractionSourceLost(InteractionSourceLostEventArgs args)
+    {
+        if (args.state.source.kind == InteractionSourceKind.Hand)
+            manipulationEnded();
+
+        EventManager.TriggerEvent("manipulation_canceled");
+    }
+
+    private void manipulationEnded()
     {
         if (HandCalibrationMode && calibrationController != null && !RightPoseInProgress)
         {
-            bool finishCalibration = flowController.addCalibrationController(calibrationController);
-            if (finishCalibration && flowController.leftHandEnabled && flowController.rightHandEnabled)
+            if (flowController.addCalibrationController(calibrationController) &&
+                flowController.leftHandEnabled && flowController.rightHandEnabled)
             {
-                Debug.Log("Both hands calibrated. Last hand was right:" + calibrationController.isRightHand());
-                //HandCalibrationMode = false;
+                HandCalibrationMode = false;
                 flowController.calibrationFinished();
             }
             else
@@ -348,25 +297,59 @@ public class HandsTrackingController : MonoBehaviour
                     HandCalibrationMode = false;
                     flowController.calibrationFinished();
                 }
+                calibrationController = null;
             }
-            calibrationController = null;
+
+            if (ObjectManipulationInProgress)
+            {
+                if (ManipulatedObject != null)
+                {
+                    UtilitiesScript.Instance.DisableOutline(ManipulatedObject);
+                    UtilitiesScript.Instance.EnableGravity(ManipulatedObject, true);
+                }
+
+                ObjectManipulationInProgress = false;
+                ManipulatedObject = null;
+                //TouchedObject = null;
+
+                if (DataCollectionMode)
+                    dataScript.manipulationEnded(trackingHand.hand);
+            }
+
+            if (trackingHand.hand != null)
+            {
+                Destroy(trackingHand.hand);
+                trackingHand.hand = null;
+                trackingHand.interactionDetected = false;
+            }
         }
-        Destroy(trackingHand.hand);
-        trackingHand.interactionDetected = false;
+    }
+
+    private void InteractionManager_InteractionSourcePressed(InteractionSourcePressedEventArgs args)
+    {
+        //Debug.Log("-----" + args.state.source.kind + "----- GestureRecognizer_Tapped");
+        if (args.state.source.kind == InteractionSourceKind.Hand)
+        {
+            if (trackingHand.hand != null)
+            {
+                Destroy(trackingHand.hand);
+                trackingHand.hand = null;
+                trackingHand.interactionDetected = false;
+            }
+            EventManager.TriggerEvent("tap");
+        }
     }
 
     public void enableHandCalibration()
     {
         HandCalibrationMode = true;
         ManipulationEnabled = false;
-        TrainingMode = false;
     }
 
     public void enableHandManipulation()
     {
         HandCalibrationMode = false;
         ManipulationEnabled = true;
-        TrainingMode = true;
     }
 
     public void enableDataCollection()

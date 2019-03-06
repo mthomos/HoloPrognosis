@@ -15,7 +15,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
     private GameObject createdGate;
     private float ScaleFactor;
     private List<GameObject> ActiveHolograms = new List<GameObject>();
-    private bool boxCreated, treeCreated;
+    private bool gateCreated, treeCreated;
 
     public void CreateTree(Vector3 positionCenter, Quaternion rotation)
     {
@@ -32,7 +32,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             createdTree = newObject;
             SetProps();
             treeCreated = true;
-            if (treeCreated && boxCreated)
+            if (treeCreated && gateCreated)
                 EventManager.TriggerEvent("world_created");
         }
     }
@@ -51,11 +51,10 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             newObject.transform.localScale = RescaleToSameScaleFactor(GatePrefab);
             ActiveHolograms.Add(newObject);
             createdGate = newObject;
-            createdGate.AddComponent<GateScript>();
             createdGate.GetComponent<MeshCollider>().enabled = false;
             createdGate.transform.Rotate(0, 0, -90f);
-            boxCreated = true;
-            if (treeCreated && boxCreated)
+            gateCreated = true;
+            if (treeCreated && gateCreated)
                 EventManager.TriggerEvent("world_created");
         }
     }
@@ -152,77 +151,23 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         ActiveHolograms.Clear();
     }
 
-    public void appearGate(CalibrationController controller)
+    public void appearGate(float height, float distance, bool toRight)
     {
-        if (controller == null)
-        {
-            Debug.Log("Controller was null");
-            return;
-        }
-
         if (createdGate == null)
         {
             Debug.Log("Gate was null");
             return;
         }
 
-        float height = controller.getRightPoseHandHeight();
-        float distance = 1.2f;//controller.getRightPoseHeadHandDistance();
-        Vector3 position;
-        position.y = 0.75f*height;
-        Vector3 forward = Camera.main.transform.forward;
+        Vector3 position = new Vector3(0, height, 0);
         Vector3 angles = Camera.main.transform.eulerAngles;
-        if( controller.isRightHand() )
-        {
-            if (angles.x >=0 && angles.z >=0) // Edit conditions
-            {
-                position.x = Camera.main.transform.position.x + Mathf.Sin(angles.y * Mathf.Rad2Deg) * distance;
-                position.z = Camera.main.transform.position.z - Mathf.Cos(angles.y * Mathf.Rad2Deg) * distance;
-            }
-            else if (angles.x >= 0 && angles.z < 0)
-            {
-                position.x = Camera.main.transform.position.x - Mathf.Sin(angles.y * Mathf.Rad2Deg) * distance;
-                position.z = Camera.main.transform.position.z + Mathf.Cos(angles.y * Mathf.Rad2Deg) * distance;
-            }
-            else if (angles.x < 0 && angles.z >= 0)
-            {
-                position.x = Camera.main.transform.position.x - Mathf.Sin(angles.y * Mathf.Rad2Deg) * distance;
-                position.z = Camera.main.transform.position.z + Mathf.Cos(angles.y * Mathf.Rad2Deg) * distance;
-            }
-            else
-            {
-                position.x = Camera.main.transform.position.x + Mathf.Sin(angles.y * Mathf.Rad2Deg) * distance;
-                position.z = Camera.main.transform.position.z - Mathf.Cos(angles.y * Mathf.Rad2Deg) * distance;
-            }
-        }
-        else
-        {
-            if (angles.x >= 0 && angles.z >= 0)
-            {
-                position.x = Camera.main.transform.position.x - Mathf.Cos(angles.y * Mathf.Rad2Deg) * distance;
-                position.z = Camera.main.transform.position.z + Mathf.Sin(angles.y * Mathf.Rad2Deg) * distance;
-            }
-            else if (angles.x >= 0 && angles.z < 0)
-            {
-                position.x = Camera.main.transform.position.x + Mathf.Cos(angles.y * Mathf.Rad2Deg) * distance;
-                position.z = Camera.main.transform.position.z - Mathf.Sin(angles.y * Mathf.Rad2Deg) * distance;
-            }
-            else if (angles.x < 0 && angles.z >= 0)
-            {
-                position.x = Camera.main.transform.position.x + Mathf.Cos(angles.y * Mathf.Rad2Deg) * distance;
-                position.z = Camera.main.transform.position.z - Mathf.Sin(angles.y * Mathf.Rad2Deg) * distance;
-            }
-            else
-            {
-                position.x = Camera.main.transform.position.x - Mathf.Cos(angles.y * Mathf.Rad2Deg) * distance;
-                position.z = Camera.main.transform.position.z + Mathf.Sin(angles.y * Mathf.Rad2Deg) * distance;
-            }
-        }
-        //position.x = Camera.main.transform.position.x + forward.x * distance;
-        //position.z = Camera.main.transform.position.z + forward.z * distance;
+        Vector3 cameraPosition = Camera.main.transform.position;
+        float d_angle = toRight ? 90f : -90f;
+        position.x = cameraPosition.x + Mathf.Sin((angles.y + d_angle) * Mathf.Deg2Rad) * distance;
+        position.z = cameraPosition.z + Mathf.Cos((angles.y + d_angle) * Mathf.Deg2Rad) * distance;
 
         createdGate.SetActive(true);
-        //createdGate.transform.position = position;
+        createdGate.transform.position = position;
         createdGate.transform.position = new Vector3(createdGate.transform.position.x,  0.7f * height, createdGate.transform.position.z);
         UtilitiesScript.Instance.DisableOutline(createdGate);
         createdGate.GetComponent<GateScript>().gateOpened = true;
@@ -235,7 +180,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
 
         createdGate.GetComponent<GateScript>().gateOpened = false;
         UtilitiesScript.Instance.DisableOutline(createdGate);
-        //createdGate.SetActive(false);
+        createdGate.SetActive(false);
     }
 
     public void appearGate()

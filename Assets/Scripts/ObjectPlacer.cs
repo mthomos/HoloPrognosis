@@ -28,7 +28,14 @@ public class ObjectPlacer : MonoBehaviour
 
         List<PlacementQuery> queries = new List<PlacementQuery>();
         queries.AddRange(AddTree());
-        queries.AddRange(AddGate());
+        //queries.AddRange(AddGate());
+        Vector3 cameraPos = Camera.main.transform.position;
+        Vector3 angles = Camera.main.transform.eulerAngles;
+        Vector3 pos = new Vector3 (cameraPos.x + Mathf.Sin((angles.y) * Mathf.Deg2Rad) * 1.5f, 
+                                   cameraPos.y , 
+                                   cameraPos.z + Mathf.Cos((angles.y) * Mathf.Deg2Rad) * 1.5f);
+        Quaternion rot = Quaternion.LookRotation(Camera.main.transform.forward, Vector3.up);
+        ObjectCollectionManager.Instance.CreateGate(pos, rot);
         GetLocationsFromSolver(queries);
     }
 

@@ -473,6 +473,7 @@ GameObject:
   - component: {fileID: 790716449}
   - component: {fileID: 790716448}
   - component: {fileID: 790716450}
+  - component: {fileID: 790716451}
   m_Layer: 0
   m_Name: Utilities
   m_TagString: Untagged
@@ -578,6 +579,7 @@ MonoBehaviour:
   uiController: {fileID: 790716450}
   placer: {fileID: 790716442}
   dataScript: {fileID: 790716445}
+  turtorialController: {fileID: 790716451}
   success: 0
   fail: 0
   rightHandEnabled: 1
@@ -737,7 +739,32 @@ MonoBehaviour:
   DebugText: {fileID: 1550465574}
   handsTrackingController: {fileID: 347611045}
   flowController: {fileID: 790716446}
+  turtorialController: {fileID: 790716451}
   menuDistance: 2
+--- !u!114 &790716451
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 790716439}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf6196fb3ae304f4b897df324824f742, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flowController: {fileID: 790716446}
+  gazeCursor: {fileID: 938779208}
+  handsTrackingController: {fileID: 347611045}
+  uiController: {fileID: 790716450}
+  TurtorialMenu: {fileID: 1227114091142613415, guid: 5a0b5364ee507c14893d6625097c5d62,
+    type: 3}
+  PointPrefab: {fileID: 8429734596543780244, guid: 46107dbb292a2744f90a9b6df34f578e,
+    type: 3}
+  AppleObject: {fileID: 1539305491740260, guid: 86a9d65223ebcc14193f02643db24916,
+    type: 3}
+  turtorialEnabled: 0
+  manipulationInProgress: 0
 --- !u!1 &864562861
 GameObject:
   m_ObjectHideFlags: 0

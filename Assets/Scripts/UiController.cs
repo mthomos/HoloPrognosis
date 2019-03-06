@@ -14,6 +14,7 @@ public class UiController : MonoBehaviour
     public TextMesh DebugText;
     public HandsTrackingController handsTrackingController;
     public FlowController flowController;
+    public TurtorialController turtorialController;
     public float menuDistance;
 
     // Settings
@@ -99,7 +100,7 @@ public class UiController : MonoBehaviour
                 }
                 else if (tappedObj.name == "BackButton")
                 {
-                    returnToStartMenu();
+                    ReturnToStartMenu();
                 }
             }
             else if (inMenu == 2) // Play Menu
@@ -108,10 +109,8 @@ public class UiController : MonoBehaviour
                 {
                     //Prepare UI
                     UtilitiesScript.Instance.disableObject(currentMenu);
-                    DebugText.text = "Place your hand in right angle pose for 2 seconds ";
-                    TextToSpeech.Instance.StartSpeaking(DebugText.text);
-                    // Prepare Logic
-                    flowController.startPlaying();
+                    StartTurtorial();
+                    //InititateCalbration();
                 }
                 else if (tappedObj.name == "RightHandButton")
                 {
@@ -140,7 +139,7 @@ public class UiController : MonoBehaviour
                 }
                 else if (tappedObj.name == "BackButton")
                 {
-                    returnToStartMenu();
+                    ReturnToStartMenu();
                 }
             }
 
@@ -148,7 +147,7 @@ public class UiController : MonoBehaviour
             {
                 if (tappedObj.name == "BackButton")
                 {
-                    returnToStartMenu();
+                    ReturnToStartMenu();
                 }
             }
 
@@ -156,10 +155,25 @@ public class UiController : MonoBehaviour
             {
                 if (tappedObj.name == "BackButton")
                 {
-                    returnToStartMenu();
+                    ReturnToStartMenu();
                 }
             }
         }
+    }
+
+    private void StartTurtorial()
+    {
+        flowController.EnableTurtorialMode();
+        turtorialController.turtorialEnabled = true;
+        // Enable manipulation with hands
+        handsTrackingController.enableHandManipulation();
+    }
+    private void InititateCalbration()
+    {
+        DebugText.text = "Place your hand in right angle pose for 2 seconds ";
+        TextToSpeech.Instance.StartSpeaking(DebugText.text);
+        // Prepare Logic
+        flowController.startPlaying();
     }
 
     private void moveToAboutScreen()
@@ -245,9 +259,11 @@ public class UiController : MonoBehaviour
         inMenu = 1;
     }
 
-    private void returnToStartMenu()
+    public void ReturnToStartMenu()
     {
-        UtilitiesScript.Instance.disableObject(currentMenu);
+        if (currentMenu != null)
+            UtilitiesScript.Instance.disableObject(currentMenu);
+
         currentMenu = menuScreen;
         UtilitiesScript.Instance.enableObject(currentMenu);
         if (inMenu == -1)

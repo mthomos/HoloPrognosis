@@ -32,23 +32,23 @@ public class UtilitiesScript : Singleton<UtilitiesScript>
         }
     }
 
-    public void EnableGravity(GameObject obj)
+    public void EnableGravity(GameObject obj, bool forceEnable)
     {
         if (obj == null)
             return;
 
-        if (obj.GetComponent<Rigidbody>() == null)
+        if (obj.GetComponent<Rigidbody>() == null && forceEnable)
         {
             obj.AddComponent<Rigidbody>();
             obj.GetComponent<Rigidbody>().useGravity = true;
         }
-        else
+        else if (obj.GetComponent<Rigidbody>() != null)
             obj.GetComponent<Rigidbody>().useGravity = true;
     }
 
     public float getDistanceObjects(Transform obj1, Transform obj2)
     {
-        if (obj1 == null || obj2==null)
+        if (obj1 == null || obj2 == null)
             return -1 ;
 
         return Vector3.Magnitude(obj1.position - obj2.position);

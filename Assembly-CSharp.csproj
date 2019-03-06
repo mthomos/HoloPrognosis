@@ -104,6 +104,7 @@
     <Compile Include="Assets\Scripts\SpatialUnderstandingState.cs" />
     <Compile Include="Assets\Scripts\TagAlongForDisplay.cs" />
     <Compile Include="Assets\Scripts\TextToSpeech.cs" />
+    <Compile Include="Assets\Scripts\TurtorialController.cs" />
     <Compile Include="Assets\Scripts\UiController.cs" />
     <Compile Include="Assets\Scripts\UtilitiesScript.cs" />
     <Compile Include="Assets\Scripts\WindEffect.cs" />
