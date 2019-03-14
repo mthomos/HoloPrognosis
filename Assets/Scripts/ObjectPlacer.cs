@@ -5,8 +5,6 @@ using System;
 
 public class ObjectPlacer : MonoBehaviour
 {
-    public float boxTreeDistance;
-    // Private variables
     private Queue<PlacementResult> results = new Queue<PlacementResult>();
 
     void Start()
@@ -50,12 +48,16 @@ public class ObjectPlacer : MonoBehaviour
     {
         if (!SpatialUnderstanding.Instance.AllowSpatialUnderstanding)
             return;
-
         SpatialUnderstandingDllObjectPlacement.Solver_Init();
 
         List<PlacementQuery> queries = new List<PlacementQuery>();
         queries.AddRange(AddTree());
         GetLocationsFromSolver(queries);
+    }
+
+    public void CreateTurtorialMenu()
+    {
+        GetLocationsFromSolver(AddTree());
     }
 
     public List<PlacementQuery> AddTree()
@@ -66,6 +68,11 @@ public class ObjectPlacer : MonoBehaviour
     public List<PlacementQuery> AddGate()
     {
         return CreateLocationQueriesForSolver(1, ObjectCollectionManager.Instance.GateSize, ObjectType.Gate);
+    }
+
+    public List<PlacementQuery> AddTurtorialMenu()
+    {
+        return CreateLocationQueriesForSolver(1, ObjectCollectionManager.Instance.TurtorialMenuSize, ObjectType.TurtorialMenu);
     }
 
 
@@ -83,6 +90,9 @@ public class ObjectPlacer : MonoBehaviour
                     break;
                 case ObjectType.Gate:
                     ObjectCollectionManager.Instance.CreateGate(toPlace.Position, rotation);
+                    break;
+                case ObjectType.TurtorialMenu:
+                    ObjectCollectionManager.Instance.CreateTurtorialMenu(toPlace.Position, rotation);
                     break;
             }
         }
@@ -144,15 +154,7 @@ public class ObjectPlacer : MonoBehaviour
                 placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_NearCenter());
                 placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_OnFloor(halfDims);
             }
-            else if (objType == ObjectType.Box)
-            {
-                placementRules = new List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule>
-                {
-                SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule.Create_AwayFromOtherObjects(boxTreeDistance)
-                };
-                placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_NearWall());
-                placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_OnFloor(halfDims);
-            }
+
             else if (objType == ObjectType.Gate)
             {
                 placementRules = new List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule>
@@ -160,6 +162,13 @@ public class ObjectPlacer : MonoBehaviour
                 SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule.Create_AwayFromOtherObjects(1.5f)
                 };
                 placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_AwayFromWalls());
+            }
+
+            else if (objType == ObjectType.TurtorialMenu)
+            {
+                //placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_NearWall());
+                placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_OnWall(halfDims, 1.5f, 2.0f, 
+                    SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.WallTypeFlags.Normal);
             }
 
             placementQueries.Add(

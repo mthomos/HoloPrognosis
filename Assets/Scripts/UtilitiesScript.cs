@@ -46,7 +46,7 @@ public class UtilitiesScript : Singleton<UtilitiesScript>
             obj.GetComponent<Rigidbody>().useGravity = true;
     }
 
-    public float getDistanceObjects(Transform obj1, Transform obj2)
+    public float GetDistanceObjects(Transform obj1, Transform obj2)
     {
         if (obj1 == null || obj2 == null)
             return -1 ;
@@ -54,7 +54,7 @@ public class UtilitiesScript : Singleton<UtilitiesScript>
         return Vector3.Magnitude(obj1.position - obj2.position);
     }
 
-    public bool isRightFromHead(Vector3 pos)
+    public bool IsRightFromHead(Vector3 pos)
     {
         Vector3 heading = pos - Camera.main.transform.position;
         Vector3 perp = Vector3.Cross(Camera.main.transform.forward, heading);
@@ -104,15 +104,26 @@ public class UtilitiesScript : Singleton<UtilitiesScript>
         }
     }
 
-    public void enableObject(GameObject obj)
+    public void EnableObject(GameObject obj)
     {
         if (obj != null)
             obj.SetActive(true);
     }
 
-    public void disableObject(GameObject obj)
+    public void DisableObject(GameObject obj)
     {
         if (obj != null)
             obj.SetActive(false);
+    }
+
+    public void PlaceInFrontOfUser(GameObject obj, float distance)
+    {
+        Vector3 pos = Camera.main.transform.position + Camera.main.transform.forward * distance;
+        obj.transform.position = pos;
+        //Fix menu direction
+        Vector3 directionToTarget = Camera.main.transform.position - pos;
+        directionToTarget.y = 0.0f;
+        if (directionToTarget.sqrMagnitude > 0.005f)
+            obj.transform.rotation = Quaternion.LookRotation(-directionToTarget);
     }
 }

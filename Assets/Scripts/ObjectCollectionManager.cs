@@ -7,8 +7,10 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
     //Public Variables - For Editor
     public GameObject TreePrefab;
     public GameObject GatePrefab;
+    public GameObject TurtorialPrefab;
     public Vector3 TreeSize;
     public Vector3 GateSize;
+    public Vector3 TurtorialMenuSize;
     // Private Variables
     public FlowController flowController;
     private GameObject createdTree;
@@ -21,10 +23,9 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
     {
         Vector3 position = positionCenter - new Vector3(0, TreeSize.y * .5f, 0);
         GameObject newObject = Instantiate(TreePrefab, position, rotation);
-        newObject.name = "Tree";
         if (newObject != null)
         {
-            Debug.Log("tree_created");
+            newObject.name = "Tree";
             newObject.transform.parent = gameObject.transform;
             newObject.tag = "Dummy";
             newObject.transform.localScale = RescaleToSameScaleFactor(TreePrefab);
@@ -42,10 +43,9 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         var position = positionCenter + new Vector3(0, GateSize.y * .25f, 0);
         position.y = 1.3f;
         GameObject newObject = Instantiate(GatePrefab, position, rotation);
-        newObject.name = "Gate";
         if (newObject != null)
         {
-            Debug.Log("gate_created");
+            newObject.name = "Gate";
             newObject.transform.parent = gameObject.transform;
             newObject.tag = "Dummy";
             newObject.transform.localScale = RescaleToSameScaleFactor(GatePrefab);
@@ -56,6 +56,18 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             gateCreated = true;
             if (treeCreated && gateCreated)
                 EventManager.TriggerEvent("world_created");
+        }
+    }
+
+    public void CreateTurtorialMenu(Vector3 positionCenter, Quaternion rotation)
+    {
+        GameObject newObject = Instantiate(TurtorialPrefab, positionCenter, rotation);
+        if (newObject != null)
+        {
+            newObject.name = "TurtorialMenu";
+            newObject.tag = "UI";
+            UiController uiController = FindObjectOfType(typeof(UiController)) as UiController;
+            uiController.SetTurtorialMenu(newObject);
         }
     }
 

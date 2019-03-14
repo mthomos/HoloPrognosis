@@ -17,7 +17,7 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
     public UiController uiController;
     public string SpaceQueryDescription;
     //Private Variables
-    private bool _triggered, scanReady, feedback_triggered;
+    private bool triggered, scanReady, feedback_triggered;
     private UnityAction TapListener;
 
     private bool DoesScanMeetMinBarForCompletion
@@ -105,7 +105,6 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
     {
         TapListener = new UnityAction(Tap_Triggered);
         EventManager.StartListening("tap", TapListener);
-
         TextToSpeech.Instance.StartSpeaking("Walk around and scan in your playspace");
     }
 
@@ -123,14 +122,14 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
         // Updates
         Update_DebugDisplay();
         
-        if (!_triggered && SpatialUnderstanding.Instance.ScanState == SpatialUnderstanding.ScanStates.Done)
+        if (!triggered && SpatialUnderstanding.Instance.ScanState == SpatialUnderstanding.ScanStates.Done)
         {
-            _triggered = true;
+            triggered = true;
             EventManager.StopListening("tap", TapListener);
             // Hide Spatial Mesh
             SpatialUnderstandingMesh.MeshMaterial = OccludedMaterial;
             //Create UI
-            uiController.createUI();
+            uiController.CreateUI();
         }
     }
 }

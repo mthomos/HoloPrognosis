@@ -468,7 +468,6 @@ GameObject:
   - component: {fileID: 790716443}
   - component: {fileID: 790716446}
   - component: {fileID: 790716445}
-  - component: {fileID: 790716444}
   - component: {fileID: 790716447}
   - component: {fileID: 790716449}
   - component: {fileID: 790716448}
@@ -519,7 +518,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f720280bfef0a1f42b7e6dc74500f772, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boxTreeDistance: 1
 --- !u!114 &790716443
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -535,21 +533,12 @@ MonoBehaviour:
   TreePrefab: {fileID: 1198309765264102, guid: d8486cdd8ad6ec54cb40d0818cc7e2a5, type: 3}
   GatePrefab: {fileID: 6770303324140087380, guid: 72ab5f51ee5c4674c92f536ddafe1ede,
     type: 3}
+  TurtorialPrefab: {fileID: 1227114091142613415, guid: 5a0b5364ee507c14893d6625097c5d62,
+    type: 3}
   TreeSize: {x: 0.8, y: 2.1, z: 0.8}
   GateSize: {x: 0.15, y: 0.15, z: 0.15}
+  TurtorialMenuSize: {x: 1, y: 0.3, z: 0.05}
   flowController: {fileID: 790716446}
---- !u!114 &790716444
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 790716439}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f6404681346e12841a0c2c6284e4e522, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &790716445
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -734,6 +723,7 @@ MonoBehaviour:
     type: 3}
   aboutPrefab: {fileID: 5193279628735756758, guid: 3e4fda2eb95e040439d9a13589eb2bc0,
     type: 3}
+  askForTurtorialPrefab: {fileID: 0}
   placer: {fileID: 790716442}
   gazeCursor: {fileID: 938779208}
   DebugText: {fileID: 1550465574}
@@ -764,7 +754,8 @@ MonoBehaviour:
   AppleObject: {fileID: 1539305491740260, guid: 86a9d65223ebcc14193f02643db24916,
     type: 3}
   turtorialEnabled: 0
-  manipulationInProgress: 0
+  turtorialStep: 0
+  manipulations: 0
 --- !u!1 &864562861
 GameObject:
   m_ObjectHideFlags: 0

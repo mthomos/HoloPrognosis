@@ -6,7 +6,8 @@ public enum ObjectType
 {
     Tree,
     Box,
-    Gate
+    Gate,
+    TurtorialMenu
 }
 
 public struct PlacementQuery

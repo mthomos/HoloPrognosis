@@ -92,7 +92,6 @@
     <Compile Include="Assets\Scripts\DataScript.cs" />
     <Compile Include="Assets\Scripts\DebugScript.cs" />
     <Compile Include="Assets\Scripts\EventManager.cs" />
-    <Compile Include="Assets\Scripts\FileManager.cs" />
     <Compile Include="Assets\Scripts\FlowController.cs" />
     <Compile Include="Assets\Scripts\GateScript.cs" />
     <Compile Include="Assets\Scripts\GazeCursor.cs" />

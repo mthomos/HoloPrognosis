@@ -21,9 +21,11 @@ public class DataScript : MonoBehaviour
     private Vector3 privPos = Vector3.zero;
     private float privSpeed, privTime, cacheTime, startTime;
     private int startHour, startMinute, startSecond, manipulations;
+    private string appPath;
 
     void Start()
     {
+        appPath = Application.persistentDataPath;
         startTime = Time.time;
         startHour = DateTime.Now.Hour;
         startMinute = DateTime.Now.Minute;
@@ -32,13 +34,12 @@ public class DataScript : MonoBehaviour
 
     private void Update()
     {
-            if (requsetFinalize)
-                finalizeSession();
+        if (requsetFinalize)
+            FinalizeSession();
     }
 
-    private void saveSession()
+    private void SaveSession()
     {
-        string appPath = FileManager.Instance.getAppPath();
         string filePath, fileName;
         string lines="";
         byte[] bytes;
@@ -149,9 +150,9 @@ public class DataScript : MonoBehaviour
         File.WriteAllBytes(filePath, bytes);
     }
 
-    private void finalizeSession()
+    private void FinalizeSession()
     {
-        saveSession();
+        SaveSession();
         speed_right.Clear();
         acceleration_right.Clear();
         handHeight_right.Clear();
@@ -164,17 +165,17 @@ public class DataScript : MonoBehaviour
         interactionTouchedList.Clear();
     }
 
-    public void finishSession()
+    public void FinishSession()
     {
         requsetFinalize = true;
     }
 
-    public void interactionTouched(bool rightHand)
+    public void InteractionTouched(bool rightHand)
     {
         interactionTouchedList.Add(Time.time, rightHand);
     }
 
-    public void addValue(Vector3 position, float height, bool rightHand)
+    public void AddValue(Vector3 position, float height, bool rightHand)
     {
         cacheTime = Time.time;
         if (cacheTime == privTime)
@@ -201,17 +202,17 @@ public class DataScript : MonoBehaviour
         privTime = cacheTime;
     }
 
-    public void manipulationStarted(bool rightHand)
+    public void ManipulationStarted(bool rightHand)
     {
         dataList.Add(Time.time, rightHand);
     }
 
-    public void manipulationEnded(bool rightHand)
+    public void ManipulationEnded(bool rightHand)
     {
         dataList.Add(Time.time, rightHand);
     }
 
-    public void addManipulationResult(bool result, bool rightHand)
+    public void AddManipulationResult(bool result, bool rightHand)
     {
         manipulationResults.Add(manipulations, result);
         manipulationHand.Add(manipulations, rightHand);

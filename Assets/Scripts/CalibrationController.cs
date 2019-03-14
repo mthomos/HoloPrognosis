@@ -20,7 +20,7 @@
         Highest_pose_handHeight = -1;
     }
 
-    public void addValue(float headHandDist, float handHeight)
+    public void AddValue(float headHandDist, float handHeight)
     {
         if (rightPoseInProgess)
         {
@@ -34,22 +34,22 @@
         }
     }
 
-    public float getRightPoseHeadHandDistance()
+    public float GetRightPoseHeadHandDistance()
     {
         return Right_Pose_headHandDistance;
     }
 
-    public float getRightPoseHandHeight()
+    public float GetRightPoseHandHeight()
     {
         return Right_Pose_handHeight;
     }
 
-    public float getHighestPoseHeadHandDistance()
+    public float GetHighestPoseHeadHandDistance()
     {
         return Highest_Pose_headHandDistance;
     }
 
-    public float getHighestPoseHandHeight()
+    public float GetHighestPoseHandHeight()
     {
         if (Highest_pose_handHeight> Right_Pose_handHeight )
             return Highest_pose_handHeight;
@@ -57,12 +57,12 @@
             return Right_Pose_handHeight;
     }
 
-    public bool isRightHand()
+    public bool IsRightHand()
     {
         return rightHand;
     }
 
-    public void finishRightPose()
+    public void FinishRightPose()
     {
         rightPoseInProgess = false;
     }

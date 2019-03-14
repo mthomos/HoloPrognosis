@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using HoloToolkit.Unity;
 
 
 public class TurtorialController : MonoBehaviour
@@ -15,25 +13,30 @@ public class TurtorialController : MonoBehaviour
     public GameObject PointPrefab;
     public GameObject AppleObject;
 
-    public bool turtorialEnabled, manipulationInProgress;
-    private int turtorialStep, manipulations;
+    public bool turtorialEnabled;
+    public int turtorialStep, manipulations;
     private GameObject manipulatedObject;
     private List<GameObject> guidanceObjects = new List<GameObject>();
     private Vector3 applePosition = Vector3.zero;
+    private GameObject createdGate;
 
     void Start()
     {
         turtorialEnabled = false;
         turtorialStep = -1;
-        manipulations = 1;
-        EventManager.StartListening("tap", tapUiReceived);
     }
 
     void Update()
     {
-        if (turtorialEnabled && turtorialStep == 2)
+        
+        if (turtorialStep == 2)
         {
-
+            GateScript gateScript = createdGate.GetComponent<GateScript>();
+            if (gateScript.objectInsideGate(manipulatedObject))
+            {
+                if (!TextToSpeech.Instance.IsSpeaking())
+                    TextToSpeech.Instance.StartSpeaking("Apple inside the Circle");
+            }
         }
     }
 
@@ -43,8 +46,13 @@ public class TurtorialController : MonoBehaviour
             Destroy(manipulatedObject);
 
         turtorialEnabled = true;
+        manipulations = 1;
         turtorialStep = 1;
-        appearAppleDemo();
+        AppearAppleDemo();
+
+        // Stop Listening for events
+        EventManager.StopListening("manipulation_started", ManipulationStarted);
+        EventManager.StopListening("manipulation_finished", ManipulationFinished);
     }
 
     public void PrepareSecondTurtorial()
@@ -53,8 +61,9 @@ public class TurtorialController : MonoBehaviour
             Destroy(manipulatedObject);
 
         turtorialEnabled = true;
+        manipulations = 1;
         turtorialStep = 2;
-        appearAppleDemo();
+        AppearAppleDemo();
         // Create Gate and hide it
         Vector3 cameraPos = Camera.main.transform.position;
         Vector3 angles = Camera.main.transform.eulerAngles;
@@ -65,44 +74,42 @@ public class TurtorialController : MonoBehaviour
         ObjectCollectionManager.Instance.CreateGate(pos, rot);
         ObjectCollectionManager.Instance.disappearGate();
         // Listen Events
-        EventManager.StartListening("manipulation_started", manipulationStarted);
-        EventManager.StartListening("manipulation_finished", manipulationFinished);
+        EventManager.StartListening("manipulation_started", ManipulationStarted);
+        EventManager.StartListening("manipulation_finished", ManipulationFinished);
     }
 
-    private void appearAppleDemo()
+    private void AppearAppleDemo()
     {
         // Appear an apple in front of user
         manipulatedObject = Instantiate(AppleObject);
         //Destroy Rigidbody to disable gravity
-        Destroy(manipulatedObject.GetComponent<Rigidbody>());
-        if (applePosition != Vector3.zero)
-            manipulatedObject.transform.position = applePosition;
-        else
-        {
+        if (manipulatedObject.GetComponent<Rigidbody>() != null)
+            Destroy(manipulatedObject.GetComponent<Rigidbody>());
+        if (applePosition == Vector3.zero)
             applePosition = Camera.main.transform.position + Camera.main.transform.forward * 2.0f;
-            manipulatedObject.transform.position = applePosition;
-        }
+
+        manipulatedObject.transform.position = applePosition;
+
     }
 
-    private void manipulationStarted()
+    private void ManipulationStarted()
     {
         if (!turtorialEnabled || turtorialStep != 2)
             return;
 
         //Appear Gate according to hand
         ObjectCollectionManager.Instance.appearGate(1.0f, 2.0f, manipulations % 2 == 1 ? true : false);
+        createdGate = ObjectCollectionManager.Instance.getCreatedGate();
         //Get manipulatedObject
-        manipulatedObject = handsTrackingController.getManipulatedObject();
+        manipulatedObject = handsTrackingController.GetManipulatedObject();
         //Delete parent
         if (manipulatedObject != null)
             manipulatedObject.transform.parent = null;
-        //Enable manipulation in flow controller
-        manipulationInProgress = true;
         //Create balls to guide user
-        createGuidance(manipulations % 2 == 1 ? true : false);
+        CreateGuidance(manipulations % 2 == 1 ? true : false);
     }
 
-    private void createGuidance(bool toRight)
+    private void CreateGuidance(bool toRight)
     {
         Vector3 center = ObjectCollectionManager.Instance.getCreatedGate().GetComponent<Renderer>().bounds.center;
         Vector3 angles = ObjectCollectionManager.Instance.getCreatedGate().transform.eulerAngles;
@@ -130,61 +137,21 @@ public class TurtorialController : MonoBehaviour
         }
     }
 
-    private void manipulationFinished()
+    private void ManipulationFinished()
     {
+         if (!turtorialEnabled || turtorialStep != 2)
+            return;
+
         // Destroy guidance
         foreach (GameObject point in guidanceObjects)
             Destroy(point);
         guidanceObjects.Clear();
+        ObjectCollectionManager.Instance.disappearGate();
+        manipulatedObject = null;
+        createdGate = null;
     }
 
-    private void tapUiReceived()
-    {
-        GameObject tappedObj = gazeCursor.getFocusedObject();
-        if (tappedObj == null)
-            return;
-
-        if (tappedObj.CompareTag("UI"))
-        {
-            if (turtorialStep == 1)
-            {
-                if (tappedObj.name == "Next")
-                    PrepareSecondTurtorial();
-                else if (tappedObj.name == "Back")
-                    ReturnToStartMenu();
-            }
-            else if (turtorialStep ==2)
-            {
-                if (tappedObj.name == "Next")
-                    ProcceedToGame();
-                else if (tappedObj.name == "Back")
-                    PrepareFirstTurtorial();
-            }
-        }
-    }
-
-    private void ReturnToStartMenu()
-    {
-        //Clear Scene and reset variables
-        FinishTurtorial();
-        flowController.DisableTurtorialMode();
-        uiController.ReturnToStartMenu();
-    }
-
-    private void ProcceedToGame()
-    {
-        //Clear Scene and reset variables
-        FinishTurtorial();
-        // Initiate Calibration
-        string text = "Place your hand in right angle pose for 2 seconds ";
-        uiController.printText(text);
-        TextToSpeech.Instance.StartSpeaking(text);
-        // Prepare Logic
-        flowController.startPlaying();
-    }
-
-
-    private void FinishTurtorial()
+    public void FinishTurtorial()
     {
         // Destroy guidance
         foreach (GameObject point in guidanceObjects)
@@ -198,10 +165,8 @@ public class TurtorialController : MonoBehaviour
         }
         turtorialEnabled = false;
         turtorialStep = -1;
-        manipulations = 1;
-        // Stop Listening for evens
-        EventManager.StopListening("tap", tapUiReceived);
-        EventManager.StopListening("manipulation_started", manipulationStarted);
-        EventManager.StopListening("manipulation_finished", manipulationFinished);
+        // Stop Listening for events
+        EventManager.StopListening("manipulation_started", ManipulationStarted);
+        EventManager.StopListening("manipulation_finished", ManipulationFinished);
     }
 }
