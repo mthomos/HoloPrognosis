@@ -72,7 +72,7 @@ public class TurtorialController : MonoBehaviour
                                    cameraPos.z + Mathf.Cos((angles.y) * Mathf.Deg2Rad) * 1.5f);
         Quaternion rot = Quaternion.LookRotation(Camera.main.transform.forward, Vector3.up);
         ObjectCollectionManager.Instance.CreateGate(pos, rot);
-        ObjectCollectionManager.Instance.disappearGate();
+        ObjectCollectionManager.Instance.DisappearGate();
         // Listen Events
         EventManager.StartListening("manipulation_started", ManipulationStarted);
         EventManager.StartListening("manipulation_finished", ManipulationFinished);
@@ -98,8 +98,8 @@ public class TurtorialController : MonoBehaviour
             return;
 
         //Appear Gate according to hand
-        ObjectCollectionManager.Instance.appearGate(1.0f, 2.0f, manipulations % 2 == 1 ? true : false);
-        createdGate = ObjectCollectionManager.Instance.getCreatedGate();
+        ObjectCollectionManager.Instance.AppearGate(1.0f, 2.0f, manipulations % 2 == 1 ? true : false);
+        createdGate = ObjectCollectionManager.Instance.GetCreatedGate();
         //Get manipulatedObject
         manipulatedObject = handsTrackingController.GetManipulatedObject();
         //Delete parent
@@ -111,8 +111,8 @@ public class TurtorialController : MonoBehaviour
 
     private void CreateGuidance(bool toRight)
     {
-        Vector3 center = ObjectCollectionManager.Instance.getCreatedGate().GetComponent<Renderer>().bounds.center;
-        Vector3 angles = ObjectCollectionManager.Instance.getCreatedGate().transform.eulerAngles;
+        Vector3 center = ObjectCollectionManager.Instance.GetCreatedGate().GetComponent<Renderer>().bounds.center;
+        Vector3 angles = ObjectCollectionManager.Instance.GetCreatedGate().transform.eulerAngles;
         //Vector3 dx = Camera.main.transform.position - manipulatedObject.transform.position;
         float distance = 1.5f; // new Vector2(dx.x, dx.z).magnitude;
         Vector3 position = new Vector3(0, center.y, 0);
@@ -146,7 +146,7 @@ public class TurtorialController : MonoBehaviour
         foreach (GameObject point in guidanceObjects)
             Destroy(point);
         guidanceObjects.Clear();
-        ObjectCollectionManager.Instance.disappearGate();
+        ObjectCollectionManager.Instance.DisappearGate();
         manipulatedObject = null;
         createdGate = null;
     }

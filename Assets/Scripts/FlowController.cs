@@ -35,8 +35,8 @@ public class FlowController : MonoBehaviour
         if (trainingMode && manipulationInProgress && !turtorialMode)
         {
             // Calculate distance of manipulated object and gate
-            if (gateScript == null && ObjectCollectionManager.Instance.getCreatedGate() != null)
-                gateScript = ObjectCollectionManager.Instance.getCreatedGate().GetComponent<GateScript>();
+            if (gateScript == null && ObjectCollectionManager.Instance.GetCreatedGate() != null)
+                gateScript = ObjectCollectionManager.Instance.GetCreatedGate().GetComponent<GateScript>();
 
             if (gateScript == null || manipulatedObject == null)
                 return;
@@ -81,14 +81,14 @@ public class FlowController : MonoBehaviour
 
         //Appear Gate according to hand
         Debug.Log("Gate appeared");
-        ObjectCollectionManager.Instance.appearGate(currentControlller.GetRightPoseHandHeight(), 
+        ObjectCollectionManager.Instance.AppearGate(currentControlller.GetRightPoseHandHeight(), 
                 2.0f, currentControlller.IsRightHand());
         //Get manipulatedObject
         manipulatedObject = handsTrackingController.GetManipulatedObject();
         //Delete parent
         if (manipulatedObject != null)
             manipulatedObject.transform.parent = null;
-        ObjectCollectionManager.Instance.disappearTree();
+        ObjectCollectionManager.Instance.DisAppearTree();
         //Enable manipulation in flow controller
         manipulationInProgress = true;
     }
@@ -124,12 +124,12 @@ public class FlowController : MonoBehaviour
         if (!trainingMode || turtorialMode)
             return;
 
-        ObjectCollectionManager.Instance.appearGate();
-        ObjectCollectionManager.Instance.appearTree();
+        ObjectCollectionManager.Instance.AppearGate();
+        ObjectCollectionManager.Instance.AppearTree();
         manipulations++;
         string debugString = "Manipulation_" + manipulations + "->";
         //Disable Gate
-        ObjectCollectionManager.Instance.disappearGate();
+        ObjectCollectionManager.Instance.DisappearGate();
         //Reset variables
         violation = 0;
         manipulationInProgress = false;
@@ -143,7 +143,7 @@ public class FlowController : MonoBehaviour
                 maxHeightLeftHand = manipulatedObject.transform.position.y;
 
             Debug.Log(debugString + "destroy_hologram");
-            ObjectCollectionManager.Instance.destoryActiveHologram(manipulatedObject.name);
+            ObjectCollectionManager.Instance.DestoryActiveHologram(manipulatedObject.name);
             Destroy(manipulatedObject);
             manipulatedObject = null;
         }
@@ -159,7 +159,7 @@ public class FlowController : MonoBehaviour
                 currentControlller = leftController;
 
             //Load (possible) next object for manipulation
-            nowPlayingObject = ObjectCollectionManager.Instance.getLowestFruit(currentControlller.GetHighestPoseHandHeight());
+            nowPlayingObject = ObjectCollectionManager.Instance.GetLowestFruit(currentControlller.GetHighestPoseHandHeight());
             if (nowPlayingObject == null)
             {
                 Debug.Log(debugString + "for the current hand, no nowPlayingObject, switch hand");
@@ -169,18 +169,18 @@ public class FlowController : MonoBehaviour
                     currentControlller = rightController;
                 else
                     currentControlller = leftController;
-                nowPlayingObject = ObjectCollectionManager.Instance.getLowestFruit(currentControlller.GetHighestPoseHandHeight());
+                nowPlayingObject = ObjectCollectionManager.Instance.GetLowestFruit(currentControlller.GetHighestPoseHandHeight());
             }
         }
         else if (rightHandEnabled && !leftHandEnabled) // Only right hand enabled
         {
             Debug.Log(debugString + "for the right hand");
-            nowPlayingObject = ObjectCollectionManager.Instance.getLowestFruit(rightController.GetHighestPoseHandHeight());
+            nowPlayingObject = ObjectCollectionManager.Instance.GetLowestFruit(rightController.GetHighestPoseHandHeight());
         }
         else if (!rightHandEnabled && leftHandEnabled) // Only left hand enabled
         {
             Debug.Log(debugString + "for the left hand");
-            nowPlayingObject = ObjectCollectionManager.Instance.getLowestFruit(leftController.GetHighestPoseHandHeight());
+            nowPlayingObject = ObjectCollectionManager.Instance.GetLowestFruit(leftController.GetHighestPoseHandHeight());
         }
         // If no objects exist, finish
         if (nowPlayingObject == null)

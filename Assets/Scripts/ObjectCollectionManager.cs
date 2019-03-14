@@ -141,7 +141,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         }
     }
     
-    public GameObject getLowestFruit(float threshold)
+    public GameObject GetLowestFruit(float threshold)
     {
         GameObject lowestObject = null;
         float dist = 100000;
@@ -163,7 +163,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         ActiveHolograms.Clear();
     }
 
-    public void appearGate(float height, float distance, bool toRight)
+    public void AppearGate(float height, float distance, bool toRight)
     {
         if (createdGate == null)
         {
@@ -185,7 +185,8 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         createdGate.GetComponent<GateScript>().gateOpened = true;
         createdGate.GetComponent<MeshCollider>().enabled = false;
     }
-    public void disappearGate()
+
+    public void DisappearGate()
     {
         if (createdGate == null)
             return;
@@ -195,7 +196,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         createdGate.SetActive(false);
     }
 
-    public void appearGate()
+    public void AppearGate()
     {
         if (createdGate == null)
             return;
@@ -204,7 +205,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         UtilitiesScript.Instance.DisableOutline(createdGate);
     }
 
-    public void disappearTree()
+    public void DisAppearTree()
     {
         if (createdTree == null)
             return;
@@ -214,7 +215,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         createdTree.SetActive(false);
     }
 
-    public void appearTree()
+    public void AppearTree()
     {
         if (createdTree == null)
             return;
@@ -227,12 +228,12 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         }
     }
 
-    public GameObject getCreatedGate()
+    public GameObject GetCreatedGate()
     {
         return createdGate;
     }
 
-    public void destoryActiveHologram(string name)
+    public void DestoryActiveHologram(string name)
     {
         foreach (GameObject hologram in ActiveHolograms)
         {
