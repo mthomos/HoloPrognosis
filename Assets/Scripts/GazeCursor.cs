@@ -29,11 +29,10 @@ public class GazeCursor : MonoBehaviour
             gameObject.transform.position = hitInfo.point;
             gameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal);
             if ( hitInfo.collider.gameObject.CompareTag("User") ||
-                 hitInfo.collider.gameObject.CompareTag("UI")) // ||
-                //hitInfo.collider.gameObject.CompareTag("Dummy"))
+                 hitInfo.collider.gameObject.CompareTag("UI") )
                 FocusedObject = hitInfo.collider.gameObject;
-            else
-                FocusedObject = null;
+            //else
+              //  FocusedObject = null;
         }
         else
             cursorMeshRenderer.enabled = false;

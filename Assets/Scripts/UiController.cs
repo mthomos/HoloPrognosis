@@ -250,6 +250,8 @@ public class UiController : MonoBehaviour
             turtorialController.PrepareFirstTurtorial();
             // Enable manipulation with hands
             handsTrackingController.EnableHandManipulation();
+            handsTrackingController.DisableDataCollection();
+            handsTrackingController.SetTurtorialMode(true);
             // Appear Menu
             UtilitiesScript.Instance.DisableObject(currentMenu);
             placer.AddTurtorialMenu();
@@ -287,7 +289,8 @@ public class UiController : MonoBehaviour
 
     private void InititateCalbration()
     { 
-
+        handsTrackingController.SetTurtorialMode(false);
+        handsTrackingController.EnableHandCalibration();
         flowController.DisableTurtorialMode();
         turtorialController.FinishTurtorial();
         DebugText.text = "Place your hand in right angle pose for 2 seconds ";

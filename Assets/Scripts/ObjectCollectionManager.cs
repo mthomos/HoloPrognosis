@@ -132,7 +132,6 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         {
             child = createdTree.transform.GetChild(i).gameObject;
             child.name = "apple_" + i;
-            //child.tag = "User";
             child.AddComponent<AppleScript>();
             child.GetComponent<SphereCollider>().enabled = false;
             child.AddComponent<Outline>();

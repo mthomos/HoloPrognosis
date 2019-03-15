@@ -13,7 +13,6 @@ public class TurtorialController : MonoBehaviour
     public GameObject PointPrefab;
     public GameObject AppleObject;
 
-    public bool turtorialEnabled;
     public int turtorialStep, manipulations;
     private GameObject manipulatedObject;
     private List<GameObject> guidanceObjects = new List<GameObject>();
@@ -22,7 +21,6 @@ public class TurtorialController : MonoBehaviour
 
     void Start()
     {
-        turtorialEnabled = false;
         turtorialStep = -1;
     }
 
@@ -45,7 +43,6 @@ public class TurtorialController : MonoBehaviour
         if (manipulatedObject != null)
             Destroy(manipulatedObject);
 
-        turtorialEnabled = true;
         manipulations = 1;
         turtorialStep = 1;
         AppearAppleDemo();
@@ -60,7 +57,6 @@ public class TurtorialController : MonoBehaviour
         if (manipulatedObject != null)
             Destroy(manipulatedObject);
 
-        turtorialEnabled = true;
         manipulations = 1;
         turtorialStep = 2;
         AppearAppleDemo();
@@ -85,16 +81,17 @@ public class TurtorialController : MonoBehaviour
         //Destroy Rigidbody to disable gravity
         if (manipulatedObject.GetComponent<Rigidbody>() != null)
             Destroy(manipulatedObject.GetComponent<Rigidbody>());
+
         if (applePosition == Vector3.zero)
-            applePosition = Camera.main.transform.position + Camera.main.transform.forward * 2.0f;
+            applePosition = Camera.main.transform.position + Camera.main.transform.forward * 1.3f;
 
         manipulatedObject.transform.position = applePosition;
-
+        UtilitiesScript.Instance.DisableOutline(manipulatedObject);
     }
 
     private void ManipulationStarted()
     {
-        if (!turtorialEnabled || turtorialStep != 2)
+        if (turtorialStep != 2)
             return;
 
         //Appear Gate according to hand
@@ -139,7 +136,7 @@ public class TurtorialController : MonoBehaviour
 
     private void ManipulationFinished()
     {
-         if (!turtorialEnabled || turtorialStep != 2)
+         if (turtorialStep != 2)
             return;
 
         // Destroy guidance
@@ -163,7 +160,7 @@ public class TurtorialController : MonoBehaviour
             Destroy(manipulatedObject);
             manipulatedObject = null;
         }
-        turtorialEnabled = false;
+
         turtorialStep = -1;
         // Stop Listening for events
         EventManager.StopListening("manipulation_started", ManipulationStarted);

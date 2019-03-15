@@ -32,7 +32,10 @@ public class FlowController : MonoBehaviour
 
     private void Update()
     {
-        if (trainingMode && manipulationInProgress && !turtorialMode)
+        if (!turtorialMode)
+            return;
+
+        if (trainingMode && manipulationInProgress && turtorialController.turtorialStep == 2)
         {
             // Calculate distance of manipulated object and gate
             if (gateScript == null && ObjectCollectionManager.Instance.GetCreatedGate() != null)
@@ -124,7 +127,7 @@ public class FlowController : MonoBehaviour
         if (!trainingMode || turtorialMode)
             return;
 
-        ObjectCollectionManager.Instance.AppearGate();
+        //ObjectCollectionManager.Instance.AppearGate();
         ObjectCollectionManager.Instance.AppearTree();
         manipulations++;
         string debugString = "Manipulation_" + manipulations + "->";
@@ -218,7 +221,7 @@ public class FlowController : MonoBehaviour
     public void CalibrationFinished()
     {
         uiController.PrintText("");
-        TextToSpeech.Instance.StartSpeaking("Now the tree will be appeared");
+        TextToSpeech.Instance.StartSpeaking("Calibration Finished. Let's play.");
         placer.CreateScene();
         // Enable manipulation with hands
         handsTrackingController.EnableHandManipulation();
@@ -261,11 +264,7 @@ public class FlowController : MonoBehaviour
 
     public float GetHeadDistanceUpperLimit(bool hand)
     {
-        CalibrationController currentController;
-        if (hand)
-            currentController = rightController;
-        else
-            currentController = leftController;
+        CalibrationController currentController = hand ? rightController : leftController;
 
         if (currentController.GetHighestPoseHeadHandDistance() > currentController.GetRightPoseHeadHandDistance())
             return currentController.GetHighestPoseHeadHandDistance();
@@ -275,11 +274,7 @@ public class FlowController : MonoBehaviour
 
     public float GetHeadDisatnceLowerLimit(bool hand)
     {
-        CalibrationController currentController;
-        if (hand)
-            currentController = rightController;
-        else
-            currentController = leftController;
+        CalibrationController currentController = hand ? rightController : leftController;
 
         if (currentController.GetHighestPoseHeadHandDistance() > currentController.GetRightPoseHeadHandDistance())
             return currentController.GetRightPoseHeadHandDistance();

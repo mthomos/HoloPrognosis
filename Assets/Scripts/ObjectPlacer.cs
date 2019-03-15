@@ -26,14 +26,13 @@ public class ObjectPlacer : MonoBehaviour
 
         List<PlacementQuery> queries = new List<PlacementQuery>();
         queries.AddRange(AddTree());
-        //queries.AddRange(AddGate());
         Vector3 cameraPos = Camera.main.transform.position;
         Vector3 angles = Camera.main.transform.eulerAngles;
         Vector3 pos = new Vector3 (cameraPos.x + Mathf.Sin((angles.y) * Mathf.Deg2Rad) * 1.5f, 
                                    cameraPos.y , 
                                    cameraPos.z + Mathf.Cos((angles.y) * Mathf.Deg2Rad) * 1.5f);
         Quaternion rot = Quaternion.LookRotation(Camera.main.transform.forward, Vector3.up);
-        ObjectCollectionManager.Instance.CreateGate(pos, rot);
+        ObjectCollectionManager.Instance.CreateGate(pos, rot); //queries.AddRange(AddGate()); 
         GetLocationsFromSolver(queries);
     }
 
@@ -72,6 +71,7 @@ public class ObjectPlacer : MonoBehaviour
 
     public List<PlacementQuery> AddTurtorialMenu()
     {
+        Debug.Log("TurtorialMenu Query");
         return CreateLocationQueriesForSolver(1, ObjectCollectionManager.Instance.TurtorialMenuSize, ObjectType.TurtorialMenu);
     }
 
@@ -166,9 +166,12 @@ public class ObjectPlacer : MonoBehaviour
 
             else if (objType == ObjectType.TurtorialMenu)
             {
-                //placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_NearWall());
-                placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_OnWall(halfDims, 1.5f, 2.0f, 
-                    SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.WallTypeFlags.Normal);
+                placementRules = new List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule>
+                {
+                SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule.Create_AwayFromOtherObjects(1.0f)
+                };
+                placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_OnWall(halfDims, 1.3f, 2.0f, 
+                    SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.WallTypeFlags.External);
             }
 
             placementQueries.Add(
