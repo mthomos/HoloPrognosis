@@ -537,7 +537,7 @@ MonoBehaviour:
     type: 3}
   TreeSize: {x: 0.8, y: 2.1, z: 0.8}
   GateSize: {x: 0.15, y: 0.15, z: 0.15}
-  TurtorialMenuSize: {x: 1, y: 0.3, z: 0.05}
+  TurtorialMenuSize: {x: 1, y: 0.4, z: 0.1}
   flowController: {fileID: 790716446}
 --- !u!114 &790716445
 MonoBehaviour:
@@ -883,10 +883,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SpatialUnderstandingMesh: {fileID: 864562863}
   OccludedMaterial: {fileID: 2100000, guid: df172103f5fba4a4d8636aeca60cb0d7, type: 2}
-  MinAreaForStats: 4
-  MinAreaForComplete: 4
-  MinHorizAreaForComplete: 1
-  MinWallAreaForComplete: 0.2
+  MinAreaForStats: 5
+  MinAreaForComplete: 5
+  MinHorizAreaForComplete: 4
+  MinWallAreaForComplete: 2
   DebugDisplay: {fileID: 416328713}
   uiController: {fileID: 790716450}
   SpaceQueryDescription: 

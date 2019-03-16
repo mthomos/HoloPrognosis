@@ -123,31 +123,29 @@ public class FlowController : MonoBehaviour
 
     public void PrepareNextManipulation()
     {
+        string debugString = "Manipulation_" + manipulations + "->";
         // If training mode is disable exit
         if (!trainingMode || turtorialMode)
             return;
 
-        //ObjectCollectionManager.Instance.AppearGate();
         ObjectCollectionManager.Instance.AppearTree();
-        manipulations++;
-        string debugString = "Manipulation_" + manipulations + "->";
-        //Disable Gate
         ObjectCollectionManager.Instance.DisappearGate();
-        //Reset variables
+        //Append Manupulations
+        manipulations++;
+        //Reset manipulation variables
         violation = 0;
         manipulationInProgress = false;
         objectInGateDetected = false;
-        //Destroy object
         if (manipulatedObject != null)
         {
+            // Store hegiht
             if (rightHandPlaying)
                 maxHeightRightHand = manipulatedObject.transform.position.y;
             else
                 maxHeightLeftHand = manipulatedObject.transform.position.y;
-
+             //Destroy object
             Debug.Log(debugString + "destroy_hologram");
             ObjectCollectionManager.Instance.DestoryActiveHologram(manipulatedObject.name);
-            Destroy(manipulatedObject);
             manipulatedObject = null;
         }
         GameObject nowPlayingObject = null;
@@ -156,11 +154,7 @@ public class FlowController : MonoBehaviour
         {
             rightHandPlaying = !rightHandPlaying;
             Debug.Log(debugString+" right hand:" + rightHandPlaying);
-            if (rightHandPlaying)
-                currentControlller = rightController;
-            else
-                currentControlller = leftController;
-
+            currentControlller = rightHandPlaying ? rightController : leftController;
             //Load (possible) next object for manipulation
             nowPlayingObject = ObjectCollectionManager.Instance.GetLowestFruit(currentControlller.GetHighestPoseHandHeight());
             if (nowPlayingObject == null)
@@ -168,10 +162,7 @@ public class FlowController : MonoBehaviour
                 Debug.Log(debugString + "for the current hand, no nowPlayingObject, switch hand");
                 //Switch to the other hand if for the current hand object doesn't exist
                 rightHandPlaying = !rightHandPlaying;
-                if (rightHandPlaying)
-                    currentControlller = rightController;
-                else
-                    currentControlller = leftController;
+                currentControlller = rightHandPlaying ? rightController : leftController;
                 nowPlayingObject = ObjectCollectionManager.Instance.GetLowestFruit(currentControlller.GetHighestPoseHandHeight());
             }
         }
@@ -192,6 +183,8 @@ public class FlowController : MonoBehaviour
         {
             // Notify user for next manipulation
             string text = "Next manipulation is with the " + (rightHandPlaying ? "right": "left") + "hand";
+            if (TextToSpeech.Instance.IsSpeaking())
+                TextToSpeech.Instance.StopSpeaking();
             TextToSpeech.Instance.StartSpeaking(text);
             UtilitiesScript.Instance.EnableOutline(nowPlayingObject, null, false);
             // Enable new object
@@ -237,7 +230,7 @@ public class FlowController : MonoBehaviour
 
     public void FinishGame()
     {
-        Debug.Log("training finished");
+        TextToSpeech.Instance.StopSpeaking();
         TextToSpeech.Instance.StartSpeaking("Training finished");
         //Save data
         dataScript.FinishSession();

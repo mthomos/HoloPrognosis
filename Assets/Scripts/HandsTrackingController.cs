@@ -108,7 +108,7 @@ public class HandsTrackingController : MonoBehaviour
 
     private void CheckForHands()
     {
-        FocusedObject = cursor.getFocusedObject();
+        FocusedObject = cursor.GetFocusedObject();
         ManipulationForOneHand();
     }
 

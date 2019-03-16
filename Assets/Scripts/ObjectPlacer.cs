@@ -6,6 +6,7 @@ using System;
 public class ObjectPlacer : MonoBehaviour
 {
     private Queue<PlacementResult> results = new Queue<PlacementResult>();
+    private bool solverInit;
 
     void Start()
     {
@@ -22,7 +23,11 @@ public class ObjectPlacer : MonoBehaviour
          if (!SpatialUnderstanding.Instance.AllowSpatialUnderstanding)
             return;
 
-        SpatialUnderstandingDllObjectPlacement.Solver_Init();
+        if (!solverInit)
+        {
+            SpatialUnderstandingDllObjectPlacement.Solver_Init();
+            solverInit = true;
+        }
 
         List<PlacementQuery> queries = new List<PlacementQuery>();
         queries.AddRange(AddTree());
@@ -38,24 +43,40 @@ public class ObjectPlacer : MonoBehaviour
 
     public void CreateGate()
     {
-        List<PlacementQuery> queries = new List<PlacementQuery>();
-        queries.AddRange(AddGate());
-        GetLocationsFromSolver(queries);
+        if (!SpatialUnderstanding.Instance.AllowSpatialUnderstanding)
+            return;
+        if (!solverInit)
+        {
+            SpatialUnderstandingDllObjectPlacement.Solver_Init();
+            solverInit = true;
+        }
+
+        GetLocationsFromSolver(AddGate());
     }
 
     public void CreateTree()
     {
         if (!SpatialUnderstanding.Instance.AllowSpatialUnderstanding)
             return;
-        SpatialUnderstandingDllObjectPlacement.Solver_Init();
+        if (!solverInit)
+        {
+            SpatialUnderstandingDllObjectPlacement.Solver_Init();
+            solverInit = true;
+        }
 
-        List<PlacementQuery> queries = new List<PlacementQuery>();
-        queries.AddRange(AddTree());
-        GetLocationsFromSolver(queries);
+        GetLocationsFromSolver(AddTree());
     }
 
     public void CreateTurtorialMenu()
     {
+        if (!SpatialUnderstanding.Instance.AllowSpatialUnderstanding)
+            return;
+
+        if (!solverInit)
+        {
+            SpatialUnderstandingDllObjectPlacement.Solver_Init();
+            solverInit = true;
+        }
         GetLocationsFromSolver(AddTree());
     }
 
@@ -71,7 +92,6 @@ public class ObjectPlacer : MonoBehaviour
 
     public List<PlacementQuery> AddTurtorialMenu()
     {
-        Debug.Log("TurtorialMenu Query");
         return CreateLocationQueriesForSolver(1, ObjectCollectionManager.Instance.TurtorialMenuSize, ObjectType.TurtorialMenu);
     }
 
@@ -131,9 +151,10 @@ public class ObjectPlacer : MonoBehaviour
                 SpatialUnderstanding.Instance.UnderstandingDLL.GetStaticObjectPlacementResultPtr()) > 0)
         {
             SpatialUnderstandingDllObjectPlacement.ObjectPlacementResult placementResult = SpatialUnderstanding.Instance.UnderstandingDLL.GetStaticObjectPlacementResult();
-
+            Debug.Log("TO BE Placed:---------" +(objType== ObjectType.TurtorialMenu ? "turtorial":"object") );
             return new PlacementResult(placementResult.Clone() as SpatialUnderstandingDllObjectPlacement.ObjectPlacementResult, boxFullDims, objType);
         }
+        Debug.Log("Not Placed:-----------" + (objType== ObjectType.TurtorialMenu ? "turtorial":"object") );
         return null;
     }
 
@@ -166,6 +187,7 @@ public class ObjectPlacer : MonoBehaviour
 
             else if (objType == ObjectType.TurtorialMenu)
             {
+                Debug.Log("Creating query for menu");
                 placementRules = new List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule>
                 {
                 SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule.Create_AwayFromOtherObjects(1.0f)
@@ -173,7 +195,7 @@ public class ObjectPlacer : MonoBehaviour
                 placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_OnWall(halfDims, 1.3f, 2.0f, 
                     SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.WallTypeFlags.External);
             }
-
+            
             placementQueries.Add(
                 new PlacementQuery(placementDefinition,
                     fullDims,

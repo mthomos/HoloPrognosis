@@ -32,13 +32,13 @@ public class GazeCursor : MonoBehaviour
                  hitInfo.collider.gameObject.CompareTag("UI") )
                 FocusedObject = hitInfo.collider.gameObject;
             //else
-              //  FocusedObject = null;
+            //  FocusedObject = null;
         }
         else
             cursorMeshRenderer.enabled = false;
     }
 
-    public GameObject getFocusedObject()
+    public GameObject GetFocusedObject()
     {
         return FocusedObject;
     }

@@ -96,7 +96,7 @@ public class UiController : MonoBehaviour
         }
         */
         //For UI navigation
-        GameObject tappedObj = gazeCursor.getFocusedObject();
+        GameObject tappedObj = gazeCursor.GetFocusedObject();
         if (tappedObj == null)
             return;
 

@@ -143,7 +143,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
     public GameObject GetLowestFruit(float threshold)
     {
         GameObject lowestObject = null;
-        float dist = 100000;
+        float dist = 100000.0f;
         if (createdTree == null)
             return null;
         for (int i = 0; i < createdTree.transform.childCount; i++)
@@ -239,6 +239,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             if(hologram.name == name)
             {
                 ActiveHolograms.Remove(hologram);
+                DestoryActiveHologram(hologram);
                 break;
             }
         }
