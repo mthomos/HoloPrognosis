@@ -16,18 +16,16 @@ public class GateScript : MonoBehaviour
 
     public bool objectInsideGate(GameObject obj)
     {
-        if (!gateOpened || obj == null)
+        if (obj == null)
             return false;
 
         if (GetComponent<Renderer>().bounds.Contains(obj.transform.position))
         {
-            UtilitiesScript.Instance.EnableOutline(obj, Color.white, true);
-            UtilitiesScript.Instance.EnableOutline(gameObject, Color.white, true);
+            UtilitiesScript.Instance.EnableOutline(gameObject, Color.magenta, true);
             return true;
         }
         else
         {
-            UtilitiesScript.Instance.DisableOutline(obj);
             UtilitiesScript.Instance.DisableOutline(gameObject);
             return false;
         }

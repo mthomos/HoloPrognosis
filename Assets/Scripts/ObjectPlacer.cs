@@ -67,7 +67,7 @@ public class ObjectPlacer : MonoBehaviour
         GetLocationsFromSolver(AddTree());
     }
 
-    public void CreateTurtorialMenu()
+    public void CreateMenu()
     {
         if (!SpatialUnderstanding.Instance.AllowSpatialUnderstanding)
             return;
@@ -77,22 +77,22 @@ public class ObjectPlacer : MonoBehaviour
             SpatialUnderstandingDllObjectPlacement.Solver_Init();
             solverInit = true;
         }
-        GetLocationsFromSolver(AddTree());
+        GetLocationsFromSolver(AddMenu());
     }
 
-    public List<PlacementQuery> AddTree()
+    private List<PlacementQuery> AddTree()
     {
         return CreateLocationQueriesForSolver(1, ObjectCollectionManager.Instance.TreeSize, ObjectType.Tree);
     }
 
-    public List<PlacementQuery> AddGate()
+    private List<PlacementQuery> AddGate()
     {
         return CreateLocationQueriesForSolver(1, ObjectCollectionManager.Instance.GateSize, ObjectType.Gate);
     }
 
-    public List<PlacementQuery> AddTurtorialMenu()
+    private List<PlacementQuery> AddMenu()
     {
-        return CreateLocationQueriesForSolver(1, ObjectCollectionManager.Instance.TurtorialMenuSize, ObjectType.TurtorialMenu);
+        return CreateLocationQueriesForSolver(1, ObjectCollectionManager.Instance.TurtorialMenuSize, ObjectType.Menu);
     }
 
 
@@ -102,7 +102,6 @@ public class ObjectPlacer : MonoBehaviour
         {
             var toPlace = results.Dequeue();
             Quaternion rotation = Quaternion.LookRotation(toPlace.Normal, Vector3.up);
-
             switch (toPlace.ObjType)
             {
                 case ObjectType.Tree:
@@ -111,8 +110,8 @@ public class ObjectPlacer : MonoBehaviour
                 case ObjectType.Gate:
                     ObjectCollectionManager.Instance.CreateGate(toPlace.Position, rotation);
                     break;
-                case ObjectType.TurtorialMenu:
-                    ObjectCollectionManager.Instance.CreateTurtorialMenu(toPlace.Position, rotation);
+                case ObjectType.Menu:
+                    ObjectCollectionManager.Instance.CreateMenu(toPlace.Position, rotation);
                     break;
             }
         }
@@ -151,10 +150,10 @@ public class ObjectPlacer : MonoBehaviour
                 SpatialUnderstanding.Instance.UnderstandingDLL.GetStaticObjectPlacementResultPtr()) > 0)
         {
             SpatialUnderstandingDllObjectPlacement.ObjectPlacementResult placementResult = SpatialUnderstanding.Instance.UnderstandingDLL.GetStaticObjectPlacementResult();
-            Debug.Log("TO BE Placed:---------" +(objType== ObjectType.TurtorialMenu ? "turtorial":"object") );
+            Debug.Log("TO BE Placed:---------" +(objType== ObjectType.Menu ? "turtorial":"object") );
             return new PlacementResult(placementResult.Clone() as SpatialUnderstandingDllObjectPlacement.ObjectPlacementResult, boxFullDims, objType);
         }
-        Debug.Log("Not Placed:-----------" + (objType== ObjectType.TurtorialMenu ? "turtorial":"object") );
+        Debug.Log("Not Placed:-----------" + (objType== ObjectType.Menu ? "turtorial":"object") );
         return null;
     }
 
@@ -185,13 +184,10 @@ public class ObjectPlacer : MonoBehaviour
                 placementConstraints.Add(SpatialUnderstandingDllObjectPlacement.ObjectPlacementConstraint.Create_AwayFromWalls());
             }
 
-            else if (objType == ObjectType.TurtorialMenu)
+            else if (objType == ObjectType.Menu)
             {
-                Debug.Log("Creating query for menu");
-                placementRules = new List<SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule>
-                {
-                SpatialUnderstandingDllObjectPlacement.ObjectPlacementRule.Create_AwayFromOtherObjects(1.0f)
-                };
+                placementRules = null;
+                placementConstraints = null;
                 placementDefinition = SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.Create_OnWall(halfDims, 1.3f, 2.0f, 
                     SpatialUnderstandingDllObjectPlacement.ObjectPlacementDefinition.WallTypeFlags.External);
             }

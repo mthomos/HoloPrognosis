@@ -32,20 +32,20 @@ public class FlowController : MonoBehaviour
 
     private void Update()
     {
-        if (!turtorialMode)
-            return;
-
-        if (trainingMode && manipulationInProgress && turtorialController.turtorialStep == 2)
+        if (trainingMode && manipulationInProgress)
         {
             // Calculate distance of manipulated object and gate
-            if (gateScript == null && ObjectCollectionManager.Instance.GetCreatedGate() != null)
-                gateScript = ObjectCollectionManager.Instance.GetCreatedGate().GetComponent<GateScript>();
+            gateScript = ObjectCollectionManager.Instance.GetCreatedGate().GetComponent<GateScript>();
 
             if (gateScript == null || manipulatedObject == null)
                 return;
-
+            Debug.Log("Not null");
             if (gateScript.objectInsideGate(manipulatedObject))
             {
+                Debug.Log("Inside circle");
+                if (!TextToSpeech.Instance.IsSpeaking())
+                    TextToSpeech.Instance.StartSpeaking("Apple inside the Circle");
+
                 if (!objectInGateDetected)
                 {
                     freeToRelease = false;
@@ -84,8 +84,9 @@ public class FlowController : MonoBehaviour
 
         //Appear Gate according to hand
         Debug.Log("Gate appeared");
-        ObjectCollectionManager.Instance.AppearGate(currentControlller.GetRightPoseHandHeight(), 
-                2.0f, currentControlller.IsRightHand());
+        float d_height = ObjectCollectionManager.Instance.GetCreatedGate().GetComponent<Renderer>().bounds.size.y * 0.25f;
+        ObjectCollectionManager.Instance.AppearGate(currentControlller.GetRightPoseHandHeight() - d_height,
+                currentControlller.GetRightPoseHeadHandDistance(), currentControlller.IsRightHand());
         //Get manipulatedObject
         manipulatedObject = handsTrackingController.GetManipulatedObject();
         //Delete parent
@@ -145,7 +146,7 @@ public class FlowController : MonoBehaviour
                 maxHeightLeftHand = manipulatedObject.transform.position.y;
              //Destroy object
             Debug.Log(debugString + "destroy_hologram");
-            ObjectCollectionManager.Instance.DestoryActiveHologram(manipulatedObject.name);
+            ObjectCollectionManager.Instance.DestroyActiveHologram(manipulatedObject.name);
             manipulatedObject = null;
         }
         GameObject nowPlayingObject = null;
@@ -183,8 +184,7 @@ public class FlowController : MonoBehaviour
         {
             // Notify user for next manipulation
             string text = "Next manipulation is with the " + (rightHandPlaying ? "right": "left") + "hand";
-            if (TextToSpeech.Instance.IsSpeaking())
-                TextToSpeech.Instance.StopSpeaking();
+            TextToSpeech.Instance.StopSpeaking();
             TextToSpeech.Instance.StartSpeaking(text);
             UtilitiesScript.Instance.EnableOutline(nowPlayingObject, null, false);
             // Enable new object
@@ -194,7 +194,7 @@ public class FlowController : MonoBehaviour
         }
     }
 
-    public void StartPlaying()
+    public void StartCalibration()
     {
         // Reset variables
         success = 0;
@@ -214,16 +214,19 @@ public class FlowController : MonoBehaviour
     public void CalibrationFinished()
     {
         uiController.PrintText("");
+        TextToSpeech.Instance.StopSpeaking();
         TextToSpeech.Instance.StartSpeaking("Calibration Finished. Let's play.");
+        uiController.MoveToPlayScreen();
         placer.CreateScene();
         // Enable manipulation with hands
         handsTrackingController.EnableHandManipulation();
         // Enable data collection
-        handsTrackingController.EnableDataCollection();
+        //handsTrackingController.EnableDataCollection();
         trainingMode = true;
         //Enable Events
         EventManager.StartListening("manipulation_started", ManipulationStarted);
-        EventManager.StartListening("box_collision", SuccessfulTry);
+        EventManager.StartListening("manipulation_finished", SuccessfulTry);
+        //EventManager.StartListening("box_collision", SuccessfulTry);
         EventManager.StartListening("floor_collision", FailedTry);
         EventManager.StartListening("world_created", PrepareNextManipulation);
     }
@@ -233,7 +236,7 @@ public class FlowController : MonoBehaviour
         TextToSpeech.Instance.StopSpeaking();
         TextToSpeech.Instance.StartSpeaking("Training finished");
         //Save data
-        dataScript.FinishSession();
+        //dataScript.FinishSession();
         //Prepare UI
         uiController.MoveToResultsScreen();
         //Reset
@@ -308,10 +311,5 @@ public class FlowController : MonoBehaviour
         }
         else
             return leftController == null ? false : true;
-    }
-
-    public void SetManipulationInProgress(bool set)
-    {
-        manipulationInProgress = set;
     }
 }

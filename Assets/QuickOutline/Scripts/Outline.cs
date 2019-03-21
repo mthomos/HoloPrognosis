@@ -28,7 +28,7 @@ public class Outline : MonoBehaviour {
     get { return outlineMode; }
     set {
       outlineMode = value;
-      needsUpdate = true;
+      needsUpdate = false;
     }
   }
 

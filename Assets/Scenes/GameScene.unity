@@ -533,11 +533,10 @@ MonoBehaviour:
   TreePrefab: {fileID: 1198309765264102, guid: d8486cdd8ad6ec54cb40d0818cc7e2a5, type: 3}
   GatePrefab: {fileID: 6770303324140087380, guid: 72ab5f51ee5c4674c92f536ddafe1ede,
     type: 3}
-  TurtorialPrefab: {fileID: 1227114091142613415, guid: 5a0b5364ee507c14893d6625097c5d62,
-    type: 3}
+  menuPrefab: {fileID: 1973505965284976, guid: 13f1995630d54f94db918a003c9faf2e, type: 3}
   TreeSize: {x: 0.8, y: 2.1, z: 0.8}
   GateSize: {x: 0.15, y: 0.15, z: 0.15}
-  TurtorialMenuSize: {x: 1, y: 0.4, z: 0.1}
+  TurtorialMenuSize: {x: 1.3, y: 0.5, z: 0.1}
   flowController: {fileID: 790716446}
 --- !u!114 &790716445
 MonoBehaviour:
@@ -717,16 +716,23 @@ MonoBehaviour:
   menuPrefab: {fileID: 1973505965284976, guid: 13f1995630d54f94db918a003c9faf2e, type: 3}
   settingsPrefab: {fileID: 1088184999046684, guid: e346954a244567c48a5e210b43cb6900,
     type: 3}
-  playPrefab: {fileID: 1163623399768020, guid: 4ccd207352f20c7489fda143091d3e01, type: 3}
+  startPrefab: {fileID: 1163623399768020, guid: 4ccd207352f20c7489fda143091d3e01,
+    type: 3}
   resultsPrefab: {fileID: 1823202565235514, guid: bbe7d2122ce15a6419861f2598e7b76a,
     type: 3}
   aboutPrefab: {fileID: 5193279628735756758, guid: 3e4fda2eb95e040439d9a13589eb2bc0,
     type: 3}
   askForTurtorialPrefab: {fileID: 5959303547640734535, guid: 462551838a1d2b64c903103df1c191b9,
     type: 3}
+  playPrefab: {fileID: 1419716944687235935, guid: b9e0db749e07d944384372ab5563186e,
+    type: 3}
+  TurtorialPrefab: {fileID: 1227114091142613415, guid: 5a0b5364ee507c14893d6625097c5d62,
+    type: 3}
+  RedPointPrefab: {fileID: 4408506078939442202, guid: 5f92cc2883fbc2040926487edb8c4e1e,
+    type: 3}
   placer: {fileID: 790716442}
   gazeCursor: {fileID: 938779208}
-  DebugText: {fileID: 1550465574}
+  UserText: {fileID: 1550465574}
   handsTrackingController: {fileID: 347611045}
   flowController: {fileID: 790716446}
   turtorialController: {fileID: 790716451}
@@ -883,9 +889,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SpatialUnderstandingMesh: {fileID: 864562863}
   OccludedMaterial: {fileID: 2100000, guid: df172103f5fba4a4d8636aeca60cb0d7, type: 2}
-  MinAreaForStats: 5
+  MinAreaForStats: 3
   MinAreaForComplete: 5
-  MinHorizAreaForComplete: 4
+  MinHorizAreaForComplete: 3
   MinWallAreaForComplete: 2
   DebugDisplay: {fileID: 416328713}
   uiController: {fileID: 790716450}
@@ -1037,7 +1043,7 @@ GameObject:
   - component: {fileID: 1550465573}
   - component: {fileID: 1550465572}
   m_Layer: 0
-  m_Name: DebugDisplay2
+  m_Name: UserDisplay
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1204,6 +1210,11 @@ PrefabInstance:
       propertyPath: flowController
       value: 
       objectReference: {fileID: 790716446}
+    - target: {fileID: 5311547430167759518, guid: a2b3e5f4155470749a69fb440c9353af,
+        type: 3}
+      propertyPath: controller
+      value: 
+      objectReference: {fileID: 790716450}
     - target: {fileID: 5311547430167759505, guid: a2b3e5f4155470749a69fb440c9353af,
         type: 3}
       propertyPath: m_LocalPosition.x

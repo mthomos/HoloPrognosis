@@ -2,8 +2,6 @@
 
 public class GazeCursor : MonoBehaviour
 {
-    //Public Variables-For Editor
-    public FlowController flowController;
     //Private Variables
     private GameObject FocusedObject = null; // The object which user is staring at
     //Cached variables
@@ -21,6 +19,7 @@ public class GazeCursor : MonoBehaviour
 
     void Update()
     {
+
         gazeOrigin = mainCamera.transform.position;
         gazeDirection = mainCamera.transform.forward;
         if (Physics.Raycast(gazeOrigin, gazeDirection, out hitInfo))
@@ -28,11 +27,15 @@ public class GazeCursor : MonoBehaviour
             cursorMeshRenderer.enabled = true;
             gameObject.transform.position = hitInfo.point;
             gameObject.transform.rotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal);
-            if ( hitInfo.collider.gameObject.CompareTag("User") ||
-                 hitInfo.collider.gameObject.CompareTag("UI") )
+            if (hitInfo.collider.gameObject.CompareTag("UI"))
+            {
                 FocusedObject = hitInfo.collider.gameObject;
-            //else
-            //  FocusedObject = null;
+                EventManager.TriggerEvent("gaze_ui");
+            }
+            else if (hitInfo.collider.gameObject.CompareTag("User"))
+            {
+                FocusedObject = hitInfo.collider.gameObject;
+            }
         }
         else
             cursorMeshRenderer.enabled = false;

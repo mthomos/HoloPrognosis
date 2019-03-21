@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-
 public class TurtorialController : MonoBehaviour
 {
     // Fill in Editor
@@ -29,6 +28,9 @@ public class TurtorialController : MonoBehaviour
         
         if (turtorialStep == 2)
         {
+            if (createdGate == null)
+                return;
+
             GateScript gateScript = createdGate.GetComponent<GateScript>();
             if (gateScript.objectInsideGate(manipulatedObject))
             {
@@ -40,9 +42,6 @@ public class TurtorialController : MonoBehaviour
 
     public void PrepareFirstTurtorial()
     {
-        if (manipulatedObject != null)
-            Destroy(manipulatedObject);
-
         manipulations = 1;
         turtorialStep = 1;
         AppearAppleDemo();
@@ -54,21 +53,18 @@ public class TurtorialController : MonoBehaviour
 
     public void PrepareSecondTurtorial()
     {
-        if (manipulatedObject != null)
-            Destroy(manipulatedObject);
-
         manipulations = 1;
         turtorialStep = 2;
         AppearAppleDemo();
         // Create Gate and hide it
         Vector3 cameraPos = Camera.main.transform.position;
         Vector3 angles = Camera.main.transform.eulerAngles;
-        Vector3 pos = new Vector3(cameraPos.x + Mathf.Sin((angles.y) * Mathf.Deg2Rad) * 1.5f,
+        Vector3 pos = new Vector3(cameraPos.x + Mathf.Sin((angles.y) * Mathf.Deg2Rad) * 1.3f,
                                    cameraPos.y,
-                                   cameraPos.z + Mathf.Cos((angles.y) * Mathf.Deg2Rad) * 1.5f);
+                                   cameraPos.z + Mathf.Cos((angles.y) * Mathf.Deg2Rad) * 1.3f);
         Quaternion rot = Quaternion.LookRotation(Camera.main.transform.forward, Vector3.up);
-        ObjectCollectionManager.Instance.CreateGate(pos, rot);
-        ObjectCollectionManager.Instance.DisappearGate();
+        createdGate = ObjectCollectionManager.Instance.CreateGate(pos, rot);
+        UtilitiesScript.Instance.DisableObject(createdGate);
         // Listen Events
         EventManager.StartListening("manipulation_started", ManipulationStarted);
         EventManager.StartListening("manipulation_finished", ManipulationFinished);
@@ -76,6 +72,8 @@ public class TurtorialController : MonoBehaviour
 
     private void AppearAppleDemo()
     {
+        if (manipulatedObject != null)
+            return;
         // Appear an apple in front of user
         manipulatedObject = Instantiate(AppleObject);
         //Destroy Rigidbody to disable gravity
@@ -83,7 +81,7 @@ public class TurtorialController : MonoBehaviour
             Destroy(manipulatedObject.GetComponent<Rigidbody>());
 
         if (applePosition == Vector3.zero)
-            applePosition = Camera.main.transform.position + Camera.main.transform.forward * 1.3f;
+            applePosition = Camera.main.transform.position + Camera.main.transform.forward * 1.0f;
 
         manipulatedObject.transform.position = applePosition;
         UtilitiesScript.Instance.DisableOutline(manipulatedObject);
@@ -94,41 +92,39 @@ public class TurtorialController : MonoBehaviour
         if (turtorialStep != 2)
             return;
 
-        //Appear Gate according to hand
-        ObjectCollectionManager.Instance.AppearGate(1.0f, 2.0f, manipulations % 2 == 1 ? true : false);
-        createdGate = ObjectCollectionManager.Instance.GetCreatedGate();
         //Get manipulatedObject
         manipulatedObject = handsTrackingController.GetManipulatedObject();
-        //Delete parent
-        if (manipulatedObject != null)
-            manipulatedObject.transform.parent = null;
+        //Appear Gate according to hand
+        Vector3 dx = Camera.main.transform.position - manipulatedObject.transform.position;
+        float distance = new Vector2(dx.x, dx.z).magnitude;
+        float d_height = createdGate.GetComponent<Renderer>().bounds.size.y * 0.45f;
+        ObjectCollectionManager.Instance.AppearGate(manipulatedObject.transform.position.y- d_height, distance, manipulations % 2 == 1 ? true : false);
         //Create balls to guide user
-        CreateGuidance(manipulations % 2 == 1 ? true : false);
+        CreateGuidance(manipulations % 2 == 1 ? true : false, distance);
     }
 
-    private void CreateGuidance(bool toRight)
+    private void CreateGuidance(bool toRight, float distance)
     {
-        Vector3 center = ObjectCollectionManager.Instance.GetCreatedGate().GetComponent<Renderer>().bounds.center;
-        Vector3 angles = ObjectCollectionManager.Instance.GetCreatedGate().transform.eulerAngles;
-        //Vector3 dx = Camera.main.transform.position - manipulatedObject.transform.position;
-        float distance = 1.5f; // new Vector2(dx.x, dx.z).magnitude;
+        Vector3 center = manipulatedObject.transform.position;
+        Vector3 userPosition = Camera.main.transform.position;
+        Vector3 angles = Camera.main.transform.eulerAngles;
         Vector3 position = new Vector3(0, center.y, 0);
-
+        
         if (toRight)
         {
-            for (float angle = 0; angle < 85f; angle += 4)
+            for (float angle = 0; angle < 84f; angle += 8)
             {
-                position.x = center.x + Mathf.Sin((angles.y + angle) * Mathf.Deg2Rad) * distance;
-                position.z = center.z + Mathf.Cos((angles.y + angle) * Mathf.Deg2Rad) * distance;
+                position.x = userPosition.x + Mathf.Sin((angles.y + angle) * Mathf.Deg2Rad) * distance;
+                position.z = userPosition.z + Mathf.Cos((angles.y + angle) * Mathf.Deg2Rad) * distance;
                 guidanceObjects.Add(Instantiate(PointPrefab, position, Quaternion.LookRotation(Vector3.zero)));
             }
         }
         else
         {
-            for (float angle = -84; angle < 1.0f; angle += 4)
+            for (float angle = -84; angle < 1.0f; angle += 8)
             {
-                position.x = center.x + Mathf.Sin((angles.y + angle) * Mathf.Deg2Rad) * distance;
-                position.z = center.z + Mathf.Cos((angles.y + angle) * Mathf.Deg2Rad) * distance;
+                position.x = userPosition.x + Mathf.Sin((angles.y + angle) * Mathf.Deg2Rad) * distance;
+                position.z = userPosition.z + Mathf.Cos((angles.y + angle) * Mathf.Deg2Rad) * distance;
                 guidanceObjects.Add(Instantiate(PointPrefab, position, Quaternion.LookRotation(Vector3.zero)));
             }
         }
@@ -139,13 +135,12 @@ public class TurtorialController : MonoBehaviour
          if (turtorialStep != 2)
             return;
 
+        manipulations++;
         // Destroy guidance
         foreach (GameObject point in guidanceObjects)
             Destroy(point);
         guidanceObjects.Clear();
         ObjectCollectionManager.Instance.DisappearGate();
-        manipulatedObject = null;
-        createdGate = null;
     }
 
     public void FinishTurtorial()
@@ -154,6 +149,7 @@ public class TurtorialController : MonoBehaviour
         foreach (GameObject point in guidanceObjects)
             Destroy(point);
         guidanceObjects.Clear();
+        ObjectCollectionManager.Instance.DisappearGate();
 
         if (manipulatedObject != null)
         {

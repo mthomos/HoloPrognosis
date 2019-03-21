@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public class UiController : MonoBehaviour
@@ -6,15 +7,17 @@ public class UiController : MonoBehaviour
     //Public Variables-For Editor
     public GameObject menuPrefab;
     public GameObject settingsPrefab;
-    public GameObject playPrefab;
+    public GameObject startPrefab;
     public GameObject resultsPrefab;
     public GameObject aboutPrefab;
     public GameObject askForTurtorialPrefab;
-    // Turtorial Prefab in CollectionManager due to Spatial
+    public GameObject playPrefab;
+    public GameObject TurtorialPrefab;
+    public GameObject RedPointPrefab;
     //
     public ObjectPlacer placer;
     public GazeCursor gazeCursor;
-    public TextMesh DebugText;
+    public TextMesh UserText;
     public HandsTrackingController handsTrackingController;
     public FlowController flowController;
     public TurtorialController turtorialController;
@@ -29,13 +32,17 @@ public class UiController : MonoBehaviour
     // Menu
     private GameObject menuScreen;
     private GameObject settingsScreen;
-    private GameObject playScreen;
+    private GameObject startScreen;
     private GameObject resultsScreen;
     private GameObject aboutScreen;
     private GameObject askTurtorialScreen;
     private GameObject turtorialScreen;
+    private GameObject playScreen;
     private int inMenu = -1; // Menu index
     private GameObject currentMenu;
+    private Vector3 menuPosition = Vector3.zero;
+    private Quaternion menuRotation = new Quaternion();
+    private List<GameObject> guidanceList = new List<GameObject>();
     /*
      * Menu Index
      * -1 : Play Scene
@@ -86,6 +93,10 @@ public class UiController : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+
+    }
     private void TapUiReceived()
     {
         /*
@@ -102,11 +113,18 @@ public class UiController : MonoBehaviour
 
         if (tappedObj.CompareTag("UI"))
         {
-            if (inMenu == 0) //Start Menu
+            if (inMenu == -1)
+            {
+                if (tappedObj.name == "ExitButton")
+                {
+                    flowController.FinishGame();
+                }
+            }
+            else if (inMenu == 0) //Start Menu
             {
                 if (tappedObj.name == "StartButton")
                 {
-                    MoveToPlayScreen();
+                    MoveToStartScreen();
                 }
                 else if (tappedObj.name == "SettingsButton")
                 {
@@ -142,7 +160,7 @@ public class UiController : MonoBehaviour
                 }
             }
 
-            else if (inMenu == 2) // Play Menu
+            else if (inMenu == 2) // Start Menu
             {
                 if (tappedObj.name == "PlayButton")
                 {
@@ -193,18 +211,25 @@ public class UiController : MonoBehaviour
             {
                 if (tappedObj.name == "SkipButton")
                 {
+                    UtilitiesScript.Instance.DisableObject(currentMenu);
                     InititateCalbration();
                 }
                 else if (tappedObj.name == "EnableButton")
                 {
                     StartTurtorial(true);
                 }
+                else if (tappedObj.name == "ExitButton")
+                {
+                    ReturnToStartMenu();
+                }
+                
             }
 
             else if (inMenu == 6) //  Turtorial Scene
             {
                 if (tappedObj.name == "SkipButton")
                 {
+                    ExitTurtorial();
                     InititateCalbration();
                 }
                 else if (tappedObj.name == "GateButton")
@@ -212,16 +237,17 @@ public class UiController : MonoBehaviour
                     if (turtorialController.turtorialStep == 1)
                     {
                         turtorialController.PrepareSecondTurtorial();
-                        tappedObj.GetComponentInChildren<TextMesh>().text = "Disable Gate";
+                        tappedObj.GetComponentInChildren<TextMesh>().text = "Disable" + "\n" + "Gate";
                     }
                     else if (turtorialController.turtorialStep == 2)
                     {
                         turtorialController.PrepareFirstTurtorial();
-                        tappedObj.GetComponentInChildren<TextMesh>().text = "Enable Gate";
+                        tappedObj.GetComponentInChildren<TextMesh>().text = "Enable" + "\n" + "Gate";
                     }
                 }
                 else if (tappedObj.name == "ExitButton")
                 {
+                    ExitTurtorial();
                     ReturnToStartMenu();
                 }
                 else if (tappedObj.name == "Video")
@@ -239,6 +265,15 @@ public class UiController : MonoBehaviour
         }
     }
 
+    public void ExitTurtorial()
+    {
+        TextToSpeech.Instance.StopSpeaking();
+        flowController.DisableTurtorialMode();
+        handsTrackingController.DisableHandManipulation();
+        handsTrackingController.SetTurtorialMode(false);
+        turtorialController.FinishTurtorial();
+    }
+
     private void StartTurtorial(bool foreceEnable)
     {
         if (foreceEnable || firstTurtorial)
@@ -253,15 +288,19 @@ public class UiController : MonoBehaviour
             handsTrackingController.DisableDataCollection();
             handsTrackingController.SetTurtorialMode(true);
             // Appear Menu
-            UtilitiesScript.Instance.DisableObject(currentMenu);
-            placer.AddTurtorialMenu();
             if (turtorialScreen != null) //Create Play menu
                 UtilitiesScript.Instance.EnableObject(turtorialScreen);
+            else
+            {
+                turtorialScreen = Instantiate(TurtorialPrefab);
+                turtorialScreen.transform.position = currentMenu.transform.position;
+                turtorialScreen.transform.rotation = currentMenu.transform.rotation;
+            }
+            UtilitiesScript.Instance.DisableObject(currentMenu);
             currentMenu = null;
             inMenu = 6;
-            if (TextToSpeech.Instance.IsSpeaking())
-                TextToSpeech.Instance.StopSpeaking();
 
+            TextToSpeech.Instance.StopSpeaking();
             TextToSpeech.Instance.StartSpeaking("Turtorial Mode has been loaded. In the wall there is a menu"+
                 "where you can see three buttons. One for skippping for the turtorial, another one for enabling or disabling gate turtorial"+
                 "and the last one to return to start menu. Above buttons there is a video turtorial so you can see how hand recognision"+
@@ -276,41 +315,59 @@ public class UiController : MonoBehaviour
             {
                 UtilitiesScript.Instance.EnableObject(askTurtorialScreen);
                 askTurtorialScreen.transform.position = currentMenu.transform.position;
-                if (TextToSpeech.Instance.IsSpeaking())
-                    TextToSpeech.Instance.StopSpeaking();
-                TextToSpeech.Instance.StartSpeaking("Do you want to enter turtorial");
             }
+            TextToSpeech.Instance.StopSpeaking();
+            TextToSpeech.Instance.StartSpeaking("Do you want to enter turtorial");
 
             UtilitiesScript.Instance.DisableObject(currentMenu);
             currentMenu = askTurtorialScreen;
             inMenu = 5;
+            if (menuPosition != Vector3.zero && menuRotation != new Quaternion())
+            {
+                currentMenu.transform.position = menuPosition;
+                currentMenu.transform.rotation = menuRotation;
+            }
         }
     }
 
     private void InititateCalbration()
-    { 
-        handsTrackingController.SetTurtorialMode(false);
-        handsTrackingController.EnableHandCalibration();
-        flowController.DisableTurtorialMode();
-        turtorialController.FinishTurtorial();
-        DebugText.text = "Place your hand in right angle pose for 2 seconds ";
-        if (TextToSpeech.Instance.IsSpeaking())
-            TextToSpeech.Instance.StopSpeaking();
-        TextToSpeech.Instance.StartSpeaking(DebugText.text);
+    {
+        UtilitiesScript.Instance.DisableObject(turtorialScreen);
+        UserText.text = "Place your hand in right angle pose for 2 seconds ";
+        TextToSpeech.Instance.StopSpeaking();
+        TextToSpeech.Instance.StartSpeaking(UserText.text);
         // Prepare Logic
-        flowController.StartPlaying();
+        flowController.StartCalibration();
         inMenu = -1;
     }
 
     private void MoveToAboutScreen()
     {
-        UtilitiesScript.Instance.DisableObject(currentMenu);
         if (aboutScreen == null) //Create Play menu
             aboutScreen = Instantiate(aboutPrefab, currentMenu.transform.position, currentMenu.transform.rotation);
         else
             UtilitiesScript.Instance.EnableObject(aboutScreen);
+        UtilitiesScript.Instance.DisableObject(currentMenu);
         currentMenu = aboutScreen;
         inMenu = 4;
+        if (menuPosition != Vector3.zero && menuRotation != new Quaternion())
+        {
+            currentMenu.transform.position = menuPosition;
+            currentMenu.transform.rotation = menuRotation;
+        }
+    }
+
+    public void MoveToPlayScreen()
+    {
+        if (playScreen == null) //Create Play menu
+            playScreen = Instantiate(playPrefab);
+        else
+            UtilitiesScript.Instance.EnableObject(playScreen);
+        UtilitiesScript.Instance.DisableObject(currentMenu);
+        currentMenu = playScreen;
+        inMenu = -1;
+        currentMenu.transform.position = menuPosition;
+        currentMenu.transform.rotation = menuRotation;
     }
 
     public void MoveToResultsScreen()
@@ -326,6 +383,12 @@ public class UiController : MonoBehaviour
         UtilitiesScript.Instance.DisableObject(currentMenu);
         currentMenu = resultsScreen;
         inMenu = 3;
+        UtilitiesScript.Instance.PlaceInFrontOfUser(menuScreen, menuDistance);
+        if (menuPosition != Vector3.zero && menuRotation != new Quaternion())
+        {
+            currentMenu.transform.position = menuPosition;
+            currentMenu.transform.rotation = menuRotation;
+        }
 
         TextMesh success = currentMenu.transform.Find("Successes").gameObject.GetComponent<TextMesh>();
         TextMesh failures = currentMenu.transform.Find("Failures").gameObject.GetComponent<TextMesh>();
@@ -347,36 +410,40 @@ public class UiController : MonoBehaviour
             impv_per = 0;
 
         left_Impv.text = flowController.leftHandEnabled ? "Left Hand improved by " + impv_per + "%" : "";
-
-        Vector3 pos = Camera.main.transform.position + Camera.main.transform.forward * menuDistance;
-        currentMenu.transform.position = pos;
-        //Fix menu direction
-        Vector3 directionToTarget = Camera.main.transform.position - pos;
-        directionToTarget.y = 0.0f;
-        if (directionToTarget.sqrMagnitude > 0.005f)
-            currentMenu.transform.rotation = Quaternion.LookRotation(-directionToTarget);
     }
 
-    private void MoveToPlayScreen()
+    private void MoveToStartScreen()
     {
-        UtilitiesScript.Instance.DisableObject(currentMenu);
-        if (playScreen == null) //Create Play menu
-            playScreen = Instantiate(playPrefab, currentMenu.transform.position, currentMenu.transform.rotation);
+        if (startScreen == null) //Create Play menu
+            startScreen = Instantiate(startPrefab, currentMenu.transform.position, currentMenu.transform.rotation);
         else
-            UtilitiesScript.Instance.EnableObject(playScreen);
-        currentMenu = playScreen;
+            UtilitiesScript.Instance.EnableObject(startScreen);
+
+        UtilitiesScript.Instance.DisableObject(currentMenu);
+        currentMenu = startScreen;
         inMenu = 2;
+        if (menuPosition != Vector3.zero && menuRotation != new Quaternion())
+        {
+            currentMenu.transform.position = menuPosition;
+            currentMenu.transform.rotation = menuRotation;
+        }
     }
 
     private void MoveToSettingsScreen()
     {
-        UtilitiesScript.Instance.DisableObject(currentMenu);
         if (settingsScreen == null) //Create Settings menu
             settingsScreen = Instantiate(settingsPrefab, currentMenu.transform.position, currentMenu.transform.rotation);
         else
             UtilitiesScript.Instance.EnableObject(settingsScreen);
+
+        UtilitiesScript.Instance.DisableObject(currentMenu);
         currentMenu = settingsScreen;
         inMenu = 1;
+        if (menuPosition != Vector3.zero && menuRotation != new Quaternion())
+        {
+            currentMenu.transform.position = menuPosition;
+            currentMenu.transform.rotation = menuRotation;
+        }
     }
 
     private void FirstTurtorialDone()
@@ -401,30 +468,80 @@ public class UiController : MonoBehaviour
         currentMenu = menuScreen;
         inMenu = 0;
         UtilitiesScript.Instance.EnableObject(currentMenu);
-        if (inMenu == -1)
-            UtilitiesScript.Instance.PlaceInFrontOfUser(currentMenu, menuDistance);
+        if (menuPosition != Vector3.zero && menuRotation != new Quaternion())
+        {
+            
+            currentMenu.transform.position = menuPosition;
+            currentMenu.transform.rotation = menuRotation;
+        }
     }
 
     public void CreateUI()
     {
         EventManager.StartListening("tap", TapUiReceived);
-        //Appear the menu in front of user
-        menuScreen = Instantiate(menuPrefab);
-        //Fix menu position
-        UtilitiesScript.Instance.PlaceInFrontOfUser(menuScreen, menuDistance);
-        currentMenu = menuScreen;
+        placer.CreateMenu();
         inMenu = 0;
     }
 
     public void PrintText(string text)
     {
-        DebugText.text = text;
+        UserText.text = text;
     }
 
-    public void SetTurtorialMenu(GameObject obj)
+    public void SetMenu(GameObject obj)
     {
-        turtorialScreen = obj;
+        menuPosition = obj.transform.position;
+        menuRotation = obj.transform.rotation;
+        menuScreen = obj;
+        // Create Guidance for user
+        Vector3 center = Vector3.Lerp(Camera.main.transform.position, menuPosition, 0.5f);
+        Vector3 useAngles = Camera.main.transform.eulerAngles;
+        Vector3 dx = Camera.main.transform.position - menuPosition;
+        float radius = new Vector2(dx.x, dx.z).magnitude / 2;
+        Vector3 position = new Vector3(0, center.y, 0);
+        //
+        Vector2 cameraPos = new Vector2(Camera.main.transform.position.x, Camera.main.transform.position.z);
+        Vector2 menuPos = new Vector2(menuPosition.x, menuPosition.z);
+        Vector2 customPos = new Vector2(cameraPos.x, menuPos.y);
+        float d1_mag = (customPos - cameraPos).magnitude;
+        float d2_mag = (menuPos - cameraPos).magnitude;
+        float d_angle = Mathf.Acos(d1_mag / d2_mag) * Mathf.Rad2Deg;
+
+        if (UtilitiesScript.Instance.IsRightFromHead(obj.transform.position))
+        {
+            for (float angle = 0f; angle < d_angle; angle += 8)
+            {
+                position.x = Camera.main.transform.position.x + Mathf.Sin((useAngles.y + angle) * Mathf.Deg2Rad) * radius;
+                position.z = Camera.main.transform.position.z + Mathf.Cos((useAngles.y + angle) * Mathf.Deg2Rad) * radius;
+                guidanceList.Add(Instantiate(RedPointPrefab, position, Quaternion.LookRotation(Vector3.up)));
+            }
+        }
+        else
+        {
+            for (float angle = -d_angle; angle < 1f; angle += 9)
+            {
+                position.x = Camera.main.transform.position.x + Mathf.Sin((useAngles.y + angle) * Mathf.Deg2Rad) * radius;
+                position.z = Camera.main.transform.position.z + Mathf.Cos((useAngles.y + angle) * Mathf.Deg2Rad) * radius;
+                guidanceList.Add(Instantiate(RedPointPrefab, position, Quaternion.LookRotation(Vector3.up)));
+            }
+        }
+        EventManager.StartListening("gaze_ui", DestroyGuidance);
+        TextToSpeech.Instance.StopSpeaking();
+        TextToSpeech.Instance.StartSpeaking("Follow the green points to see the menu");
         if (currentMenu == null)
+        {
             currentMenu = obj;
+            inMenu = 0;
+        }
+    }
+
+    private void DestroyGuidance()
+    {
+        EventManager.StopListening("gaze_ui", DestroyGuidance);
+        TextToSpeech.Instance.StopSpeaking();
+        foreach (GameObject point in guidanceList)
+            Destroy(point);
+
+        guidanceList.Clear();
     }
 }

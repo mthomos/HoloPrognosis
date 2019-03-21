@@ -7,20 +7,23 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
     //Public Variables - For Editor
     public GameObject TreePrefab;
     public GameObject GatePrefab;
-    public GameObject TurtorialPrefab;
+    public GameObject menuPrefab;
     public Vector3 TreeSize;
     public Vector3 GateSize;
     public Vector3 TurtorialMenuSize;
     // Private Variables
     public FlowController flowController;
-    private GameObject createdTree;
-    private GameObject createdGate;
+    private GameObject createdTree = null;
+    private GameObject createdGate = null;
     private float ScaleFactor;
     private List<GameObject> ActiveHolograms = new List<GameObject>();
     private bool gateCreated, treeCreated;
 
     public void CreateTree(Vector3 positionCenter, Quaternion rotation)
     {
+        if (createdTree != null)
+            return;
+        
         Vector3 position = positionCenter - new Vector3(0, TreeSize.y * .5f, 0);
         GameObject newObject = Instantiate(TreePrefab, position, rotation);
         if (newObject != null)
@@ -38,9 +41,12 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         }
     }
 
-    public void CreateGate(Vector3 positionCenter, Quaternion rotation)
+    public GameObject CreateGate(Vector3 positionCenter, Quaternion rotation)
     {
-        var position = positionCenter + new Vector3(0, GateSize.y * .25f, 0);
+        if (createdGate != null)
+            return createdGate;
+
+        Vector3 position = positionCenter + new Vector3(0, GateSize.y * .25f, 0);
         position.y = 1.3f;
         GameObject newObject = Instantiate(GatePrefab, position, rotation);
         if (newObject != null)
@@ -49,29 +55,31 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             newObject.transform.parent = gameObject.transform;
             newObject.tag = "Dummy";
             newObject.transform.localScale = RescaleToSameScaleFactor(GatePrefab);
-            ActiveHolograms.Add(newObject);
             createdGate = newObject;
             createdGate.GetComponent<MeshCollider>().enabled = false;
             createdGate.transform.Rotate(0, 0, -90f);
             gateCreated = true;
             if (treeCreated && gateCreated)
                 EventManager.TriggerEvent("world_created");
+            return newObject;
         }
+        return null;
     }
 
-    public void CreateTurtorialMenu(Vector3 positionCenter, Quaternion rotation)
+    public void CreateMenu(Vector3 positionCenter, Quaternion rotation)
     {
-        GameObject newObject = Instantiate(TurtorialPrefab, positionCenter, rotation);
+        GameObject newObject = Instantiate(menuPrefab, positionCenter, rotation);
         if (newObject != null)
         {
-            newObject.name = "TurtorialMenu";
+            newObject.name = "Menu";
             newObject.tag = "UI";
             UiController uiController = FindObjectOfType(typeof(UiController)) as UiController;
-            uiController.SetTurtorialMenu(newObject);
+            newObject.transform.Rotate(0, 180, 0); 
+            uiController.SetMenu(newObject);
         }
     }
 
-    private Vector3 RescaleToSameScaleFactor(GameObject objectToScale)
+    public Vector3 RescaleToSameScaleFactor(GameObject objectToScale)
     {
         if (ScaleFactor == 0f) CalculateScaleFactor();
         return objectToScale.transform.localScale * ScaleFactor;
@@ -159,7 +167,10 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
     {
         foreach (GameObject i in ActiveHolograms)
             Destroy(i);
+
         ActiveHolograms.Clear();
+        createdGate = null;
+        createdTree = null;
     }
 
     public void AppearGate(float height, float distance, bool toRight)
@@ -169,17 +180,29 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             Debug.Log("Gate was null");
             return;
         }
-
         Vector3 position = new Vector3(0, height, 0);
         Vector3 angles = Camera.main.transform.eulerAngles;
-        Vector3 cameraPosition = Camera.main.transform.position;
+        Vector3 userPosition = Camera.main.transform.position;
         float d_angle = toRight ? 90f : -90f;
-        position.x = cameraPosition.x + Mathf.Sin((angles.y + d_angle) * Mathf.Deg2Rad) * distance;
-        position.z = cameraPosition.z + Mathf.Cos((angles.y + d_angle) * Mathf.Deg2Rad) * distance;
+        position.x = userPosition.x + Mathf.Sin((angles.y + d_angle) * Mathf.Deg2Rad) * distance;
+        position.z = userPosition.z + Mathf.Cos((angles.y + d_angle) * Mathf.Deg2Rad) * distance;
 
         createdGate.SetActive(true);
         createdGate.transform.position = position;
-        createdGate.transform.position = new Vector3(createdGate.transform.position.x,  0.7f * height, createdGate.transform.position.z);
+        UtilitiesScript.Instance.DisableOutline(createdGate);
+        createdGate.GetComponent<GateScript>().gateOpened = true;
+        createdGate.GetComponent<MeshCollider>().enabled = false;
+    }
+
+    public void AppearGate(Vector3 position)
+    {
+        if (createdGate == null)
+        {
+            Debug.Log("Gate was null");
+            return;
+        }
+        createdGate.SetActive(true);
+        createdGate.transform.position = position;
         UtilitiesScript.Instance.DisableOutline(createdGate);
         createdGate.GetComponent<GateScript>().gateOpened = true;
         createdGate.GetComponent<MeshCollider>().enabled = false;
@@ -232,14 +255,14 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         return createdGate;
     }
 
-    public void DestoryActiveHologram(string name)
+    public void DestroyActiveHologram(string name)
     {
         foreach (GameObject hologram in ActiveHolograms)
         {
             if(hologram.name == name)
             {
                 ActiveHolograms.Remove(hologram);
-                DestoryActiveHologram(hologram);
+                Destroy(hologram);
                 break;
             }
         }

@@ -86,6 +86,7 @@
     <Compile Include="Assets\Common\Scripts\WorldAnchorManager.cs" />
     <Compile Include="Assets\QuickOutline\Scripts\Outline.cs" />
     <Compile Include="Assets\Scripts\AppleScript.cs" />
+    <Compile Include="Assets\Scripts\ArrowPointer.cs" />
     <Compile Include="Assets\Scripts\AudioFeedBackManager.cs" />
     <Compile Include="Assets\Scripts\CalibrationController.cs" />
     <Compile Include="Assets\Scripts\ClickerController.cs" />

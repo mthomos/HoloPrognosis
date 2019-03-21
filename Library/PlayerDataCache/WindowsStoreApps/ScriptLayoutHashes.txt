@@ -86,7 +86,7 @@ fc108ce7d98c40ac0907e8ca7f500c76 UnityEngine.UI.dll:UnityEngine.UI.Text
 0fd6822f6177297bd0eb4d83cc7a9030 UnityEngine.UI.dll:UnityEngine.UI.ToggleGroup
 abf1930d8126d0b2e00e9449129a0190 UnityEngine.UI.dll:UnityEngine.EventSystems.TouchInputModule
 64e54c0cbb0177c5ea26f340efb9ff85 UnityEngine.UI.dll:UnityEngine.UI.VerticalLayoutGroup
-55f7de44f250e1c4448793c45332021d Assembly-CSharp.dll:.GazeCursor
+71bb6a6b6c8f052f948db64c7dd3ca4f Assembly-CSharp.dll:.GazeCursor
 abd5cb597156c96808cb2a8143653591 Assembly-CSharp.dll:.GateScript
 8046b142d068c2cc548e066f7bf2dabc Assembly-CSharp.dll:.WindEffect
 71bb6a6b6c8f052f948db64c7dd3ca4f UnityEngine.Timeline.dll:UnityEngine.Timeline.ActivationPlayableAsset
@@ -120,7 +120,7 @@ d251bf88db6c95a6b1aa0b69298da9ef UnityEngine.SpatialTracking.dll:UnityEngine.Spa
 71bb6a6b6c8f052f948db64c7dd3ca4f Assembly-CSharp.dll:.TextToSpeech
 b475398734b5e142867609c83b16046a Assembly-CSharp.dll:HoloToolkit.Unity.SpatialMapping.SurfaceMeshesToPlanes
 71bb6a6b6c8f052f948db64c7dd3ca4f Assembly-CSharp.dll:.UtilitiesScript
-d977d9db5f1e37bc4f4ff052383cb6d6 Assembly-CSharp.dll:.UiController
+34d796ce9b102d0ef85294e8468e51fe Assembly-CSharp.dll:.UiController
 71bb6a6b6c8f052f948db64c7dd3ca4f Unity.XR.WindowsMR.dll:UnityEngine.EventSystems.HoloLensInput
 6a1740751fcbe3cc995dbcc04a956d01 Unity.XR.WindowsMR.dll:UnityEngine.EventSystems.HoloLensInputModule
 19bd23fcf6f220f58fd17516ca11b85f Assembly-CSharp.dll:.HandsTrackingController
@@ -162,7 +162,7 @@ e0ee4b3d4e27318934cc940a969d3d96 UnityEngine.Networking.dll:UnityEngine.Networki
 ad9173d3a69d99153f38ed4b62226129 UnityEngine.Networking.dll:UnityEngine.Networking.NetworkTransform
 9b895dcabbc1faf095c000c32d471fd0 UnityEngine.Networking.dll:UnityEngine.Networking.NetworkTransformChild
 5887ef1bc706b22b773d253fd443ceef UnityEngine.Networking.dll:UnityEngine.Networking.NetworkTransformVisualizer
-c3905a74c28c4b49147aa48d32422534 Assembly-CSharp.dll:.ObjectCollectionManager
+52ac48ca09f1fb2d81528d622581a9a6 Assembly-CSharp.dll:.ObjectCollectionManager
 e3bb88506cbb15be50c6c2d4c1bebfba Assembly-CSharp.dll:HoloToolkit.Unity.WorldAnchorManager
 cf96e5f7b3d069bab453925bd41be04e UnityEngine.TestRunner.dll:UnityEngine.TestTools.EnumerableSetUpTearDownCommandState
 71bb6a6b6c8f052f948db64c7dd3ca4f UnityEngine.TestRunner.dll:UnityEngine.TestTools.TestRunner.Callbacks.PlayModeRunnerCallback

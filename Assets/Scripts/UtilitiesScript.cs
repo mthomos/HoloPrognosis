@@ -19,7 +19,7 @@ public class UtilitiesScript : Singleton<UtilitiesScript>
             outline = gameObject.AddComponent<Outline>();
             if (outline != null)
             {
-                outline.OutlineMode = Outline.Mode.OutlineAll;
+                outline.OutlineMode = Outline.Mode.OutlineVisible;
                 outline.OutlineWidth = 5f;
                 outline.OutlineColor = (Color) color;
                 outline.enabled = true;
@@ -92,6 +92,8 @@ public class UtilitiesScript : Singleton<UtilitiesScript>
     {
         if (obj == null)
             return;
+        if (obj.GetComponent<Renderer>() == null)
+            return;
 
         obj.GetComponent<Renderer>().material.color = color;
     }
@@ -125,5 +127,14 @@ public class UtilitiesScript : Singleton<UtilitiesScript>
         directionToTarget.y = 0.0f;
         if (directionToTarget.sqrMagnitude > 0.005f)
             obj.transform.rotation = Quaternion.LookRotation(-directionToTarget);
+    }
+
+    public float GetAngleFromVectorFloatΧΥ(Vector3 dir)
+    {
+        dir = dir.normalized;
+        float n = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        if (n < 0) n += 360;
+
+        return n;
     }
 }
