@@ -93,10 +93,6 @@ public class UiController : MonoBehaviour
         }
     }
 
-    private void Update()
-    {
-
-    }
     private void TapUiReceived()
     {
         //For UI navigation

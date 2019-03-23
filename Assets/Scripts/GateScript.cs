@@ -10,11 +10,6 @@ public class GateScript : MonoBehaviour
         gateRenderer = GetComponent<Renderer>();
     }
 
-    void Update()
-    {
-
-    }
-
     public bool objectInsideGate(GameObject obj)
     {
         if (obj == null)

@@ -26,7 +26,6 @@ public class TurtorialController : MonoBehaviour
 
     void Update()
     {
-        
         if (turtorialStep == 2)
         {
             if (createdGate == null)

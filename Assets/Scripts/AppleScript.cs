@@ -13,12 +13,13 @@ public class AppleScript : MonoBehaviour
     }
 
     // Update is called once per frame
+    /*
     void Update()
     {
         if(windEnabled)
             GetComponent<Rigidbody>().AddForce(effect.windDirection * effect.windSpeed);
     }
-
+    */
     void OnCollisionEnter(Collision collision)
     {
         //Get collision object
