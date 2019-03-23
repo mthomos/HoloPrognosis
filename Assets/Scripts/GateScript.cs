@@ -3,10 +3,11 @@
 public class GateScript : MonoBehaviour
 {
     public bool gateOpened = false;
+    private Renderer gateRenderer;
 
     void Start()
     {
-    
+        gateRenderer = GetComponent<Renderer>();
     }
 
     void Update()
@@ -19,7 +20,7 @@ public class GateScript : MonoBehaviour
         if (obj == null)
             return false;
 
-        if (GetComponent<Renderer>().bounds.Contains(obj.transform.position))
+        if (gateRenderer.bounds.Contains(obj.transform.position))
         {
             UtilitiesScript.Instance.EnableOutline(gameObject, Color.magenta, true);
             return true;

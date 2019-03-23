@@ -34,7 +34,6 @@ public class AppleScript : MonoBehaviour
         {
             triggered = true;
             gameObject.transform.parent = null;
-            //gameObject.transform.parent = colObject.transform;
             if (gameObject.GetComponent<Outline>() != null)
                 gameObject.GetComponent<Outline>().enabled = false;
         }

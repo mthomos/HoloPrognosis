@@ -64,9 +64,11 @@ public class HandsTrackingController : MonoBehaviour
     public float bodyOffset;
     private float startTime;
     private bool RightPoseInProgress;
-    private Vector3 initUserPos = Vector3.zero;
-    // Trick to encounter Unity bug in input events
-    //private Vector3 HandPosition = Vector3.zero;
+    private Vector3 initUserPos = Vector3.zero, initHandPos = Vector3.zero;
+    // Optimization variables
+    private Renderer focusedObjectRenderer = null;
+    private Renderer touchedObjectRenderer = null;
+    private Renderer manipulatedObjectRenderer = null;
 
     void Awake()
     {
@@ -119,10 +121,18 @@ public class HandsTrackingController : MonoBehaviour
 
         Vector3 focusPos = FocusedObject.transform.position; //The player gazes at the item which will catch
         Vector3 handPos = trackingHand.hand.transform.position; //The position of user's hand in the Holospace
-        if (FocusedObject.GetComponent<Renderer>() == null)
-            return;
+        
+        if (cursor.focusedObjectChanged)
+        {
+            //if (FocusedObject.GetComponent<Renderer>() == null)
+            //    return;
+            focusedObjectRenderer = FocusedObject.GetComponent<Renderer>();
+        }
 
-        Bounds focusedObjectBounds = FocusedObject.GetComponent<Renderer>().bounds;
+        if (focusedObjectRenderer == null)
+                return;
+
+        Bounds focusedObjectBounds = focusedObjectRenderer.bounds;
         focusedObjectBounds.Expand(.10f);
         if (focusedObjectBounds.Contains(handPos))
         {
@@ -131,6 +141,7 @@ public class HandsTrackingController : MonoBehaviour
                 UtilitiesScript.Instance.ChangeObjectColor(trackingHand.hand, TouchedColor);
                 ObjectTouched = true;
                 TouchedObject = FocusedObject;
+                touchedObjectRenderer = focusedObjectRenderer;
                 //Refresh Outline
                 if (!ColorOutlineChanged)
                 {
@@ -154,17 +165,19 @@ public class HandsTrackingController : MonoBehaviour
 
     private void GestureRecognizer_ManipulationStarted(ManipulationStartedEventArgs args)
     {
-        uint id = args.source.id;
         if (trackingHand.enabled == true && ObjectTouched && TouchedObject != null)
         {
             ObjectManipulationInProgress = true;
             ManipulatedObject = TouchedObject;
+            manipulatedObjectRenderer = touchedObjectRenderer;
             //Viusal feedback	
             UtilitiesScript.Instance.ChangeColorOutline(ManipulatedObject, OutlineManipulateColor);
-            ManipulatedObject.transform.position = trackingHand.hand.transform.position;
-            //ManipulatedObject.transform.position = HandPosition;
+            //Align the hand with object
+            Vector3 newPos = trackingHand.hand.transform.position;
+            newPos.y = newPos.y - manipulatedObjectRenderer.bounds.size.y * 0.5f;
+            ManipulatedObject.transform.position = newPos;
             //Store initial position of hand and head	
-            Vector3 initHandPos = ManipulatedObject.transform.position;
+            initHandPos = ManipulatedObject.transform.position;
             initUserPos = Camera.main.transform.position;
             //Gather data	
             if (DataCollectionMode)
@@ -179,9 +192,14 @@ public class HandsTrackingController : MonoBehaviour
         if (trackingHand.enabled == true && ObjectManipulationInProgress)
         {
             //Move hand during manipulation
+            /*
             if (ManipulatedObject != null)
-                ManipulatedObject.transform.position = trackingHand.hand.transform.position;
-
+            {
+                Vector3 newPos = trackingHand.hand.transform.position;
+                newPos.y = newPos.y - manipulatedObjectRenderer.bounds.size.y * 0.5f;
+                ManipulatedObject.transform.position = newPos;
+            }
+            */
             if (TurtorialModeEnabled)
                 return;
 
@@ -274,22 +292,22 @@ public class HandsTrackingController : MonoBehaviour
 
     private void InteractionManager_InteractionSourceUpdated(InteractionSourceUpdatedEventArgs args)
     {
-        if (trackingHand.enabled == true && args.state.source.kind == InteractionSourceKind.Hand) // Detect Hand
+        if (args.state.source.kind == InteractionSourceKind.Hand) // Detect Hand
         {
             //Update hand position
             if (args.state.sourcePose.TryGetPosition(out Vector3 pos))
             {
                 if (trackingHand.hand != null)
-                {   
-                    pos.y = pos.y - trackingHand.hand.GetComponent<Renderer>().bounds.size.y * 0.5f;
+                //{ 
                     trackingHand.hand.transform.position = pos;
-                }
+                //}
             }
 
             //Update calibration
             if (HandCalibrationMode && calibrationController != null)
             {
-                float dist = (Camera.main.transform.position - pos).magnitude;
+                Vector3 dx = Camera.main.transform.position - pos;
+                float dist = new Vector2(dx.x, dx.z).magnitude;
                 if (RightPoseInProgress)
                 {
                     calibrationController.AddValue(dist, pos.y);
@@ -309,7 +327,11 @@ public class HandsTrackingController : MonoBehaviour
                 dataScript.AddValue(pos, pos.y, trackingHand.rightHand);
 
             if (ManipulatedObject != null)
-                ManipulatedObject.transform.position = trackingHand.hand.transform.position;
+            {
+                Vector3 newPos = trackingHand.hand.transform.position;
+                newPos.y = newPos.y - manipulatedObjectRenderer.bounds.size.y * 0.5f;
+                ManipulatedObject.transform.position = newPos;
+            }
         }
     }
 

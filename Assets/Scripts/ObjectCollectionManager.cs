@@ -15,6 +15,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
     public FlowController flowController;
     private GameObject createdTree = null;
     private GameObject createdGate = null;
+    private GameObject createdGateScript = null;
     private float ScaleFactor;
     private List<GameObject> ActiveHolograms = new List<GameObject>();
     private bool gateCreated, treeCreated;
@@ -58,6 +59,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             createdGate = newObject;
             createdGate.GetComponent<MeshCollider>().enabled = false;
             createdGate.transform.Rotate(0, 0, -90f);
+            createdGateScript = createdGate.GetComponent<GateScript>();
             gateCreated = true;
             if (treeCreated && gateCreated)
                 EventManager.TriggerEvent("world_created");
@@ -190,7 +192,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         createdGate.SetActive(true);
         createdGate.transform.position = position;
         UtilitiesScript.Instance.DisableOutline(createdGate);
-        createdGate.GetComponent<GateScript>().gateOpened = true;
+        createdGateScript.gateOpened = true;
         createdGate.GetComponent<MeshCollider>().enabled = false;
     }
 
@@ -204,7 +206,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         createdGate.SetActive(true);
         createdGate.transform.position = position;
         UtilitiesScript.Instance.DisableOutline(createdGate);
-        createdGate.GetComponent<GateScript>().gateOpened = true;
+        createdGateScript.gateOpened = true;
         createdGate.GetComponent<MeshCollider>().enabled = false;
     }
 
@@ -213,7 +215,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         if (createdGate == null)
             return;
 
-        createdGate.GetComponent<GateScript>().gateOpened = false;
+        createdGateScript.gateOpened = false;
         UtilitiesScript.Instance.DisableOutline(createdGate);
         createdGate.SetActive(false);
     }
@@ -253,6 +255,11 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
     public GameObject GetCreatedGate()
     {
         return createdGate;
+    }
+
+    public GameObject GetCreatedGateScript()
+    {
+        return createdGateScript;
     }
 
     public void DestroyActiveHologram(string name)

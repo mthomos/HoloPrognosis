@@ -35,7 +35,7 @@ public class FlowController : MonoBehaviour
         if (trainingMode && manipulationInProgress)
         {
             // Calculate distance of manipulated object and gate
-            gateScript = ObjectCollectionManager.Instance.GetCreatedGate().GetComponent<GateScript>();
+            gateScript = ObjectCollectionManager.Instance.GetCreatedGateScript();
 
             if (gateScript == null || manipulatedObject == null)
                 return;
@@ -84,7 +84,7 @@ public class FlowController : MonoBehaviour
 
         //Appear Gate according to hand
         Debug.Log("Gate appeared");
-        float d_height = ObjectCollectionManager.Instance.GetCreatedGate().GetComponent<Renderer>().bounds.size.y * 0.25f;
+        float d_height = ObjectCollectionManager.Instance.GetCreatedGate().GetComponent<Renderer>().bounds.size.y * 0.4f;
         ObjectCollectionManager.Instance.AppearGate(currentControlller.GetRightPoseHandHeight() - d_height,
                 currentControlller.GetRightPoseHeadHandDistance(), currentControlller.IsRightHand());
         //Get manipulatedObject

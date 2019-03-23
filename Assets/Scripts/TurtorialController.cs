@@ -17,6 +17,7 @@ public class TurtorialController : MonoBehaviour
     private List<GameObject> guidanceObjects = new List<GameObject>();
     private Vector3 applePosition = Vector3.zero;
     private GameObject createdGate;
+    private GateScript createdGateScript = null;
 
     void Start()
     {
@@ -31,8 +32,7 @@ public class TurtorialController : MonoBehaviour
             if (createdGate == null)
                 return;
 
-            GateScript gateScript = createdGate.GetComponent<GateScript>();
-            if (gateScript.objectInsideGate(manipulatedObject))
+            if (createdGateScript.objectInsideGate(manipulatedObject))
             {
                 if (!TextToSpeech.Instance.IsSpeaking())
                     TextToSpeech.Instance.StartSpeaking("Apple inside the Circle");
@@ -64,6 +64,7 @@ public class TurtorialController : MonoBehaviour
                                    cameraPos.z + Mathf.Cos((angles.y) * Mathf.Deg2Rad) * 1.3f);
         Quaternion rot = Quaternion.LookRotation(Camera.main.transform.forward, Vector3.up);
         createdGate = ObjectCollectionManager.Instance.CreateGate(pos, rot);
+        createdGateScript = ObjectCollectionManager.Instance.GetCreatedGateScript();
         UtilitiesScript.Instance.DisableObject(createdGate);
         // Listen Events
         EventManager.StartListening("manipulation_started", ManipulationStarted);

@@ -99,13 +99,6 @@ public class UiController : MonoBehaviour
     }
     private void TapUiReceived()
     {
-        /*
-        if (inMenu == -1) // Play scene
-        {
-            moveToResultsScreen();
-            return;
-        }
-        */
         //For UI navigation
         GameObject tappedObj = gazeCursor.GetFocusedObject();
         if (tappedObj == null)
