@@ -10,7 +10,7 @@ public class GazeCursor : MonoBehaviour
     private Vector3 gazeOrigin;
     private Vector3 gazeDirection;
     private Camera mainCamera;
-    public bool focusedObjectChanged = false;
+    public bool focusedManipualtedObjectChanged = false;
 
     void Start ()
     {
@@ -36,11 +36,11 @@ public class GazeCursor : MonoBehaviour
             else if (hitInfo.collider.gameObject.CompareTag("User"))
             {
                 if (FocusedObject == hitInfo.collider.gameObject)
-                    focusedObjectChanged = false;
+                    focusedManipualtedObjectChanged = false;
                 else
                 {
                     FocusedObject = hitInfo.collider.gameObject;
-                    focusedObjectChanged = true;
+                    focusedManipualtedObjectChanged = true;
                 }
             }
         }

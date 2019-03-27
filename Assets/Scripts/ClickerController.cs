@@ -11,7 +11,7 @@ public class ClickerController : MonoBehaviour
 
     private void Start()
     {
-        if(clickerEnabled)
+        if (clickerEnabled)
             InteractionManager.InteractionSourcePressed += InteractionManager_InteractionSourcePressed;
     }
 

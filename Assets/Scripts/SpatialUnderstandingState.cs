@@ -6,6 +6,7 @@ using UnityEngine.Events;
 public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
 {
     //Public Variables - For Editor
+    public AudioSource audioSource;
     public SpatialUnderstandingCustomMesh SpatialUnderstandingMesh;
     public Material OccludedMaterial;
     public float MinAreaForStats = 2.0f; // both floor and wall surfaces
@@ -15,7 +16,6 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
     //Debug displays
     public TextMesh DebugDisplay;
     public UiController uiController;
-    public string SpaceQueryDescription;
     //Private Variables
     private bool triggered, scanReady, feedback_triggered;
     private UnityAction TapListener;
@@ -43,15 +43,11 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
                 return false;
         }
     }
-    //OK
+
     private string PrimaryText
     {
         get
         {
-            // Display the space and object query results (has priority)
-            if (!string.IsNullOrEmpty(SpaceQueryDescription))
-                return SpaceQueryDescription;
-
             // Scan state
             if (SpatialUnderstanding.Instance.AllowSpatialUnderstanding)
             {
@@ -63,14 +59,24 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
                             if (!feedback_triggered)
                             {
                                 feedback_triggered = true;
-                                TextToSpeech.Instance.StartSpeaking("Space scanned, air tap to finalize your playspace");
+                                if (uiController.greekEnabled)
+                                {
+                                    audioSource.Stop();
+                                    audioSource.clip = uiController.SpatialFinshClip;
+                                    audioSource.Play();
+                                }
+                                else
+                                {
+                                    TextToSpeech.Instance.StopSpeaking();
+                                    TextToSpeech.Instance.StartSpeaking("Space scanned, air tap to finalize your playspace");
+                                }
                             }
-                            return "Space scanned, air tap to finalize your playspace";
+                            return uiController.greekEnabled ? "Χώρος αποτυπώθηκε \n Kάντε κλικ για να τερματισετε το σκανάρισμα" : "Space scanned, air tap to finalize your playspace";
                         }
                         else
-                        return "Walk around and scan in your playspace";
+                        return uiController.greekEnabled ? "Σκανάρετε τον χώρο σας" : "Walk around and scan in your playspace";
                     case SpatialUnderstanding.ScanStates.Finishing:
-                        return "Finalizing scan";
+                        return uiController.greekEnabled ? "Λήξη σκαναρίσματος" :  "Finalizing scan";
                     case SpatialUnderstanding.ScanStates.Done:
                         return "";
                     default:
@@ -105,7 +111,17 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
     {
         TapListener = new UnityAction(Tap_Triggered);
         EventManager.StartListening("tap", TapListener);
-        TextToSpeech.Instance.StartSpeaking("Walk around and scan in your playspace");
+        if (uiController.greekEnabled)
+        {
+            audioSource.Stop();
+            audioSource.clip = uiController.SpatialStartClip;
+            audioSource.Play();
+        }
+        else
+        {
+            TextToSpeech.Instance.StopSpeaking();
+            TextToSpeech.Instance.StartSpeaking("Walk around and scan in your space");
+        }
     }
 
     private void Tap_Triggered()

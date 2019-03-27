@@ -5,6 +5,7 @@ public class TurtorialController : MonoBehaviour
 {
     // Fill in Editor
     public FlowController flowController;
+    public AudioSource audioSource;
     public GazeCursor gazeCursor;
     public HandsTrackingController handsTrackingController;
     public UiController uiController;
@@ -33,8 +34,16 @@ public class TurtorialController : MonoBehaviour
 
             if (createdGateScript.objectInsideGate(manipulatedObject))
             {
-                if (!TextToSpeech.Instance.IsSpeaking())
-                    TextToSpeech.Instance.StartSpeaking("Apple inside the Circle");
+                if (uiController.greekEnabled)
+                {
+                    if (!audioSource.isPlaying)
+                        audioSource.Play();
+                }
+                else
+                {
+                    if (!TextToSpeech.Instance.IsSpeaking())
+                        TextToSpeech.Instance.StartSpeaking("Apple inside the Circle");
+                }
             }
         }
     }
@@ -68,6 +77,8 @@ public class TurtorialController : MonoBehaviour
         // Listen Events
         EventManager.StartListening("manipulation_started", ManipulationStarted);
         EventManager.StartListening("manipulation_finished", ManipulationFinished);
+        // For greek audio feedback
+        audioSource.clip = uiController.GateClip;
     }
 
     private void AppearAppleDemo()

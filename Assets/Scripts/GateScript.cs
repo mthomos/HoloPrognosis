@@ -7,12 +7,18 @@ public class GateScript : MonoBehaviour
 
     void Start()
     {
-        gateRenderer = GetComponent<Renderer>();
+
     }
 
     public bool objectInsideGate(GameObject obj)
     {
         if (obj == null)
+            return false;
+
+        if (gateRenderer == null)
+            gateRenderer = GetComponent<Renderer>();
+
+        if (gateRenderer == null)
             return false;
 
         if (gateRenderer.bounds.Contains(obj.transform.position))

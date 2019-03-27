@@ -86,7 +86,7 @@ fc108ce7d98c40ac0907e8ca7f500c76 UnityEngine.UI.dll:UnityEngine.UI.Text
 0fd6822f6177297bd0eb4d83cc7a9030 UnityEngine.UI.dll:UnityEngine.UI.ToggleGroup
 abf1930d8126d0b2e00e9449129a0190 UnityEngine.UI.dll:UnityEngine.EventSystems.TouchInputModule
 64e54c0cbb0177c5ea26f340efb9ff85 UnityEngine.UI.dll:UnityEngine.UI.VerticalLayoutGroup
-71bb6a6b6c8f052f948db64c7dd3ca4f Assembly-CSharp.dll:.GazeCursor
+401353f017a1f9d84c880243b90f4647 Assembly-CSharp.dll:.GazeCursor
 abd5cb597156c96808cb2a8143653591 Assembly-CSharp.dll:.GateScript
 8046b142d068c2cc548e066f7bf2dabc Assembly-CSharp.dll:.WindEffect
 71bb6a6b6c8f052f948db64c7dd3ca4f UnityEngine.Timeline.dll:UnityEngine.Timeline.ActivationPlayableAsset
@@ -120,12 +120,12 @@ d251bf88db6c95a6b1aa0b69298da9ef UnityEngine.SpatialTracking.dll:UnityEngine.Spa
 71bb6a6b6c8f052f948db64c7dd3ca4f Assembly-CSharp.dll:.TextToSpeech
 b475398734b5e142867609c83b16046a Assembly-CSharp.dll:HoloToolkit.Unity.SpatialMapping.SurfaceMeshesToPlanes
 71bb6a6b6c8f052f948db64c7dd3ca4f Assembly-CSharp.dll:.UtilitiesScript
-34d796ce9b102d0ef85294e8468e51fe Assembly-CSharp.dll:.UiController
+e3f8b0ee7dd9ac22551d9c0fccef1849 Assembly-CSharp.dll:.UiController
 71bb6a6b6c8f052f948db64c7dd3ca4f Unity.XR.WindowsMR.dll:UnityEngine.EventSystems.HoloLensInput
 6a1740751fcbe3cc995dbcc04a956d01 Unity.XR.WindowsMR.dll:UnityEngine.EventSystems.HoloLensInputModule
-19bd23fcf6f220f58fd17516ca11b85f Assembly-CSharp.dll:.HandsTrackingController
+c3f60e0721445ae5b5366d017096124f Assembly-CSharp.dll:.HandsTrackingController
 71bb6a6b6c8f052f948db64c7dd3ca4f Assembly-CSharp.dll:HoloToolkit.Unity.SpatialMapping.SpatialMappingSource
-6129493e1095aae2ce2de3090e411156 Assembly-CSharp.dll:.FlowController
+333451c32c9428b4bf333e31b7a631b5 Assembly-CSharp.dll:.FlowController
 71bb6a6b6c8f052f948db64c7dd3ca4f Assembly-CSharp.dll:.DataScript
 e6ae40841db498b6e673877ac45ad208 UnityEngine.Networking.dll:UnityEngine.Networking.NetworkAnimator
 71bb6a6b6c8f052f948db64c7dd3ca4f UnityEngine.Networking.dll:UnityEngine.Networking.NetworkBehaviour
@@ -181,8 +181,8 @@ fb6a1ea36b4f6ef5948d283d93760765 UnityEngine.GoogleAudioSpatializer.dll:UnityEng
 5b0391b7e3d9ea9db6c0a8fbd0ca23f6 UnityEngine.GoogleAudioSpatializer.dll:UnityEngine.Experimental.Audio.Google.GvrAudioSourceExtension
 68310e261a220591e997719e173fc014 Assembly-CSharp.dll:.Outline
 746dd34481f4a6772249bdb6d9f13f41 Unity.XR.WindowsMR.dll:UnityEngine.XR.WSA.SpatialMappingCollider
-7be992d5f1dec6a6a933f317ee580e02 Assembly-CSharp.dll:.TurtorialController
-072949609ad5d909c9c5ef660530da7e Assembly-CSharp.dll:.SpatialUnderstandingState
+1ea52b47e31724081f9e5404ad04d3d7 Assembly-CSharp.dll:.TurtorialController
+823ae42f51af8c349c4e1a1c9b2eb135 Assembly-CSharp.dll:.SpatialUnderstandingState
 d251bf88db6c95a6b1aa0b69298da9ef UnityEngine.SpatialTracking.dll:UnityEngine.SpatialTracking.TrackedPoseDriver
 952b5af44a6cd63c76cdffc4e664de10 Assembly-CSharp.dll:.ClickerController
 013e9789169e6e0b0cafb16111080320 Assembly-CSharp.dll:HoloToolkit.Unity.SpatialMapping.SurfacePlane

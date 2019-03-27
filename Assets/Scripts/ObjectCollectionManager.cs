@@ -15,7 +15,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
     public FlowController flowController;
     private GameObject createdTree = null;
     private GameObject createdGate = null;
-    private GameObject createdGateScript = null;
+    private GateScript createdGateScript = null;
     private float ScaleFactor;
     private List<GameObject> ActiveHolograms = new List<GameObject>();
     private bool gateCreated, treeCreated;
@@ -257,7 +257,7 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
         return createdGate;
     }
 
-    public GameObject GetCreatedGateScript()
+    public GateScript GetCreatedGateScript()
     {
         return createdGateScript;
     }

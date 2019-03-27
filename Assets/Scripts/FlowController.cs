@@ -2,6 +2,7 @@
 
 public class FlowController : MonoBehaviour
 {
+    public AudioSource audioSource;
     public HandsTrackingController handsTrackingController;
     public GazeCursor gazeCursor;
     public UiController uiController;
@@ -39,12 +40,19 @@ public class FlowController : MonoBehaviour
 
             if (gateScript == null || manipulatedObject == null)
                 return;
-            Debug.Log("Not null");
+
             if (gateScript.objectInsideGate(manipulatedObject))
             {
-                Debug.Log("Inside circle");
-                if (!TextToSpeech.Instance.IsSpeaking())
-                    TextToSpeech.Instance.StartSpeaking("Apple inside the Circle");
+                if (uiController.greekEnabled)
+                {
+                    if (!audioSource.isPlaying)
+                        audioSource.Play();
+                }
+                else
+                {
+                    if (!TextToSpeech.Instance.IsSpeaking())
+                        TextToSpeech.Instance.StartSpeaking("Apple inside the Circle");
+                }
 
                 if (!objectInGateDetected)
                 {
@@ -83,7 +91,6 @@ public class FlowController : MonoBehaviour
             return;
 
         //Appear Gate according to hand
-        Debug.Log("Gate appeared");
         float d_height = ObjectCollectionManager.Instance.GetCreatedGate().GetComponent<Renderer>().bounds.size.y * 0.4f;
         ObjectCollectionManager.Instance.AppearGate(currentControlller.GetRightPoseHandHeight() - d_height,
                 currentControlller.GetRightPoseHeadHandDistance(), currentControlller.IsRightHand());
@@ -183,14 +190,23 @@ public class FlowController : MonoBehaviour
         else
         {
             // Notify user for next manipulation
-            string text = "Next manipulation is with the " + (rightHandPlaying ? "right": "left") + "hand";
-            TextToSpeech.Instance.StopSpeaking();
-            TextToSpeech.Instance.StartSpeaking(text);
+            if (uiController.greekEnabled)
+            {
+                string text = "Τώρα παίξτε με το " + (rightHandPlaying ? "δεξί" : "αριστερό") + " χέρι";
+                audioSource.Stop();
+                audioSource.clip = rightHandPlaying ? uiController.rightManClip : uiController.leftManClip;
+                audioSource.Play();
+            }
+            else
+            {
+                string text = "Play with the " + (rightHandPlaying ? "right" : "left") + "hand";
+                TextToSpeech.Instance.StopSpeaking();
+                TextToSpeech.Instance.StartSpeaking(text);
+            }
             UtilitiesScript.Instance.EnableOutline(nowPlayingObject, null, false);
             // Enable new object
             nowPlayingObject.tag = "User";
             nowPlayingObject.GetComponent<SphereCollider>().enabled = true;
-            Debug.Log(debugString + "object_name->"+nowPlayingObject.name);
         }
     }
 
@@ -214,8 +230,17 @@ public class FlowController : MonoBehaviour
     public void CalibrationFinished()
     {
         uiController.PrintText("");
-        TextToSpeech.Instance.StopSpeaking();
-        TextToSpeech.Instance.StartSpeaking("Calibration Finished. Let's play.");
+        if (uiController.greekEnabled)
+        {
+            audioSource.Stop();
+            audioSource.clip = uiController.allCalibFinishedClip;
+            audioSource.Play();
+        }
+        else
+        {
+            TextToSpeech.Instance.StopSpeaking();
+            TextToSpeech.Instance.StartSpeaking("Calibration Finished. Let's play.");
+        }
         uiController.MoveToPlayScreen();
         placer.CreateScene();
         // Enable manipulation with hands
@@ -229,12 +254,22 @@ public class FlowController : MonoBehaviour
         //EventManager.StartListening("box_collision", SuccessfulTry);
         EventManager.StartListening("floor_collision", FailedTry);
         EventManager.StartListening("world_created", PrepareNextManipulation);
+        audioSource.clip = uiController.GateClip;
     }
 
     public void FinishGame()
     {
-        TextToSpeech.Instance.StopSpeaking();
-        TextToSpeech.Instance.StartSpeaking("Training finished");
+        if (uiController.greekEnabled)
+        {
+            audioSource.Stop();
+            audioSource.clip = uiController.finishAudioClip;
+            audioSource.Play();
+        }
+        else
+        {
+            TextToSpeech.Instance.StopSpeaking();
+            TextToSpeech.Instance.StartSpeaking("Training finished");
+        }
         //Save data
         //dataScript.FinishSession();
         //Prepare UI
@@ -252,10 +287,7 @@ public class FlowController : MonoBehaviour
             leftController = controller;
 
         //Are controllers full ?
-        if (rightController != null && leftController != null)
-            return true;
-        else
-            return false;
+        return (rightController != null && leftController != null) ? true : false;
     }
 
     public float GetHeadDistanceUpperLimit(bool hand)
@@ -306,9 +338,7 @@ public class FlowController : MonoBehaviour
     public bool IsHandCalibrated(bool rightHand)
     {
         if (rightHand)
-        {
             return rightController == null ? false : true;
-        }
         else
             return leftController == null ? false : true;
     }

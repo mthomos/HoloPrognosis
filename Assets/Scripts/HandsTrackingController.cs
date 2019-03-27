@@ -27,6 +27,7 @@ public class HandsTrackingController : MonoBehaviour
 {
     //Public Variables - For Editor
     //GameObjects
+    public AudioSource audioSource;
     public DataScript dataScript;
     public GazeCursor cursor; // Cusrsor used for defining FocusedObject
     public GameObject TrackingObject; // GameObject representing the hand in holographic space
@@ -85,7 +86,6 @@ public class HandsTrackingController : MonoBehaviour
         gestureRecognizer.ManipulationCanceled += GestureRecognizer_ManipulationCanceled;
         gestureRecognizer.StartCapturingGestures();
         handObject = Instantiate(TrackingObject);
-        handObject.SetActive(false);
     }
 
     void Update()
@@ -110,7 +110,17 @@ public class HandsTrackingController : MonoBehaviour
 
     private void CheckForHands()
     {
+        // Get FocusedObject
         FocusedObject = cursor.GetFocusedObject();
+        if (FocusedObject.CompareTag("UI"))
+            return;
+        //Refresh Renderer for new object
+        if (cursor.focusedManipualtedObjectChanged)
+            focusedObjectRenderer = FocusedObject.GetComponent<Renderer>();
+
+        if (focusedObjectRenderer == null)
+            return;
+
         ManipulationForOneHand();
     }
 
@@ -121,16 +131,6 @@ public class HandsTrackingController : MonoBehaviour
 
         Vector3 focusPos = FocusedObject.transform.position; //The player gazes at the item which will catch
         Vector3 handPos = trackingHand.hand.transform.position; //The position of user's hand in the Holospace
-        
-        if (cursor.focusedObjectChanged)
-        {
-            //if (FocusedObject.GetComponent<Renderer>() == null)
-            //    return;
-            focusedObjectRenderer = FocusedObject.GetComponent<Renderer>();
-        }
-
-        if (focusedObjectRenderer == null)
-                return;
 
         Bounds focusedObjectBounds = focusedObjectRenderer.bounds;
         focusedObjectBounds.Expand(.10f);
@@ -165,7 +165,7 @@ public class HandsTrackingController : MonoBehaviour
 
     private void GestureRecognizer_ManipulationStarted(ManipulationStartedEventArgs args)
     {
-        if (trackingHand.enabled == true && ObjectTouched && TouchedObject != null)
+        if (ObjectTouched && TouchedObject != null)
         {
             ObjectManipulationInProgress = true;
             ManipulatedObject = TouchedObject;
@@ -189,17 +189,8 @@ public class HandsTrackingController : MonoBehaviour
 
     private void GestureRecognizer_ManipulationUpdated(ManipulationUpdatedEventArgs args)
     {
-        if (trackingHand.enabled == true && ObjectManipulationInProgress)
+        if (ObjectManipulationInProgress)
         {
-            //Move hand during manipulation
-            /*
-            if (ManipulatedObject != null)
-            {
-                Vector3 newPos = trackingHand.hand.transform.position;
-                newPos.y = newPos.y - manipulatedObjectRenderer.bounds.size.y * 0.5f;
-                ManipulatedObject.transform.position = newPos;
-            }
-            */
             if (TurtorialModeEnabled)
                 return;
 
@@ -257,7 +248,6 @@ public class HandsTrackingController : MonoBehaviour
         if (args.state.source.kind == InteractionSourceKind.Hand)
         {
             //Get hand position and illustrate it
-            handObject.SetActive(true);
             if (args.state.sourcePose.TryGetPosition(out Vector3 pos))
                 handObject.transform.position = pos;
 
@@ -275,10 +265,21 @@ public class HandsTrackingController : MonoBehaviour
                 }
                 else
                 {
-                    string handText = IsRightHand ? "Right hand " : "Left hand ";
-                    uiController.PrintText(handText + "already calibrated");
-                    TextToSpeech.Instance.StopSpeaking();
-                    TextToSpeech.Instance.StartSpeaking(handText + "already calibrated");
+                    if (uiController.greekEnabled)
+                    {
+                        string handText = IsRightHand ? "Δεξί" : "Αριστερό";
+                        uiController.PrintText(handText + " χέρι έχει ήδη βαθμονομηθεί");
+                        audioSource.Stop();
+                        audioSource.clip = IsRightHand ? uiController.rightAlreadyCalibClip : uiController.leftAlreadyCalibClip;
+                        audioSource.Play();
+                    }
+                    else
+                    {
+                        string handText = IsRightHand ? "Right" : "Left";
+                        uiController.PrintText(handText + " hand already calibrated");
+                        TextToSpeech.Instance.StopSpeaking();
+                        TextToSpeech.Instance.StartSpeaking(handText + "already calibrated");
+                    }
                 }
             }
             //Gather hand data
@@ -296,12 +297,7 @@ public class HandsTrackingController : MonoBehaviour
         {
             //Update hand position
             if (args.state.sourcePose.TryGetPosition(out Vector3 pos))
-            {
-                if (trackingHand.hand != null)
-                //{ 
-                    trackingHand.hand.transform.position = pos;
-                //}
-            }
+                trackingHand.hand.transform.position = pos;
 
             //Update calibration
             if (HandCalibrationMode && calibrationController != null)
@@ -314,9 +310,20 @@ public class HandsTrackingController : MonoBehaviour
                     if (Time.time - startTime > flowController.timerForRightPose) //Start max pose calibration
                     {
                         calibrationController.FinishRightPose();
-                        uiController.PrintText("Raise your hand as high as you can. When ready open your palm");
-                        TextToSpeech.Instance.StartSpeaking("Raise your hand as high as you can. When ready open your palm");
                         RightPoseInProgress = false;
+                        if (uiController.greekEnabled)
+                        {
+                            audioSource.Stop();
+                            audioSource.clip = uiController.highPoseClip;
+                            audioSource.Play();
+                            uiController.PrintText("Σηκώστε όσο πιο ψηλά το χέρι σας." + " \n" + " Όταν είστε έτοιμοι ανοίξτε την παλάμη σας");
+                        }
+                        else
+                        {
+                            TextToSpeech.Instance.StopSpeaking();
+                            uiController.PrintText("Raise your hand as high as you can." + "\n" + "When ready open your palm");
+                            TextToSpeech.Instance.StartSpeaking("Raise your hand as high as you can. When ready open your palm");
+                        }
                     }
                 }
                 else // High pose calibration
@@ -353,7 +360,6 @@ public class HandsTrackingController : MonoBehaviour
 
     private void InteractionEnded()
     {
-        Debug.Log("Interaction_Ended");
         if (HandCalibrationMode && calibrationController != null && !RightPoseInProgress)
         {
             if (flowController.AddCalibrationController(calibrationController) &&
@@ -365,30 +371,47 @@ public class HandsTrackingController : MonoBehaviour
             else
             {
                 TextToSpeech.Instance.StopSpeaking();
+                audioSource.Stop();
                 if (calibrationController.IsRightHand() && flowController.leftHandEnabled)
                 {
-                    Debug.Log("Right hand calibrated, waith for left");
-                    uiController.PrintText("Right Hand calibrated successfully. Now let's calibrate the left one");
-                    TextToSpeech.Instance.StartSpeaking("Right Hand calibrated successfully. Now let's calibrate the left one");
+                    if (uiController.greekEnabled)
+                    {
+                        uiController.PrintText("Tο δεξι χέρι βαθμονομήθηκε επιτυχώς." + "\n" + "Επαναλάβετε την ίδια διαδικασία με το αριστερό χέρι σας");
+                        audioSource.Stop();
+                        audioSource.clip = uiController.doLeftCalibClip;
+                        audioSource.Play();
+                    }
+                    else
+                    {
+                        uiController.PrintText("Right Hand calibrated successfully." + "\n" + "Now let's calibrate the left one");
+                        TextToSpeech.Instance.StopSpeaking();
+                        TextToSpeech.Instance.StartSpeaking("Right Hand calibrated successfully. Now let's calibrate the left one");
+                    }
                 }
                 else if (!calibrationController.IsRightHand() && flowController.rightHandEnabled)
                 {
-                    Debug.Log("Left hand calibrated, waith for right");
-                    uiController.PrintText("Left Hand calibrated successfully. Now let's calibrate the right one");
-                    TextToSpeech.Instance.StartSpeaking("Left Hand calibrated successfully. Now let's calibrate the right one");
+                    if (uiController.greekEnabled)
+                    {
+                        uiController.PrintText("Tο αριστερό χέρι βαθμονομήθηκε επιτυχώς." + "\n" + "Επαναλάβετε την ίδια διαδικασία με το δεξί χέρι σας");
+                        audioSource.Stop();
+                        audioSource.clip = uiController.doRightCalibClip;
+                        audioSource.Play();
+                    }
+                    else
+                    {
+                        uiController.PrintText("Left Hand calibrated successfully." + "\n" + " Now let's calibrate the right one");
+                        TextToSpeech.Instance.StopSpeaking();
+                        TextToSpeech.Instance.StartSpeaking("Left Hand calibrated successfully. Now let's calibrate the right one");
+                    }
                 }
                 else
                 {
-                    Debug.Log("Calibration finished for the enabled hand(s)");
                     HandCalibrationMode = false;
                     flowController.CalibrationFinished();
                 }
                 calibrationController = null;
             }
-
-            handObject.SetActive(false);
-            trackingHand = new HandStruct(false);
-            
+            trackingHand = new HandStruct(false);  
         }
     }
 
@@ -396,11 +419,9 @@ public class HandsTrackingController : MonoBehaviour
     {
         if (args.state.source.kind == InteractionSourceKind.Hand)
         {
-            if (trackingHand.enabled == true && !ObjectTouched)
-            {
-                handObject.SetActive(false);
+            if (!ObjectTouched)
                 trackingHand = new HandStruct(false);
-            }
+
             EventManager.TriggerEvent("tap");
         }
     }
