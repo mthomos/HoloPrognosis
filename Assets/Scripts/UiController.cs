@@ -564,10 +564,8 @@ public class UiController : MonoBehaviour
                 child.GetComponentInChildren<TextMesh>().text = (greekEnabled ? el_ResultsFailuresText : en_ResultsFailuresText) + " : " + flowController.fail;
             else if (child.name == "Right_Impv")
             {
-                if (flowController.rightHandEnabled)
-                {
+                if (!flowController.rightHandEnabled)
                     child.GetComponentInChildren<TextMesh>().text = "Not used";
-                }
                 else
                 {
                     float impv_per = ((flowController.maxHeightRightHand / flowController.GetRightCalibrationController().GetHighestPoseHandHeight()) - 1) * 100f;
@@ -580,13 +578,11 @@ public class UiController : MonoBehaviour
             }
             else if (child.name == "Left_Impv")
             {
-                if (flowController.leftHandEnabled)
-                {
+                if (!flowController.leftHandEnabled)
                     child.GetComponentInChildren<TextMesh>().text = "Not used";
-                }
                 else
                 {
-                    float impv_per = ((flowController.maxHeightLeftHand/ flowController.GetRightCalibrationController().GetHighestPoseHandHeight()) - 1) * 100f;
+                    float impv_per = ((flowController.maxHeightLeftHand/ flowController.GetLeftCalibrationController().GetHighestPoseHandHeight()) - 1) * 100f;
 
                     if (impv_per < 0 || flowController.maxHeightLeftHand == 0)
                         impv_per = 0;

@@ -314,13 +314,10 @@ MonoBehaviour:
   flowController: {fileID: 790716446}
   uiController: {fileID: 790716450}
   utilities: {fileID: 790716441}
-  DefaultColor: {r: 0, g: 1, b: 0, a: 1}
-  TapColor: {r: 1, g: 1, b: 1, a: 1}
+  DefaultColor: {r: 1, g: 1, b: 1, a: 1}
   TouchedColor: {r: 1, g: 0, b: 1, a: 1}
-  OutlineHoldColor: {r: 0, g: 0, b: 1, a: 1}
   OutlineDefaultColor: {r: 1, g: 0, b: 0, a: 1}
   OutlineManipulateColor: {r: 0, g: 1, b: 0, a: 1}
-  HoldFinished: {r: 1, g: 1, b: 1, a: 1}
   offset: 1
   bodyOffset: 1
 --- !u!1 &416328711
@@ -601,6 +598,10 @@ MonoBehaviour:
   highPoseClip: {fileID: 8300000, guid: ca0fab8244fe95e499f5c3246bfd87ab, type: 3}
   doRightCalibClip: {fileID: 8300000, guid: 5af9b2830218b2b40b256cb23d2150dc, type: 3}
   doLeftCalibClip: {fileID: 8300000, guid: 993aa6265578aed44bcb4910a3e42995, type: 3}
+  allCalibFinishedClip: {fileID: 0}
+  finishAudioClip: {fileID: 0}
+  TutorialBeginClip: {fileID: 0}
+  askTutorialClip: {fileID: 0}
   menuPrefab: {fileID: 1973505965284976, guid: 13f1995630d54f94db918a003c9faf2e, type: 3}
   settingsPrefab: {fileID: 1088184999046684, guid: e346954a244567c48a5e210b43cb6900,
     type: 3}
@@ -790,7 +791,6 @@ MonoBehaviour:
   MinWallAreaForComplete: 2
   DebugDisplay: {fileID: 416328713}
   uiController: {fileID: 790716450}
-  SpaceQueryDescription: 
 --- !u!114 &938779208 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5311547430167759518, guid: a2b3e5f4155470749a69fb440c9353af,

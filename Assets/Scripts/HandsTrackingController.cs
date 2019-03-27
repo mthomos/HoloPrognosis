@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.XR.WSA.Input;
 
 public struct HandStruct
@@ -35,13 +34,10 @@ public class HandsTrackingController : MonoBehaviour
     public UiController uiController;
     public UtilitiesScript utilities;
     //Colors
-    public Color DefaultColor = Color.green;
-    public Color TapColor = Color.white;
+    public Color DefaultColor = Color.white;
     public Color TouchedColor = Color.magenta;
-    public Color OutlineHoldColor = Color.blue;
     public Color OutlineDefaultColor = Color.red;
     public Color OutlineManipulateColor = Color.green;
-    public Color HoldFinished = Color.white;
     //Private Variables
     //Booleans
     private bool ManipulationEnabled = false;
@@ -126,37 +122,35 @@ public class HandsTrackingController : MonoBehaviour
 
     private void ManipulationForOneHand()
     {
-        if (FocusedObject == null || trackingHand.enabled == false)
+        if (FocusedObject == null || trackingHand.enabled == false || !ObjectManipulationInProgress)
             return;
 
-        Vector3 focusPos = FocusedObject.transform.position; //The player gazes at the item which will catch
         Vector3 handPos = trackingHand.hand.transform.position; //The position of user's hand in the Holospace
-
         Bounds focusedObjectBounds = focusedObjectRenderer.bounds;
-        focusedObjectBounds.Expand(.10f);
+        focusedObjectBounds.Expand(+0.5f);
         if (focusedObjectBounds.Contains(handPos))
         {
-            if (!ObjectManipulationInProgress) // Execute only before manipulation
+            ObjectTouched = true;
+            TouchedObject = FocusedObject;
+            touchedObjectRenderer = focusedObjectRenderer;
+            //Refresh Outline
+            if (!ColorOutlineChanged)
             {
                 UtilitiesScript.Instance.ChangeObjectColor(trackingHand.hand, TouchedColor);
-                ObjectTouched = true;
-                TouchedObject = FocusedObject;
-                touchedObjectRenderer = focusedObjectRenderer;
-                //Refresh Outline
-                if (!ColorOutlineChanged)
-                {
-                    UtilitiesScript.Instance.EnableOutline(TouchedObject, Color.magenta, true);
-                    ColorOutlineChanged = true;
-                }
-                //Gather data
-                if (DataCollectionMode)
-                    dataScript.InteractionTouched(trackingHand.rightHand);
+                UtilitiesScript.Instance.EnableOutline(TouchedObject, TouchedColor, true);
+                ColorOutlineChanged = true;
             }
+            //Gather data
+            if (DataCollectionMode)
+                dataScript.InteractionTouched(trackingHand.rightHand);
         }
         else
         {
-            UtilitiesScript.Instance.ChangeColorOutline(FocusedObject, Color.white);
-            UtilitiesScript.Instance.ChangeObjectColor(trackingHand.hand, DefaultColor);
+            float dd = (FocusedObject.transform.position - Camera.main.transform.position).magnitude;
+            float lerpValue = (dd > 1.0f) ? 1.0f : dd;
+            Color tempColor = Color.Lerp(Color.magenta, Color.white, lerpValue);
+            UtilitiesScript.Instance.ChangeColorOutline(FocusedObject, tempColor);
+            UtilitiesScript.Instance.ChangeObjectColor(trackingHand.hand, tempColor);
             ObjectTouched = false;
             TouchedObject = null;
             ColorOutlineChanged = false;
@@ -304,9 +298,9 @@ public class HandsTrackingController : MonoBehaviour
             {
                 Vector3 dx = Camera.main.transform.position - pos;
                 float dist = new Vector2(dx.x, dx.z).magnitude;
+                calibrationController.AddValue(dist, pos.y);
                 if (RightPoseInProgress)
                 {
-                    calibrationController.AddValue(dist, pos.y);
                     if (Time.time - startTime > flowController.timerForRightPose) //Start max pose calibration
                     {
                         calibrationController.FinishRightPose();
@@ -325,9 +319,7 @@ public class HandsTrackingController : MonoBehaviour
                             TextToSpeech.Instance.StartSpeaking("Raise your hand as high as you can. When ready open your palm");
                         }
                     }
-                }
-                else // High pose calibration
-                    calibrationController.AddValue(dist, pos.y);
+                }                   
             }
 
             if (DataCollectionMode)
