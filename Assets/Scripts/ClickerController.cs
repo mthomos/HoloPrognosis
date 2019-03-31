@@ -36,7 +36,7 @@ public class ClickerController : MonoBehaviour
         }
         if (doubleClickTriggered == false && clickTriggered == true)
         {
-            if (Time.time - lastClickTime > .9f) clickTriggered = false;
+            clickTriggered = false;
             EventManager.TriggerEvent("click");
         }
     }
@@ -52,7 +52,11 @@ public class ClickerController : MonoBehaviour
             }
             else //Second click
             {
-                doubleClickTriggered = true;
+                if (Time.time - lastClickTime < 0.6f)
+                {
+                    clickTriggered = false;
+                    doubleClickTriggered = true;
+                }
             }
         }
     }

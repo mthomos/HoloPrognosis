@@ -144,8 +144,10 @@ public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
             child.name = "apple_" + i;
             child.AddComponent<AppleScript>();
             child.GetComponent<SphereCollider>().enabled = false;
-            child.AddComponent<Outline>();
+            if (child.GetComponent<Outline>() == null)
+                child.AddComponent<Outline>();
             child.GetComponent<Outline>().enabled = false;
+            child.GetComponent<Outline>().OutlineWidth = 3.0f;
             ActiveHolograms.Add(child);
         }
     }

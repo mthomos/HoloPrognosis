@@ -247,7 +247,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2647600126386914040}
-  m_Text: Do you want to enter to turtorial again ?
+  m_Text: Do you want to enter to the turtorial again ?
   m_OffsetZ: 0
   m_CharacterSize: 1
   m_LineSpacing: 1

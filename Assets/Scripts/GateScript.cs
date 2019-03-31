@@ -23,7 +23,7 @@ public class GateScript : MonoBehaviour
 
         if (gateRenderer.bounds.Contains(obj.transform.position))
         {
-            UtilitiesScript.Instance.EnableOutline(gameObject, Color.magenta, true);
+            UtilitiesScript.Instance.EnableOutline(gameObject, Color.green, true);
             return true;
         }
         else

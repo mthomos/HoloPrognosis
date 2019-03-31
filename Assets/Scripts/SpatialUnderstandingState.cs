@@ -94,7 +94,7 @@ public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
         {
             scanReady = DoesScanMeetMinBarForCompletion;
             if (SpatialUnderstanding.Instance.ScanState == SpatialUnderstanding.ScanStates.Scanning && scanReady)
-                return Color.yellow;
+                return Color.green;
             else
                 return Color.white;
         }

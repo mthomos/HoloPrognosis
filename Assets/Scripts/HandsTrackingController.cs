@@ -34,10 +34,10 @@ public class HandsTrackingController : MonoBehaviour
     public UiController uiController;
     public UtilitiesScript utilities;
     //Colors
-    public Color DefaultColor = Color.white;
-    public Color TouchedColor = Color.magenta;
-    public Color OutlineDefaultColor = Color.red;
-    public Color OutlineManipulateColor = Color.green;
+    private Color DefaultColor = Color.white;
+    private Color TouchedColor = Color.magenta;
+    private Color OutlineDefaultColor = Color.magenta;
+    private Color OutlineManipulateColor = Color.green;
     //Private Variables
     //Booleans
     private bool ManipulationEnabled = false;
@@ -111,7 +111,7 @@ public class HandsTrackingController : MonoBehaviour
         if (FocusedObject.CompareTag("UI"))
             return;
         //Refresh Renderer for new object
-        if (cursor.focusedManipualtedObjectChanged)
+        //if (cursor.focusedManipualtedObjectChanged)
             focusedObjectRenderer = FocusedObject.GetComponent<Renderer>();
 
         if (focusedObjectRenderer == null)
@@ -122,12 +122,17 @@ public class HandsTrackingController : MonoBehaviour
 
     private void ManipulationForOneHand()
     {
-        if (FocusedObject == null || trackingHand.enabled == false || !ObjectManipulationInProgress)
+        if (FocusedObject == null || trackingHand.enabled == false || ObjectManipulationInProgress)
+        {
+            if (!ObjectManipulationInProgress)
+                UtilitiesScript.Instance.DisableOutline(FocusedObject);
+
             return;
+        }
 
         Vector3 handPos = trackingHand.hand.transform.position; //The position of user's hand in the Holospace
         Bounds focusedObjectBounds = focusedObjectRenderer.bounds;
-        focusedObjectBounds.Expand(+0.5f);
+        focusedObjectBounds.Expand(+0.03f);
         if (focusedObjectBounds.Contains(handPos))
         {
             ObjectTouched = true;
@@ -136,8 +141,8 @@ public class HandsTrackingController : MonoBehaviour
             //Refresh Outline
             if (!ColorOutlineChanged)
             {
-                UtilitiesScript.Instance.ChangeObjectColor(trackingHand.hand, TouchedColor);
-                UtilitiesScript.Instance.EnableOutline(TouchedObject, TouchedColor, true);
+                UtilitiesScript.Instance.ChangeObjectColor(trackingHand.hand, Color.green);
+                UtilitiesScript.Instance.ChangeColorOutline(TouchedObject, Color.green);
                 ColorOutlineChanged = true;
             }
             //Gather data
@@ -146,9 +151,10 @@ public class HandsTrackingController : MonoBehaviour
         }
         else
         {
-            float dd = (FocusedObject.transform.position - Camera.main.transform.position).magnitude;
+            float dd = (FocusedObject.transform.position - trackingHand.hand.transform.position).magnitude * 4.5f;
             float lerpValue = (dd > 1.0f) ? 1.0f : dd;
-            Color tempColor = Color.Lerp(Color.magenta, Color.white, lerpValue);
+            Debug.Log("Lerp.Value : " + lerpValue);
+            Color tempColor = Color.Lerp(Color.green, Color.magenta, lerpValue);
             UtilitiesScript.Instance.ChangeColorOutline(FocusedObject, tempColor);
             UtilitiesScript.Instance.ChangeObjectColor(trackingHand.hand, tempColor);
             ObjectTouched = false;
@@ -183,7 +189,7 @@ public class HandsTrackingController : MonoBehaviour
 
     private void GestureRecognizer_ManipulationUpdated(ManipulationUpdatedEventArgs args)
     {
-        if (ObjectManipulationInProgress)
+        if (trackingHand.enabled && ObjectManipulationInProgress)
         {
             if (TurtorialModeEnabled)
                 return;
@@ -200,7 +206,7 @@ public class HandsTrackingController : MonoBehaviour
 
     private void GestureRecognizer_ManipulationCompleted(ManipulationCompletedEventArgs args)
     {
-        if (args.source.kind != InteractionSourceKind.Hand)
+        if (args.source.kind != InteractionSourceKind.Hand || !trackingHand.enabled)
             return;
 
         ManipulationEnded();
@@ -209,7 +215,7 @@ public class HandsTrackingController : MonoBehaviour
 
     private void GestureRecognizer_ManipulationCanceled(ManipulationCanceledEventArgs args)
     {
-        if (args.source.kind != InteractionSourceKind.Hand)
+        if (args.source.kind != InteractionSourceKind.Hand || !trackingHand.enabled)
             return;
 
         ManipulationEnded();
@@ -241,6 +247,7 @@ public class HandsTrackingController : MonoBehaviour
     {
         if (args.state.source.kind == InteractionSourceKind.Hand)
         {
+            handObject.SetActive(true);
             //Get hand position and illustrate it
             if (args.state.sourcePose.TryGetPosition(out Vector3 pos))
                 handObject.transform.position = pos;
@@ -289,6 +296,8 @@ public class HandsTrackingController : MonoBehaviour
     {
         if (args.state.source.kind == InteractionSourceKind.Hand) // Detect Hand
         {
+            if (trackingHand.hand == null)
+                return;
             //Update hand position
             if (args.state.sourcePose.TryGetPosition(out Vector3 pos))
                 trackingHand.hand.transform.position = pos;
@@ -403,6 +412,7 @@ public class HandsTrackingController : MonoBehaviour
                 }
                 calibrationController = null;
             }
+            handObject.SetActive(false);
             trackingHand = new HandStruct(false);  
         }
     }
@@ -411,8 +421,11 @@ public class HandsTrackingController : MonoBehaviour
     {
         if (args.state.source.kind == InteractionSourceKind.Hand)
         {
-            if (!ObjectTouched)
+            if (!ObjectTouched || ObjectManipulationInProgress)
+            {
+                handObject.SetActive(false);
                 trackingHand = new HandStruct(false);
+            }
 
             EventManager.TriggerEvent("tap");
         }
@@ -454,5 +467,13 @@ public class HandsTrackingController : MonoBehaviour
     public void SetTurtorialMode(bool status)
     {
         TurtorialModeEnabled = status;
+    }
+
+    public bool IsHandRight()
+    {
+        if (!trackingHand.enabled)
+            return false;
+
+        return trackingHand.rightHand;
     }
 }

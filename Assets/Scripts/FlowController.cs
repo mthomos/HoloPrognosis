@@ -268,7 +268,7 @@ public class FlowController : MonoBehaviour
         else
         {
             TextToSpeech.Instance.StopSpeaking();
-            TextToSpeech.Instance.StartSpeaking("Training finished");
+            TextToSpeech.Instance.StartSpeaking("Game finished");
         }
         //Save data
         //dataScript.FinishSession();

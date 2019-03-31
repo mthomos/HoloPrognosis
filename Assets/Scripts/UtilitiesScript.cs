@@ -20,7 +20,7 @@ public class UtilitiesScript : Singleton<UtilitiesScript>
             if (outline != null)
             {
                 outline.OutlineMode = Outline.Mode.OutlineVisible;
-                outline.OutlineWidth = 5f;
+                outline.OutlineWidth = 3f;
                 outline.OutlineColor = (Color) color;
                 outline.enabled = true;
             }

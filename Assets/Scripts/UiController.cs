@@ -18,7 +18,7 @@ public class UiController : MonoBehaviour
     private string el_AskText = "Θέλετε να εκκινήσετε την επίδειξη;";
     private string el_AskSkipButton = "Προχωρήστε" + "\n" + "στο παιχνίδι";
     private string el_AskEnableButton = "Εκκίνση" + "\n" + "επίδειξης";
-    private string el_AskExitButton = "Έξοδος";
+    private string el_AskExitButton = "Έξοδος \n";
     // Play object
     private string en_PlayText = "Game in progress";
     private string en_PlayExitButton = "End" + "\n" + "game";
@@ -65,7 +65,7 @@ public class UiController : MonoBehaviour
     private string el_TurtorialExitButton = "Έξοδος";
     // Texts
     private string en_InitiateCalibration = "Place your hand in right angle pose for 2 seconds ";
-    private string el_InitiateCalibration = "Τοποθεστείτε το χέρι σας, τεντομένο σε ορθή γωνία για 2 δευτερόλεπτα";
+    private string el_InitiateCalibration = "Τοποθεστείτε το χέρι σας," + "\n" + "τεντομένο σε ορθή γωνία για 2 δευτερόλεπτα";
     // Audio Clips
     public AudioClip mainMenuClip;
     public AudioClip SpatialStartClip;
@@ -406,7 +406,7 @@ public class UiController : MonoBehaviour
             }
 
             UtilitiesScript.Instance.DisableObject(currentMenu);
-            currentMenu = null;
+            currentMenu = turtorialScreen;
             inMenu = 6;
 
             if (greekEnabled)
@@ -456,7 +456,7 @@ public class UiController : MonoBehaviour
             else
             {
                 TextToSpeech.Instance.StopSpeaking();
-                TextToSpeech.Instance.StartSpeaking("Do you want to enter tutorial");
+                TextToSpeech.Instance.StartSpeaking("Do you want to enter to the hand recognition tutorial ?");
             }
 
             UtilitiesScript.Instance.DisableObject(currentMenu);
@@ -726,11 +726,10 @@ public class UiController : MonoBehaviour
         }
 
         // Create Guidance for user
-        Vector3 center = Vector3.Lerp(Camera.main.transform.position, menuPosition, 0.5f);
         Vector3 useAngles = Camera.main.transform.eulerAngles;
         Vector3 dx = Camera.main.transform.position - menuPosition;
         float radius = new Vector2(dx.x, dx.z).magnitude / 2;
-        Vector3 position = new Vector3(0, center.y, 0);
+        Vector3 position = Vector3.zero;
         //
         Vector2 cameraPos = new Vector2(Camera.main.transform.position.x, Camera.main.transform.position.z);
         Vector2 menuPos = new Vector2(menuPosition.x, menuPosition.z);
@@ -745,15 +744,17 @@ public class UiController : MonoBehaviour
             {
                 position.x = Camera.main.transform.position.x + Mathf.Sin((useAngles.y + angle) * Mathf.Deg2Rad) * radius;
                 position.z = Camera.main.transform.position.z + Mathf.Cos((useAngles.y + angle) * Mathf.Deg2Rad) * radius;
+                position.y = Camera.main.transform.position.y * (1 - (angle / d_angle)) + menuPosition.y * (angle / d_angle);
                 guidanceList.Add(Instantiate(RedPointPrefab, position, Quaternion.LookRotation(Vector3.up)));
             }
         }
         else
         {
-            for (float angle = -d_angle; angle < 1f; angle += 9)
+            for (float angle = -1 * d_angle; angle < 1f; angle += 9)
             {
                 position.x = Camera.main.transform.position.x + Mathf.Sin((useAngles.y + angle) * Mathf.Deg2Rad) * radius;
                 position.z = Camera.main.transform.position.z + Mathf.Cos((useAngles.y + angle) * Mathf.Deg2Rad) * radius;
+                position.y = Camera.main.transform.position.y * (1 - (angle / d_angle)) + menuPosition.y * (angle / d_angle);
                 guidanceList.Add(Instantiate(RedPointPrefab, position, Quaternion.LookRotation(Vector3.up)));
             }
         }

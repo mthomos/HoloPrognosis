@@ -13,16 +13,24 @@ public class TurtorialController : MonoBehaviour
     public GameObject PointPrefab;
     public GameObject AppleObject;
 
-    public int turtorialStep, manipulations;
+    public int turtorialStep;
     private GameObject manipulatedObject;
     private List<GameObject> guidanceObjects = new List<GameObject>();
     private Vector3 applePosition = Vector3.zero;
     private GameObject createdGate;
     private GateScript createdGateScript = null;
+    private bool feedbackTriggered;
+    //
+    private SpriteRenderer imageViewRenderer = null;
+    int inPic = 1;
+    public Sprite pic1, pic2, pic3;
 
     void Start()
     {
         turtorialStep = -1;
+        // Listen Events
+        //EventManager.StartListening("double_click", ClickerDoubleClickTriggered);
+        EventManager.StartListening("click", ClickerClickTriggered);
     }
 
     void Update()
@@ -48,9 +56,34 @@ public class TurtorialController : MonoBehaviour
         }
     }
 
+    private void ClickerClickTriggered()
+    {
+        if (imageViewRenderer == null)
+        {
+            imageViewRenderer = Object.FindObjectOfType<SpriteRenderer>();
+        }
+        if (imageViewRenderer == null)
+            return;
+
+        if (inPic == 1)
+        {
+            imageViewRenderer.sprite = pic2;
+            inPic = 2;
+        }
+        else if (inPic == 2)
+        {
+            imageViewRenderer.sprite = pic3;
+            inPic = 3;
+        }
+        else if (inPic == 3)
+        {
+            imageViewRenderer.sprite = pic1;
+            inPic = 1;
+        }
+    }
+
     public void PrepareFirstTurtorial()
     {
-        manipulations = 1;
         turtorialStep = 1;
         AppearAppleDemo();
 
@@ -61,7 +94,6 @@ public class TurtorialController : MonoBehaviour
 
     public void PrepareSecondTurtorial()
     {
-        manipulations = 1;
         turtorialStep = 2;
         AppearAppleDemo();
         // Create Gate and hide it
@@ -78,7 +110,23 @@ public class TurtorialController : MonoBehaviour
         EventManager.StartListening("manipulation_started", ManipulationStarted);
         EventManager.StartListening("manipulation_finished", ManipulationFinished);
         // For greek audio feedback
-        audioSource.clip = uiController.GateClip;
+        if (!feedbackTriggered)
+        {
+            feedbackTriggered = true;
+            if (uiController.greekEnabled)
+            {
+                audioSource.Stop();
+                audioSource.clip = uiController.GateClip;
+                audioSource.Play();
+            }
+            else
+            {
+                TextToSpeech.Instance.StopSpeaking();
+                TextToSpeech.Instance.StartSpeaking("Now every time you move an object , a circle will be appeared. " +
+                    "If you use your right hand, the circle will appear to the right, otherwise to the left." +
+                    "Guidance points will also appear to guide you the circle. Your goal is to move the object with a turn of the body and your hand stretched out");
+            }
+        }
     }
 
     private void AppearAppleDemo()
@@ -95,7 +143,7 @@ public class TurtorialController : MonoBehaviour
             applePosition = Camera.main.transform.position + Camera.main.transform.forward * 1.0f;
 
         manipulatedObject.transform.position = applePosition;
-        UtilitiesScript.Instance.DisableOutline(manipulatedObject);
+        UtilitiesScript.Instance.EnableOutline(manipulatedObject, Color.magenta, true);
     }
 
     private void ManipulationStarted()
@@ -109,9 +157,9 @@ public class TurtorialController : MonoBehaviour
         Vector3 dx = Camera.main.transform.position - manipulatedObject.transform.position;
         float distance = new Vector2(dx.x, dx.z).magnitude;
         float d_height = createdGate.GetComponent<Renderer>().bounds.size.y * 0.45f;
-        ObjectCollectionManager.Instance.AppearGate(manipulatedObject.transform.position.y- d_height, distance, manipulations % 2 == 1 ? true : false);
+        ObjectCollectionManager.Instance.AppearGate(manipulatedObject.transform.position.y - d_height, distance, handsTrackingController.IsHandRight() ? true : false);
         //Create balls to guide user
-        CreateGuidance(manipulations % 2 == 1 ? true : false, distance);
+        CreateGuidance(handsTrackingController.IsHandRight() ? true : false, distance);
     }
 
     private void CreateGuidance(bool toRight, float distance)
@@ -146,7 +194,6 @@ public class TurtorialController : MonoBehaviour
          if (turtorialStep != 2)
             return;
 
-        manipulations++;
         // Destroy guidance
         foreach (GameObject point in guidanceObjects)
             Destroy(point);

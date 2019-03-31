@@ -273,6 +273,7 @@ GameObject:
   m_Component:
   - component: {fileID: 347611044}
   - component: {fileID: 347611045}
+  - component: {fileID: 347611046}
   m_Layer: 0
   m_Name: Hand Tracking
   m_TagString: Untagged
@@ -320,6 +321,19 @@ MonoBehaviour:
   OutlineManipulateColor: {r: 0, g: 1, b: 0, a: 1}
   offset: 1
   bodyOffset: 1
+--- !u!114 &347611046
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 347611043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc5259bd8313fbf41abf270408450aae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  clickerEnabled: 1
 --- !u!1 &416328711
 GameObject:
   m_ObjectHideFlags: 0
@@ -598,10 +612,11 @@ MonoBehaviour:
   highPoseClip: {fileID: 8300000, guid: ca0fab8244fe95e499f5c3246bfd87ab, type: 3}
   doRightCalibClip: {fileID: 8300000, guid: 5af9b2830218b2b40b256cb23d2150dc, type: 3}
   doLeftCalibClip: {fileID: 8300000, guid: 993aa6265578aed44bcb4910a3e42995, type: 3}
-  allCalibFinishedClip: {fileID: 0}
-  finishAudioClip: {fileID: 0}
-  TutorialBeginClip: {fileID: 0}
-  askTutorialClip: {fileID: 0}
+  allCalibFinishedClip: {fileID: 8300000, guid: 0ca107f0609fa6841a731e61206ee126,
+    type: 3}
+  finishAudioClip: {fileID: 8300000, guid: bd040e8ef5082f44984ab145ea88abf0, type: 3}
+  TutorialBeginClip: {fileID: 8300000, guid: f6173f1281311e541a89043bf7b0bb2a, type: 3}
+  askTutorialClip: {fileID: 8300000, guid: 7269daf8f71082847bbeb28eb06b245e, type: 3}
   menuPrefab: {fileID: 1973505965284976, guid: 13f1995630d54f94db918a003c9faf2e, type: 3}
   settingsPrefab: {fileID: 1088184999046684, guid: e346954a244567c48a5e210b43cb6900,
     type: 3}
@@ -656,6 +671,9 @@ MonoBehaviour:
     type: 3}
   turtorialStep: 0
   manipulations: 0
+  pic1: {fileID: 21300000, guid: 8b4101067e4660047bb527eb342b96b0, type: 3}
+  pic2: {fileID: 21300000, guid: 0e67ea9e6075907418ae79abde614b56, type: 3}
+  pic3: {fileID: 21300000, guid: 4cd056d872533d840a80bb29f22b0b60, type: 3}
 --- !u!1 &864562861
 GameObject:
   m_ObjectHideFlags: 0
