@@ -728,15 +728,10 @@ public class UiController : MonoBehaviour
         // Create Guidance for user
         Vector3 useAngles = Camera.main.transform.eulerAngles;
         Vector3 dx = Camera.main.transform.position - menuPosition;
-        float radius = new Vector2(dx.x, dx.z).magnitude / 2;
+        Vector2 d_menu = new Vector2(dx.x, dx.z);
+        float radius = d_menu.magnitude;
+        float d_angle = Mathf.Atan(d_menu.y/ d_menu.x) * Mathf.Rad2Deg;
         Vector3 position = Vector3.zero;
-        //
-        Vector2 cameraPos = new Vector2(Camera.main.transform.position.x, Camera.main.transform.position.z);
-        Vector2 menuPos = new Vector2(menuPosition.x, menuPosition.z);
-        Vector2 customPos = new Vector2(cameraPos.x, menuPos.y);
-        float d1_mag = (customPos - cameraPos).magnitude;
-        float d2_mag = (menuPos - cameraPos).magnitude;
-        float d_angle = Mathf.Acos(d1_mag / d2_mag) * Mathf.Rad2Deg;
 
         if (UtilitiesScript.Instance.IsRightFromHead(obj.transform.position))
         {
@@ -750,7 +745,7 @@ public class UiController : MonoBehaviour
         }
         else
         {
-            for (float angle = -1 * d_angle; angle < 1f; angle += 9)
+            for (float angle = 0f; angle > d_angle; angle -= 8)
             {
                 position.x = Camera.main.transform.position.x + Mathf.Sin((useAngles.y + angle) * Mathf.Deg2Rad) * radius;
                 position.z = Camera.main.transform.position.z + Mathf.Cos((useAngles.y + angle) * Mathf.Deg2Rad) * radius;
