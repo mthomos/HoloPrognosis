@@ -34,9 +34,8 @@ public class HandsTrackingController : MonoBehaviour
     public UiController uiController;
     public UtilitiesScript utilities;
     //Colors
-    private Color DefaultColor = Color.white;
-    private Color TouchedColor = Color.magenta;
-    private Color OutlineDefaultColor = Color.magenta;
+    private Color OutlineHandAwayColor = new Color(1.0f, 0.655f, 0.1372f); // Oragne Color
+    private Color OutlineTouchedColor = Color.green;
     private Color OutlineManipulateColor = Color.green;
     //Private Variables
     //Booleans
@@ -86,7 +85,7 @@ public class HandsTrackingController : MonoBehaviour
 
     void Update()
     {
-        if(ManipulationEnabled)
+        if (ManipulationEnabled)
             CheckForHands();
     }
 
@@ -132,7 +131,7 @@ public class HandsTrackingController : MonoBehaviour
 
         Vector3 handPos = trackingHand.hand.transform.position; //The position of user's hand in the Holospace
         Bounds focusedObjectBounds = focusedObjectRenderer.bounds;
-        focusedObjectBounds.Expand(+0.03f);
+        focusedObjectBounds.Expand(+0.02f);
         if (focusedObjectBounds.Contains(handPos))
         {
             ObjectTouched = true;
@@ -151,10 +150,10 @@ public class HandsTrackingController : MonoBehaviour
         }
         else
         {
-            float dd = (FocusedObject.transform.position - trackingHand.hand.transform.position).magnitude * 4.5f;
+            float dd = (FocusedObject.transform.position - trackingHand.hand.transform.position).magnitude * 5.0f;
             float lerpValue = (dd > 1.0f) ? 1.0f : dd;
             Debug.Log("Lerp.Value : " + lerpValue);
-            Color tempColor = Color.Lerp(Color.green, Color.magenta, lerpValue);
+            Color tempColor = Color.Lerp(OutlineTouchedColor, OutlineHandAwayColor  , lerpValue);
             UtilitiesScript.Instance.ChangeColorOutline(FocusedObject, tempColor);
             UtilitiesScript.Instance.ChangeObjectColor(trackingHand.hand, tempColor);
             ObjectTouched = false;
