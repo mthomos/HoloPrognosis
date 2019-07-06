@@ -714,9 +714,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1618976003221298}
-  m_Text: 'Left Hand:
-
-    Yes'
+  m_Text: "Left Hand:\n\u039D\u03B1\u03B9"
   m_OffsetZ: 0
   m_CharacterSize: 1
   m_LineSpacing: 1
@@ -807,9 +805,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1620985991640124}
-  m_Text: 'Right Hand:
-
-    Yes'
+  m_Text: "Right Hand:\n\u039D\u03B1\u03B9"
   m_OffsetZ: 0
   m_CharacterSize: 1
   m_LineSpacing: 1

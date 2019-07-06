@@ -54,6 +54,8 @@ public class UiController : MonoBehaviour
     private string el_StartPlayButton = "Παίξτε";
     private string el_StartRightButton = "Δεξί χέρι";
     private string el_StartLeftButton = "Αριστερό χέρι";
+    private string el_StartHandOn = "Ναι";
+    private string el_StartHandOff = "Όχι";
     // Τurtorial object
     private string en_TurtorialSkipButton = "Procceed to" + "\n" + "game";
     private string en_TurtorialEnableGateButton = "Enable" + "\n" + "gate";
@@ -83,7 +85,7 @@ public class UiController : MonoBehaviour
     public AudioClip finishAudioClip;
     public AudioClip TutorialBeginClip;
     public AudioClip askTutorialClip;
-    //public AudioClip
+    public AudioClip GateIntoClip;
     //public AudioClip
     //public AudioClip
 
@@ -268,14 +270,14 @@ public class UiController : MonoBehaviour
                 else if (tappedObj.name == "RightHandButton")
                 {
                     flowController.rightHandEnabled = (!flowController.rightHandEnabled);
-                    string status = flowController.rightHandEnabled ? "On" : "Off";
+                    string status = flowController.rightHandEnabled ? (greekEnabled ? el_StartHandOn : "On") : (greekEnabled ? el_StartHandOff : "Off");
                     string newText = greekEnabled ? el_StartRightButton : en_StartRightButton;
                     tappedObj.GetComponentInChildren<TextMesh>().text = newText + ":\n" + status;
                 }
                 else if (tappedObj.name == "LeftHandButton")
                 {
                     flowController.leftHandEnabled = (!flowController.leftHandEnabled);
-                    string status = flowController.leftHandEnabled ? "On" : "Off";
+                    string status = flowController.rightHandEnabled ? (greekEnabled ? el_StartHandOn : "On") : (greekEnabled ? el_StartHandOff : "Off");
                     string newText = greekEnabled ? el_StartLeftButton : en_StartLeftButton;
                     tappedObj.GetComponentInChildren<TextMesh>().text = newText + ":\n" + status;
                 }
@@ -570,7 +572,7 @@ public class UiController : MonoBehaviour
                 {
                     float impv_per = ((flowController.maxHeightRightHand / flowController.GetRightCalibrationController().GetHighestPoseHandHeight()) - 1) * 100f;
 
-                    if (impv_per < 0 || flowController.maxHeightRightHand == 0)
+                    if (impv_per < 0)
                         impv_per = 0;
 
                     child.GetComponentInChildren<TextMesh>().text = (greekEnabled ? el_ResultsRightImpvText : en_ResultsRightImpvText) + " " + impv_per + " % ";
@@ -584,7 +586,7 @@ public class UiController : MonoBehaviour
                 {
                     float impv_per = ((flowController.maxHeightLeftHand/ flowController.GetLeftCalibrationController().GetHighestPoseHandHeight()) - 1) * 100f;
 
-                    if (impv_per < 0 || flowController.maxHeightLeftHand == 0)
+                    if (impv_per < 0)
                         impv_per = 0;
 
                     child.GetComponentInChildren<TextMesh>().text = (greekEnabled ? el_ResultsLeftImpvText : en_ResultsLeftImpvText) + " " + impv_per + " % ";
@@ -611,14 +613,14 @@ public class UiController : MonoBehaviour
                 child.GetComponentInChildren<TextMesh>().text = greekEnabled ? el_StartPlayButton : en_StartPlayButton;
             else if (child.name == "RightHandButton")
             {
-                string status = flowController.rightHandEnabled ? "On" : "Off";
+                string status = flowController.rightHandEnabled ? (greekEnabled ? el_StartHandOn : "On") : (greekEnabled ? el_StartHandOff : "Off");
                 string newText = greekEnabled ? el_StartRightButton : en_StartRightButton;
                 child.GetComponentInChildren<TextMesh>().text = newText + ":\n" + status;
             }
             else if (child.name == "LeftHandButton")
             {
-                string status = flowController.leftHandEnabled ? "On" : "Off";
-                string newText = greekEnabled ? el_StartLeftButton : en_StartLeftButton;
+                string status = flowController.rightHandEnabled ? (greekEnabled ? el_StartHandOn : "On") : (greekEnabled ? el_StartHandOff : "Off");
+                string newText = greekEnabled ? el_StartRightButton : en_StartRightButton;
                 child.GetComponentInChildren<TextMesh>().text = newText + ":\n" + status;
             }
             else if (child.name == "BackButton")

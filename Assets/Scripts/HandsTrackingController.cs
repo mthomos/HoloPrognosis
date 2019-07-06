@@ -34,7 +34,7 @@ public class HandsTrackingController : MonoBehaviour
     public UiController uiController;
     public UtilitiesScript utilities;
     //Colors
-    private Color OutlineHandAwayColor = new Color(1.0f, 0.655f, 0.1372f); // Oragne Color
+    private Color OutlineHandAwayColor = Color.magenta;//new Color(1.0f, 0.655f, 0.1372f); // Oragne Color
     private Color OutlineTouchedColor = Color.green;
     private Color OutlineManipulateColor = Color.green;
     //Private Variables
@@ -247,6 +247,7 @@ public class HandsTrackingController : MonoBehaviour
         if (args.state.source.kind == InteractionSourceKind.Hand)
         {
             handObject.SetActive(true);
+            UtilitiesScript.Instance.ChangeObjectColor(trackingHand.hand, Color.white);
             //Get hand position and illustrate it
             if (args.state.sourcePose.TryGetPosition(out Vector3 pos))
                 handObject.transform.position = pos;
@@ -474,5 +475,10 @@ public class HandsTrackingController : MonoBehaviour
             return false;
 
         return trackingHand.rightHand;
+    }
+
+    public bool handDetected()
+    {
+        return handObject.activeSelf;
     }
 }

@@ -21,6 +21,9 @@ public class GateScript : MonoBehaviour
         if (gateRenderer == null)
             return false;
 
+        if (!gateOpened)
+            return false;
+
         if (gateRenderer.bounds.Contains(obj.transform.position))
         {
             UtilitiesScript.Instance.EnableOutline(gameObject, Color.green, true);

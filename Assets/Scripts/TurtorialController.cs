@@ -90,6 +90,7 @@ public class TurtorialController : MonoBehaviour
         // Stop Listening for events
         EventManager.StopListening("manipulation_started", ManipulationStarted);
         EventManager.StopListening("manipulation_finished", ManipulationFinished);
+        EventManager.StartListening("floor_collision", AppleOnTheFloorTriggered);
     }
 
     public void PrepareSecondTurtorial()
@@ -116,7 +117,7 @@ public class TurtorialController : MonoBehaviour
             if (uiController.greekEnabled)
             {
                 audioSource.Stop();
-                audioSource.clip = uiController.GateClip;
+                audioSource.clip = uiController.GateIntoClip;
                 audioSource.Play();
             }
             else
@@ -219,5 +220,17 @@ public class TurtorialController : MonoBehaviour
         // Stop Listening for events
         EventManager.StopListening("manipulation_started", ManipulationStarted);
         EventManager.StopListening("manipulation_finished", ManipulationFinished);
+        EventManager.StopListening("floor_collision", AppleOnTheFloorTriggered);
+    }
+
+    public void AppleOnTheFloorTriggered()
+    {
+        if (manipulatedObject.GetComponent<Rigidbody>() == null)
+            manipulatedObject.AddComponent<Rigidbody>();
+        // Create an apple in front of user
+        manipulatedObject = Instantiate(AppleObject);
+        
+        manipulatedObject.transform.position = applePosition;
+        UtilitiesScript.Instance.EnableOutline(manipulatedObject, Color.magenta, true);
     }
 }

@@ -12,6 +12,7 @@ public class GazeCursor : MonoBehaviour
     private Vector3 gazeDirection;
     private Camera mainCamera;
     public bool focusedManipualtedObjectChanged = false;
+    public HandsTrackingController handsTrackingController;
 
     void Start ()
     {
@@ -40,7 +41,8 @@ public class GazeCursor : MonoBehaviour
             {
                 if (FocusedObject == hitInfo.collider.gameObject)
                 {
-                    UtilitiesScript.Instance.ChangeColorOutline(FocusedObject, FocusedColor);
+                    if (!handsTrackingController.handDetected())
+                        UtilitiesScript.Instance.ChangeColorOutline(FocusedObject, FocusedColor);
                     focusedManipualtedObjectChanged = false;
                 }
                 else
