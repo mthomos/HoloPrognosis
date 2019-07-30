@@ -2,6 +2,11 @@
 using HoloToolkit.Unity;
 using UnityEngine;
 
+/*
+ * PlacementQuery class
+ * This class contatins the query-input for the solver of SpatialUnderstandingDllObjectPlacement library
+ */
+
 public enum ObjectType
 {
     Tree,

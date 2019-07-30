@@ -1,5 +1,10 @@
 ﻿using UnityEngine;
 
+/*
+ * FlowController script
+ * Script for controlling the flow of the app and game
+ */
+
 public class FlowController : MonoBehaviour
 {
     public AudioSource audioSource;

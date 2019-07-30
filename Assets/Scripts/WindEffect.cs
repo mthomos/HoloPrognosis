@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
 
+// Script for wind effect
+// Just for test purposes
+
 public class WindEffect : MonoBehaviour
 {
     public Vector3 windDirection;

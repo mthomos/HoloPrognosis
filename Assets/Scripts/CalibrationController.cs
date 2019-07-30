@@ -1,4 +1,9 @@
-﻿public class CalibrationController
+﻿/*
+ * CalibrationController class
+ * Call for storing info about a hand calibration
+ */
+
+public class CalibrationController
 {
     //Right Pose Variables
     private float Right_Pose_headHandDistance;

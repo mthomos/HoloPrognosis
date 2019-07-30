@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 
+// Just a debug script
+
 public class DebugScript : MonoBehaviour
 {
     public UtilitiesScript utilities;

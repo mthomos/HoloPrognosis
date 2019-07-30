@@ -2,6 +2,11 @@
 using HoloToolkit.Unity;
 using UnityEngine;
 
+/*
+ * ObjectCollectionManager class
+ * Class contains the 3D assets for the objects, code for placement and resizing , safe object destruction and other stuff
+ */
+
 public class ObjectCollectionManager : Singleton<ObjectCollectionManager>
 {
     //Public Variables - For Editor

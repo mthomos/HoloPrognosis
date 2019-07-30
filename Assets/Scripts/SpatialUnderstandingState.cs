@@ -3,6 +3,13 @@ using UnityEngine;
 using HoloToolkit.Unity;
 using UnityEngine.Events;
 
+/*
+ * SpatialUnderstandingState script
+ * Script for controlling spatial understanding aka space scanning
+ * Use public variables to define dimensions of scanned space needed
+ * There is also logic for the text to inform user about scan process
+ */
+
 public class SpatialUnderstandingState : Singleton<SpatialUnderstandingState>
 {
     //Public Variables - For Editor

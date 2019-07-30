@@ -3,6 +3,13 @@
 using System;
 using UnityEngine;
 
+/*
+ * TextToSpeech script
+ * Script for giving audio feedback
+ * Taken from HoloToolkit. Removed functionality to change voices and other minor stuff
+ * Just to keep it simple with the needed functionality
+ */
+
 #if !UNITY_EDITOR && UNITY_WSA
 using Windows.Foundation;
 using Windows.Media.SpeechSynthesis;

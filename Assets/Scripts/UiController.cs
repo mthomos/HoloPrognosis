@@ -2,6 +2,12 @@
 using System.IO;
 using UnityEngine;
 
+/*
+ * UiController script
+ * Script for controlling UI navigation and  menu elements of the app
+ * Contains most of the audio stuff and greek/english texts
+ */
+
 public class UiController : MonoBehaviour
 {
     // Back Button

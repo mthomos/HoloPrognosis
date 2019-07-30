@@ -1,5 +1,12 @@
 ﻿using UnityEngine;
 
+/*
+ * Apple script
+ * Script attached to apple object to define properties
+ * and to events.
+ * There is also code for wind effect but no being used or maintained
+ */
+ 
 public class AppleScript : MonoBehaviour
 {
     private bool triggered = false; //Collision Triggered
@@ -12,14 +19,6 @@ public class AppleScript : MonoBehaviour
             effect = GameObject.Find("Wind").GetComponent<WindEffect>();
     }
 
-    // Update is called once per frame
-    /*
-    void Update()
-    {
-        if(windEnabled)
-            GetComponent<Rigidbody>().AddForce(effect.windDirection * effect.windSpeed);
-    }
-    */
     void OnCollisionEnter(Collision collision)
     {
         //Get collision object

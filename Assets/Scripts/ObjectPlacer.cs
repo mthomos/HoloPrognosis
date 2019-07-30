@@ -3,6 +3,11 @@ using HoloToolkit.Unity;
 using UnityEngine;
 using System;
 
+/*
+ * ObjectPlacer class
+ * Class for initating object placement using SpatialUnderstandingDllObjectPlacement from HoloToolkit
+ */
+
 public class ObjectPlacer : MonoBehaviour
 {
     private Queue<PlacementResult> results = new Queue<PlacementResult>();

@@ -1,6 +1,11 @@
 ﻿using HoloToolkit.Unity;
 using UnityEngine;
 
+/*
+ * TagAlongForDisplay script
+ * Script for placing info text in front of user
+ */
+
 public class TagAlongForDisplay : MonoBehaviour
 {
     public float TagalongDistance = 1.75f;

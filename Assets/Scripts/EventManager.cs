@@ -2,6 +2,11 @@
 using UnityEngine.Events;
 using System.Collections.Generic;
 
+/*
+ * EventManager script
+ * Script for creating events to being used from other scripts
+ */
+
 public class EventManager : MonoBehaviour
 {
 

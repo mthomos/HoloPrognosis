@@ -1,6 +1,11 @@
 ﻿using UnityEngine;
 using UnityEngine.XR.WSA.Input;
 
+/*
+ * HandsTrackingController class
+ * Class for controlling hand gestures, object manipulation from hands using Unity API
+ */
+
 public struct HandStruct
 {
     public GameObject hand;

@@ -2,6 +2,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/* 
+ * Class which contains scripts that being used in the game
+ * EnableOutline : enable outline in an object
+ * EnableGravity : enable gravity in an object
+ * GetDistanceObjects : get distance between 2 object in 3D spaces
+ * IsRightFromHead : define if an object is right or left from the user's head
+ * ChangeColorOutline : change color of an outline. If outline is disabled, enable and change color
+ * ChangeObjectColor : change color of an object or many objects contained in a dictionary
+ * EnableObject : .... with null check
+ * DisableObject .... with null check
+ * PlaceInFrontOfUser place an existent object in front of the user
+ * GetAngleFromVectorFloatΧΥ : get angle from XY vector
+*/
+
 public class UtilitiesScript : Singleton<UtilitiesScript>
 {
     public void EnableOutline(GameObject focusedObject, object color, bool createIfNeeded)

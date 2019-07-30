@@ -1,6 +1,11 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+/*
+ * TurtorialController script
+ * Script for controlling turtorial logic flow
+ */
+
 public class TurtorialController : MonoBehaviour
 {
     // Fill in Editor
@@ -29,7 +34,6 @@ public class TurtorialController : MonoBehaviour
     {
         turtorialStep = -1;
         // Listen Events
-        //EventManager.StartListening("double_click", ClickerDoubleClickTriggered);
         EventManager.StartListening("click", ClickerClickTriggered);
     }
 

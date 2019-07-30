@@ -3,6 +3,11 @@ using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
 
+/*
+ * Data script
+ * Script for storing data for each game session
+ */
+
 public class DataScript : MonoBehaviour
 {
     private bool requsetFinalize = false;

@@ -1,5 +1,10 @@
 ﻿using UnityEngine;
 
+/*
+ * Gate script
+ * Script for controlling gate behaviour
+ */
+
 public class GateScript : MonoBehaviour
 {
     public bool gateOpened = false;

@@ -1,6 +1,11 @@
 ﻿using HoloToolkit.Unity;
 using UnityEngine;
-//Done
+
+/*
+ * PlacementResult class
+ * This class contatins the reuslt from the solver of SpatialUnderstandingDllObjectPlacement library
+ */
+
 public class PlacementResult
 {
     public Vector3 Position { get { return _result.Position; } }

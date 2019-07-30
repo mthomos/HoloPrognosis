@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Windows.Speech;
 
+/*
+ * AudioFeedBackManager script
+ * Script for receiving audio feedback from user
+ */
+
 public class AudioFeedBackManager : MonoBehaviour
 {
     public bool PersistentKeywords;

@@ -1,5 +1,11 @@
 ﻿using UnityEngine;
 
+/*
+ * GazeCursor script
+ * Script for controlling apperance and placement of the cursor
+ * Also using gaze to get the object that the user is looking at.
+ */
+
 public class GazeCursor : MonoBehaviour
 {
     public Color FocusedColor = Color.red;

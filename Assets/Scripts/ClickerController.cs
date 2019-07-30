@@ -1,6 +1,11 @@
 ﻿using UnityEngine;
 using UnityEngine.XR.WSA.Input;
 
+/*
+ * ClickerController script
+ * Script for receiving click and double click events from Clicker
+ */
+
 public class ClickerController : MonoBehaviour
 {
     private float lastClickTime = .0f;
