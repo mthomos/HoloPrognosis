@@ -5,3 +5,5 @@ Tested on :
 Unity 2018.4 LTS
 Windows Holographic OS version 1809
 Windows 10 SDK 17763
+
+Code from Microsoft HoloToolKit is being used and incuded in this project / repo.
