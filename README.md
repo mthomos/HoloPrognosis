@@ -13,3 +13,7 @@ This is my thesis that was developed under the supervision of SPTBU AUTH.
 * Holotoolkit uses prebuilt binaries. So only .NET backend in Unity will work. If you want IL2CPP switch to Mixed Reality Toolkit.
 * For better perfomance build with Master option, both in Unity and Visual Studio. Use Debug build option only for debugging purposes.
 * Last Unity release with .NET script backend support will be 2018.4 LTS.
+
+## Thesis and Presentation
+https://1drv.ms/u/s!At4EYW8sDVcnw18sOEsCdPubqV2S?e=a9KcSs
+(in Greek)
